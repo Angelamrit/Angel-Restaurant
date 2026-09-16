@@ -299,16 +299,16 @@
     text-transform: uppercase;
     text-align: center;
     text-decoration: none;
-    transition: background-color var(--duration-ui) var(--ease-standard), color var(--duration-ui) var(--ease-standard), border-color var(--duration-ui) var(--ease-standard);
+    transition: background-color var(--duration-ui) var(--ease-standard), color var(--duration-ui) var(--ease-standard), border-color var(--duration-ui) var(--ease-standard), box-shadow var(--duration-ui) var(--ease-standard), transform var(--duration-ui) var(--ease-standard);
   }
-  .button-primary { background: var(--button-primary); color: var(--button-primary-foreground); }
+  .button-primary { background: var(--button-primary); color: var(--button-primary-foreground); box-shadow: 0 4px 12px color-mix(in srgb, var(--button-primary) 20%, transparent); }
   .button-secondary { border-color: var(--border-strong); color: var(--foreground); background: transparent; }
   .button:disabled { opacity: 0.55; }
   .skip-link { position: fixed; top: calc(var(--space-unit) * 4); left: var(--gutter); z-index: var(--z-skip-link); transform: translateY(-200%); }
   .skip-link:focus { transform: translateY(0); }
   @media (hover: hover) {
-    .button-primary:hover:not(:disabled) { background: var(--button-primary-hover); color: var(--button-primary-foreground); }
-    .button-secondary:hover:not(:disabled) { background: var(--foreground); color: var(--background); border-color: var(--foreground); }
+    .button-primary:hover:not(:disabled) { background: var(--button-primary-hover); color: var(--button-primary-foreground); box-shadow: 0 12px 32px color-mix(in srgb, var(--button-primary) 35%, transparent); transform: translateY(-2px); }
+    .button-secondary:hover:not(:disabled) { background: var(--foreground); color: var(--background); border-color: var(--foreground); box-shadow: 0 12px 32px color-mix(in srgb, var(--foreground) 25%, transparent); transform: translateY(-2px); }
   }
 }
 
@@ -331,5 +331,9 @@
     animation-delay: 0ms !important;
     transition-duration: 0ms !important;
     scroll-behavior: auto !important;
+  }
+  /* Disable hover transforms under reduced motion */
+  a, button, .button, .text-link, .signature-card, .gallery-group figure {
+    transform: none !important;
   }
 }

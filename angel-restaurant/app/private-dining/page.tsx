@@ -1,0 +1,6 @@
+import type { Metadata } from "next";
+import { PageIntro } from "@/components/editorial";
+import { EnquiryForm } from "@/components/enquiry-form";
+import { CinematicSlideshow } from "@/components/cinematic-slideshow";
+export const metadata: Metadata = { title: "Private dining" };
+export default function PrivateDiningPage() { return <main id="main-content" tabIndex={-1}><PageIntro eyebrow="Private dining & gatherings" title="Your people." italic="Our table." description="Birthdays, family gatherings, and company dinners. Bring your occasion to Angel." /><div className="container-shell private-dining"><div><CinematicSlideshow className="private-cinema" priority label="Private dining atmosphere at Angel" slides={[{ name: "interior-aceva", alt: "Angel’s dining room, editorially relit" }, { name: "feast-aceva", alt: "A table of Indian dishes ready to share" }, { name: "thali-aceva", alt: "A generous Indian meal for a gathering" }]} /><div className="private-copy" data-reveal><p className="type-eyebrow">Good company deserves good food</p><h2>Something<br /><em>to celebrate.</em></h2><p>Tell us your date, party size, and occasion. Our team will discuss availability, space options, and pricing with you.</p><p>Spaces and capacities are confirmed directly with our team. An enquiry is not a confirmed reservation.</p></div></div><EnquiryForm /></div></main>; }

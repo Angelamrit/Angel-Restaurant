@@ -1,0 +1,6 @@
+import type { Metadata } from "next";
+import { PageIntro, Photo, Reservation } from "@/components/editorial";
+import { GalleryRail } from "@/components/gallery-rail";
+export const metadata: Metadata = { title: "The experience" };
+const photos = [["interior-aceva", "A room to settle into"], ["tandoori-aceva", "Straight from the tandoor"], ["dal-naan-aceva", "The comfort of familiar flavors"], ["lamb-curry-aceva", "A little spice, a little soul"], ["feast-aceva", "Better when shared"], ["thali-aceva", "An invitation to linger"]];
+export default function GalleryPage() { return <main id="main-content" tabIndex={-1}><PageIntro eyebrow="The Angel experience" title="Come for the food." italic="Stay for the feeling." description="A glimpse of the room, the table, and the flavors that bring us together." /><GalleryRail /><section className="gallery-grid container-shell section-space" aria-label="Angel photo collection">{photos.map(([name, label], i) => <figure key={name} data-reveal><Photo name={name} alt={`${label} — Angel editorial collection`} /><figcaption><span>0{i + 1}</span>{label}</figcaption></figure>)}<p className="type-caption gallery-disclosure">From Angel’s existing editorial collection, including relit imagery.</p></section><Reservation /></main>; }

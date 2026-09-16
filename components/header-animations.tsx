@@ -24,12 +24,12 @@ export function ScrollHeader({ children }: ScrollHeaderProps) {
   return (
     <motion.div
       animate={{
-        background: hasScrolled
-          ? "color-mix(in srgb, rgb(37, 19, 13) 94%, transparent)"
-          : "transparent",
+        backgroundColor: hasScrolled
+          ? "rgba(37, 19, 13, 0.94)"
+          : "rgba(37, 19, 13, 0)",
         boxShadow: hasScrolled
-          ? "0 8px 40px color-mix(in srgb, rgb(22, 12, 8) 28%, transparent)"
-          : "0 0px 0px transparent",
+          ? "0 8px 40px rgba(22, 12, 8, 0.28)"
+          : "0 0px 0px rgba(22, 12, 8, 0)",
       }}
       transition={{
         duration: ANIMATION_DURATIONS.ui / 1000,

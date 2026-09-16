@@ -880,40 +880,172 @@
   .enquiry-form {
     position: sticky;
     top: calc(var(--nav-height) + 2rem);
-    padding: clamp(1.5rem, 4vw, 3.5rem);
-    background: var(--ivory);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow-subtle);
-    backdrop-filter: blur(8px);
-    transition: box-shadow var(--duration-ui) var(--ease-standard);
+    padding: clamp(2.5rem, 5vw, 4.5rem);
+    background: linear-gradient(135deg, var(--ivory) 0%, color-mix(in srgb, var(--ivory) 50%, var(--cream)) 100%);
+    border: 2px solid color-mix(in srgb, var(--apricot) 30%, transparent);
+    border-radius: var(--radius-panel);
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--apricot) 15%, transparent),
+      0 16px 48px color-mix(in srgb, var(--ink) 12%, transparent),
+      inset 0 1px 0 color-mix(in srgb, var(--apricot) 20%, transparent);
+    backdrop-filter: blur(12px);
+    transition: box-shadow var(--duration-ui) var(--ease-standard), transform var(--duration-ui) var(--ease-standard);
   }
-  .enquiry-form h2 { color: var(--espresso); }
-  .enquiry-form > p { margin: 1rem 0 2rem; color: var(--muted-foreground); }
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem 1rem; }
-  .enquiry-form label { display: flex; flex-direction: column; gap: .4rem; color: var(--espresso); font-size: .72rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+  @media (hover: hover) {
+    .enquiry-form:hover {
+      box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--apricot) 40%, transparent),
+        0 24px 64px color-mix(in srgb, var(--ink) 18%, transparent),
+        inset 0 1px 0 color-mix(in srgb, var(--apricot) 30%, transparent);
+    }
+  }
+  .enquiry-form.luxury-occasion { }
+  .form-header { margin-bottom: clamp(2rem, 5vw, 3.5rem); padding-bottom: clamp(2rem, 5vw, 3rem); border-bottom: 2px solid color-mix(in srgb, var(--apricot) 20%, transparent); }
+  .form-header .type-eyebrow { color: var(--apricot); letter-spacing: 0.15em; font-size: 0.8rem; }
+  .enquiry-form h2 {
+    color: var(--espresso);
+    margin-top: 1rem;
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    line-height: 1.1;
+    letter-spacing: -.02em;
+  }
+  .form-description {
+    margin: 1.5rem 0 0;
+    color: var(--muted-foreground);
+    font-size: clamp(1rem, 1.3vw, 1.125rem);
+    line-height: 1.6;
+    max-width: 55rem;
+  }
+  .form-section { margin-bottom: clamp(2rem, 5vw, 3rem); }
+  .form-section fieldset { border: none; padding: 0; margin: 0; }
+  .form-legend {
+    display: block;
+    font-family: var(--font-editorial);
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    color: var(--espresso);
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--apricot) 15%, transparent);
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(1.5rem, 3vw, 2rem);
+  }
+  .form-occasion-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: clamp(1.5rem, 3vw, 2rem);
+  }
+  .form-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    transition: transform var(--duration-ui) var(--ease-standard);
+  }
+  .form-label.is-focused {
+    transform: translateY(-2px);
+  }
+  .form-label span {
+    color: var(--espresso);
+    font-size: .8rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
   .enquiry-form input,
   .enquiry-form select,
   .enquiry-form textarea {
     width: 100%;
     color: var(--espresso);
     background: var(--cream);
-    border-color: var(--border-strong);
-    font-size: 1rem;
+    border: 2px solid color-mix(in srgb, var(--apricot) 25%, transparent);
+    border-radius: var(--radius-control);
+    padding: clamp(0.75rem, 2vw, 1rem);
+    font-size: clamp(0.95rem, 1vw, 1.05rem);
+    font-family: var(--font-functional);
     letter-spacing: 0;
     text-transform: none;
-    transition: border-color var(--duration-ui) var(--ease-standard), background-color var(--duration-ui) var(--ease-standard), box-shadow var(--duration-ui) var(--ease-standard);
+    transition:
+      border-color var(--duration-ui) var(--ease-standard),
+      background-color var(--duration-ui) var(--ease-standard),
+      box-shadow var(--duration-ui) var(--ease-standard);
   }
   .enquiry-form input:focus,
   .enquiry-form select:focus,
   .enquiry-form textarea:focus {
+    outline: none;
     border-color: var(--apricot);
-    background: var(--background);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--apricot) 12%, transparent);
+    background: color-mix(in srgb, var(--cream) 80%, var(--apricot));
+    box-shadow:
+      0 0 0 4px color-mix(in srgb, var(--apricot) 20%, transparent),
+      inset 0 1px 2px color-mix(in srgb, var(--apricot) 15%, transparent);
   }
-  .enquiry-form > label { margin-top: 1.25rem; }
-  .enquiry-form .consent { flex-direction: row; align-items: start; color: var(--muted-foreground); text-transform: none; }
-  .enquiry-form .button { margin-top: 1.5rem; }
-  .enquiry-form [role="status"] { padding: .8rem; border: 1px solid var(--border); color: var(--espresso); border-radius: var(--radius-control); }
+  .enquiry-form textarea {
+    resize: vertical;
+    min-height: 120px;
+    font-family: var(--font-functional);
+  }
+  .char-count {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+    margin-top: 0.4rem;
+  }
+  .form-label.full-width { grid-column: 1 / -1; }
+  .form-footer {
+    margin-top: clamp(2.5rem, 6vw, 3.5rem);
+    padding-top: clamp(2rem, 5vw, 3rem);
+    border-top: 2px solid color-mix(in srgb, var(--apricot) 20%, transparent);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .consent {
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    gap: 0.8rem;
+    color: var(--muted-foreground);
+    text-transform: none;
+  }
+  .consent input {
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.3rem;
+    border-radius: var(--radius-control);
+    cursor: pointer;
+  }
+  .consent span {
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+  .button-lg {
+    padding: clamp(1rem, 2vw, 1.25rem) clamp(2rem, 4vw, 3rem);
+    min-height: 3.25rem;
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+  }
+  .enquiry-form .button { margin-top: 0; align-self: flex-start; }
+  .form-status {
+    margin-top: clamp(2rem, 5vw, 3rem);
+    padding: clamp(1.5rem, 3vw, 2.5rem);
+    border-radius: var(--radius-control);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  .form-status.success {
+    background: color-mix(in srgb, var(--apricot) 8%, transparent);
+    border: 2px solid var(--apricot);
+    color: var(--espresso);
+  }
+  .form-status p { margin: 0 0 0.8rem; }
+  .form-status p:last-child { margin-bottom: 0; }
+  .form-status a {
+    color: var(--apricot);
+    font-weight: 600;
+  }
 }
 
 @media (max-width: 64rem) {
@@ -984,7 +1116,11 @@
   .faq-list summary { grid-template-columns: 2rem 1fr auto; }
   .faq-list details p { margin-inline: 2rem 0; }
   .form-grid { grid-template-columns: 1fr; }
-  .enquiry-form { position: static; }
+  .form-occasion-grid { grid-template-columns: 1fr; }
+  .enquiry-form { position: static; padding: clamp(2rem, 5vw, 3rem); }
+  .enquiry-form h2 { font-size: clamp(2rem, 8vw, 3.5rem); }
+  .form-legend { font-size: clamp(1.25rem, 4vw, 1.75rem); }
+  .form-footer { flex-direction: column; }
 }
 
 @media (max-width: 25rem) {

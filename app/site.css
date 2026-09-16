@@ -261,19 +261,20 @@
   .hero-topline { padding-bottom: 2rem; border-bottom: 1px solid color-mix(in srgb, var(--espresso) 22%, transparent); }
   .hero-composition {
     display: grid;
-    grid-template-columns: minmax(0, .92fr) minmax(28rem, 1.08fr);
-    gap: clamp(2rem, 5vw, 6rem);
+    grid-template-columns: minmax(0, .85fr) minmax(28rem, 1.15fr);
+    gap: clamp(2rem, 5vw, 8rem);
     align-items: center;
     min-height: calc(100svh - var(--nav-height) - 9rem);
     padding-block: clamp(3rem, 6vw, 7rem);
   }
   .hero-copy h1 {
     color: var(--espresso);
-    font-size: clamp(4rem, 7.1vw, 8.5rem);
-    line-height: .84;
-    letter-spacing: -.05em;
+    font-size: clamp(4.5rem, 7.5vw, 9.5rem);
+    line-height: .85;
+    letter-spacing: -.06em;
+    text-shadow: 0 2px 40px color-mix(in srgb, var(--ink) 15%, transparent);
   }
-  .hero-copy h1 em { font-weight: 500; }
+  .hero-copy h1 em { font-weight: 600; }
   .hero-bottom { display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: end; margin-top: clamp(2rem, 5vw, 5rem); }
   .hero-bottom p { max-width: 25ch; font-size: clamp(1rem, 1.4vw, 1.25rem); }
   .hero-image-wrap { position: relative; }

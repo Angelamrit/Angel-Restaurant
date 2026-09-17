@@ -1233,10 +1233,88 @@
     text-transform: uppercase;
   }
 
+  /* Hover-preview dish index: hover/tap a dish on one side, it previews on the other.
+     Reuses the .cinematic-frame crossfade; the difference is who drives it — the
+     visitor here, a timer in .cinematic-slideshow. */
+  .dish-index {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(16rem, .65fr);
+    gap: clamp(1.5rem, 4vw, 4rem);
+    align-items: stretch;
+  }
+  .dish-index-preview { aspect-ratio: 4 / 5; }
+  .dish-index--split .dish-index-preview { min-height: 100%; }
+  .dish-index-preview::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: linear-gradient(180deg, transparent 52%, color-mix(in srgb, var(--ink) 55%, transparent));
+    pointer-events: none;
+  }
+  .dish-index-caption {
+    position: absolute;
+    z-index: 3;
+    inset: auto 1.4rem 1.35rem;
+    display: flex;
+    align-items: baseline;
+    gap: .9rem;
+    color: var(--cream);
+  }
+  .dish-index-caption-num { font-family: var(--font-functional); font-size: .62rem; font-weight: 700; letter-spacing: .18em; }
+  .dish-index-caption-name {
+    font-family: var(--font-editorial);
+    font-size: clamp(1.5rem, 2.6vw, 2.4rem);
+    line-height: 1;
+    letter-spacing: -.01em;
+  }
+  .dish-index-list { display: flex; flex-direction: column; justify-content: center; list-style: none; margin: 0; padding: 0; }
+  .dish-index-item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 2.75rem 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    min-height: 3.75rem;
+    padding: 1rem .25rem;
+    border-top: 1px solid var(--border);
+    color: color-mix(in srgb, var(--espresso) 55%, transparent);
+    text-align: left;
+    cursor: pointer;
+    transition: color var(--duration-ui) var(--ease-standard), padding-left var(--duration-ui) var(--ease-reveal);
+  }
+  .dish-index-list li:last-child .dish-index-item { border-bottom: 1px solid var(--border); }
+  .dish-index-num { font-family: var(--font-functional); font-size: .68rem; font-weight: 700; letter-spacing: .12em; }
+  .dish-index-name {
+    font-family: var(--font-editorial);
+    font-size: clamp(1.6rem, 2.6vw, 2.6rem);
+    line-height: 1.02;
+    letter-spacing: -.02em;
+  }
+  .dish-index-mark {
+    justify-self: end;
+    font-size: 1.1rem;
+    opacity: 0;
+    transform: translateX(-.35rem);
+    transition: opacity var(--duration-ui) var(--ease-standard), transform var(--duration-ui) var(--ease-reveal);
+  }
+  .dish-index-item:hover,
+  .dish-index-item:focus-visible { color: var(--espresso); }
+  .dish-index-item.is-active { color: var(--espresso); padding-left: 1rem; }
+  .dish-index-item.is-active .dish-index-num { color: var(--apricot-rich); }
+  .dish-index-item.is-active .dish-index-mark { opacity: 1; transform: translateX(0); }
+  .dish-index--stacked { grid-template-columns: 1fr; }
+  .dish-index--stacked .dish-index-list { justify-content: flex-start; }
+  /* With the list below the preview, shorten and cap the image so the dishes stay in view without scrolling. */
+  .dish-index--stacked .dish-index-preview { aspect-ratio: 3 / 2; max-height: 46svh; }
+
   .story-feature { padding-top: var(--section-space); }
   .story-feature > .editorial-photo { aspect-ratio: 4 / 5; }
   .story-cinema { aspect-ratio: 4 / 5; }
   .story-feature > div:not(.editorial-photo) { max-width: 36rem; }
+  /* The dish index is a grid column in its own right, not a copy block to be narrowed. */
+  .story-feature > .dish-index { max-width: none; }
   .story-feature h2 { margin: 1rem 0 2rem; }
   .story-feature p:not(.type-eyebrow) { margin-bottom: 1.4rem; }
   .story-feature:nth-of-type(4) { grid-template-columns: minmax(20rem, .75fr) minmax(0, 1.05fr); }
@@ -1545,6 +1623,11 @@
   .private-dining,
   .contact-section { grid-template-columns: 1fr; }
   .story-copy h2 { font-size: clamp(4rem, 20vw, 6.5rem); }
+  .dish-index { grid-template-columns: 1fr; gap: 1.75rem; }
+  .dish-index-preview,
+  .dish-index--stacked .dish-index-preview { aspect-ratio: 4 / 3; max-height: 44svh; }
+  .dish-index--split .dish-index-preview { min-height: 0; }
+  .dish-index-item { min-height: 3.25rem; }
   /* Keeps the overlapping print inside the gutter instead of causing horizontal overflow. */
   .story-image-accent { left: -.75rem; bottom: -1.5rem; width: clamp(6rem, 28vw, 8rem); border-width: 4px; }
   .recognition > div { grid-template-columns: 1fr 1fr; }

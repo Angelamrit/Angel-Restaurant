@@ -50,7 +50,9 @@ export function CinematicSlideshow({
               alt={index === active ? slide.alt : ""}
               fill
               sizes="(max-width: 767px) 100vw, 60vw"
-              preload={priority && index === 0}
+              // Next 16: `loading="eager"` (not `preload`) is what the LCP heuristic
+              // checks on the rendered <img>, so only the real first slide gets it.
+              loading={priority && index === 0 ? "eager" : undefined}
             />
           </div>
         ))}

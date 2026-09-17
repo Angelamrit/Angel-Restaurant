@@ -9,8 +9,11 @@
   --espresso: #25130d;
   --chocolate: #351c13;
   --brown: #5a3426;
-  --ivory: #f5e9d6;
-  --cream: #fbf4e8;
+  /* Ivory and cream are a deliberate gold+brown+white blend, not a plain off-white -
+     weighted toward white since both still serve as light backgrounds and light
+     text; contrast against espresso/brown is verified in DESIGN_SPEC.md. */
+  --ivory: #e4d6c8;
+  --cream: #eaded2;
   --warm-stone: #b99b83;
   --ink: #160c08;
 
@@ -39,12 +42,9 @@
   --focus: var(--brown);
   --selection: var(--apricot);
   --selection-foreground: var(--espresso);
-  --scrim: color-mix(in srgb, var(--ink) 72%, transparent);
 
   --font-editorial: var(--font-cormorant), Georgia, "Times New Roman", serif;
   --font-functional: var(--font-manrope), Arial, Helvetica, sans-serif;
-  --type-display-xl: clamp(3.25rem, 1rem + 10vw, 10rem);
-  --type-display: clamp(3.5rem, 2rem + 6vw, 7.5rem);
   --type-h1: clamp(3rem, 2rem + 4vw, 6rem);
   --type-h2: clamp(2.5rem, 1.75rem + 3vw, 4.5rem);
   --type-h3: clamp(1.875rem, 1.5rem + 1.5vw, 2.75rem);
@@ -53,17 +53,13 @@
   --type-body-sm: 0.875rem;
   --type-caption: 0.75rem;
   --type-eyebrow: 0.75rem;
-  --type-navigation: 0.875rem;
   --type-button: 0.75rem;
-  --leading-display: 1;
   --leading-heading: 1.08;
   --leading-body: 1.75;
   --leading-ui: 1.5;
-  --tracking-display: -0.035em;
   --tracking-heading: -0.02em;
   --tracking-eyebrow: 0.18em;
   --tracking-button: 0.12em;
-  --tracking-navigation: 0.025em;
   --weight-display: 500;
   --weight-body: 400;
   --weight-ui: 600;
@@ -86,7 +82,6 @@
   --focus-offset: 4px;
   --shadow-subtle: 0 4px 20px color-mix(in srgb, var(--ink) 12%, transparent);
   --shadow-floating: 0 16px 48px color-mix(in srgb, var(--ink) 24%, transparent);
-  --z-base: 0;
   --z-raised: 10;
   --z-nav: 30;
   --z-overlay: 40;
@@ -102,9 +97,6 @@
   --ease-reveal: cubic-bezier(0.22, 1, 0.36, 1);
   --reveal-distance: 1.25rem;
   --image-scale: 1.035;
-  --aspect-editorial: 4 / 5;
-  --aspect-landscape: 3 / 2;
-  --aspect-cinema: 16 / 9;
 }
 
 /* Surface scopes change inherited semantics together with the background. */
@@ -199,6 +191,21 @@
     font-weight: var(--weight-body);
     line-height: var(--leading-body);
     -webkit-font-smoothing: antialiased;
+    position: relative;
+  }
+  /* Whole-site film grain: a tiny inline SVG noise tile, nearly invisible, blended
+     rather than drawn — the one atmosphere cue every scene shares. Fixed and inert
+     so it never affects layout, scroll, or hit-testing. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0.035;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 160px 160px;
   }
   *, ::before, ::after { border-color: var(--border); }
   ::selection { background: var(--selection); color: var(--selection-foreground); }
@@ -244,25 +251,6 @@
 }
 
 @layer components {
-  .type-display-xl, .type-display {
-    font-family: var(--font-editorial);
-    font-weight: var(--weight-display);
-    line-height: var(--leading-display);
-    letter-spacing: var(--tracking-display);
-    text-wrap: balance;
-  }
-  .type-display-xl { font-size: var(--type-display-xl); }
-  .type-display { font-size: var(--type-display); }
-  .type-h1, .type-h2, .type-h3 {
-    font-family: var(--font-editorial);
-    font-weight: var(--weight-display);
-    line-height: var(--leading-heading);
-    letter-spacing: var(--tracking-heading);
-    text-wrap: balance;
-  }
-  .type-h1 { font-size: var(--type-h1); }
-  .type-h2 { font-size: var(--type-h2); }
-  .type-h3 { font-size: var(--type-h3); }
   .type-body-lg, .type-body, .type-body-sm {
     font-family: var(--font-functional);
     font-weight: var(--weight-body);
@@ -271,17 +259,14 @@
   .type-body-lg { font-size: var(--type-body-lg); }
   .type-body { font-size: var(--type-body); }
   .type-body-sm { font-size: var(--type-body-sm); }
-  .type-eyebrow, .type-navigation, .type-button, .type-caption {
+  .type-eyebrow, .type-caption {
     font-family: var(--font-functional);
     line-height: var(--leading-ui);
   }
   .type-eyebrow { font-size: var(--type-eyebrow); font-weight: var(--weight-ui); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; }
-  .type-navigation { font-size: var(--type-navigation); font-weight: var(--weight-ui); letter-spacing: var(--tracking-navigation); }
-  .type-button { font-size: var(--type-button); font-weight: var(--weight-ui); letter-spacing: var(--tracking-button); text-transform: uppercase; }
   .type-caption { font-size: var(--type-caption); }
   .container-shell { width: 100%; max-width: var(--content-wide); margin-inline: auto; padding-inline: var(--gutter); }
   .section-space { padding-block: var(--section-space); }
-  .surface-theme { background: var(--background); color: var(--foreground); }
   .button {
     display: inline-flex;
     align-items: center;
@@ -302,14 +287,15 @@
     transition: background-color var(--duration-ui) var(--ease-standard), color var(--duration-ui) var(--ease-standard), border-color var(--duration-ui) var(--ease-standard), box-shadow var(--duration-ui) var(--ease-standard), transform var(--duration-ui) var(--ease-standard);
   }
   .button-primary { background: var(--button-primary); color: var(--button-primary-foreground); box-shadow: 0 4px 12px color-mix(in srgb, var(--button-primary) 20%, transparent); }
-  .button-secondary { border-color: var(--border-strong); color: var(--foreground); background: transparent; }
   .button:disabled { opacity: 0.55; }
   .skip-link { position: fixed; top: calc(var(--space-unit) * 4); left: var(--gutter); z-index: var(--z-skip-link); transform: translateY(-200%); }
   .skip-link:focus { transform: translateY(0); }
   @media (hover: hover) {
-    .button-primary:hover:not(:disabled) { background: var(--button-primary-hover); color: var(--button-primary-foreground); box-shadow: 0 12px 32px color-mix(in srgb, var(--button-primary) 35%, transparent); transform: translateY(-2px); }
-    .button-secondary:hover:not(:disabled) { background: var(--foreground); color: var(--background); border-color: var(--foreground); box-shadow: 0 12px 32px color-mix(in srgb, var(--foreground) 25%, transparent); transform: translateY(-2px); }
+    /* --mx/--my come from Motion's delegated pointer listener (magnetic pull); they
+       default to 0px so this is identical to a plain lift wherever JS hasn't set them. */
+    .button-primary:hover:not(:disabled) { background: var(--button-primary-hover); color: var(--button-primary-foreground); box-shadow: 0 12px 32px color-mix(in srgb, var(--button-primary) 35%, transparent); transform: translate(var(--mx, 0px), calc(var(--my, 0px) - 2px)); }
   }
+  .button:active:not(:disabled) { transform: translateY(0) scale(.985); transition-duration: var(--duration-fast); }
 }
 
 /* Tailwind's existing md breakpoint; media queries cannot use var(). */

@@ -6,6 +6,10 @@ export const restaurant = {
   email: "info@angelindianrestaurant.com",
   address: "75-18 37th Avenue, Jackson Heights, NY 11372",
   instagram: "https://www.instagram.com/angel_indian_restaurant/",
+  // TODO — Client Information Required: no production domain has been assigned yet.
+  // NEXT_PUBLIC_SITE_URL lets deployment set the real domain; this placeholder only
+  // keeps metadata/sitemap/JSON-LD builds valid until then.
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://www.angelindianrestaurant.com",
 };
 
 export const categories = ["All dishes", "Chef’s special", "Vegetarian starters", "From the tandoor", "Vegetarian mains", "Curries"];

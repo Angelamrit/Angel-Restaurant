@@ -1,17 +1,64 @@
 /* Shared restaurant composition. Tokens remain in globals.css. */
 @layer components {
   [hidden] { display: none !important; }
+  /* Set from an inline head script (and by Motion) only when motion is allowed. */
+  html[data-motion-ready] [data-reveal]:not(.is-revealed) { opacity: 0; }
+  .page-enter { animation: page-in 640ms var(--ease-reveal) backwards; }
+  @keyframes page-in { from { opacity: 0; transform: translateY(14px); } }
+
+  /* Editorial line reveal: an oversized heading rises out from behind a clip edge
+     rather than fading in place. Use data-reveal="mask" on the wrapper Motion
+     observes; the content itself lives in .mask-reveal-inner. Works for headings
+     of any wrap length — the mask clips, it doesn't require known line breaks. */
+  /* Padding/negative-margin pair (same trick as .hero-line below) gives the clipped
+     text room for ascenders, descenders and italic overhang without moving layout. */
+  .mask-reveal { display: block; overflow: clip; padding: .1em .06em .16em; margin: -.1em -.06em -.16em; }
+  .mask-reveal-inner { display: block; }
+  [data-reveal="mask"].is-revealed .mask-reveal-inner {
+    animation: mask-rise var(--duration-cinematic) var(--ease-reveal) backwards;
+  }
+  @keyframes mask-rise { from { transform: translateY(105%); } }
+
+  /* A fine apricot rule that draws itself left to right — Golden Apricot used as a
+     light cue rather than a fill. Use data-reveal="line" on the element itself. */
+  .apricot-rule {
+    position: relative;
+    display: block;
+    width: 3rem;
+    height: 1px;
+    background: color-mix(in srgb, var(--espresso) 15%, transparent);
+    overflow: clip;
+  }
+  .apricot-rule::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--apricot);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  [data-reveal="line"].is-revealed.apricot-rule::after {
+    animation: line-draw var(--duration-cinematic) var(--ease-reveal) forwards;
+  }
+  @keyframes line-draw { to { transform: scaleX(1); } }
 
   .site-header {
     position: sticky;
     inset-block-start: 0;
     z-index: var(--z-nav);
-    background: color-mix(in srgb, var(--ink) 94%, transparent);
+    background: color-mix(in srgb, var(--ink) 78%, transparent);
     color: var(--ivory);
     border-bottom: 1px solid color-mix(in srgb, var(--apricot) 28%, transparent);
-    box-shadow: 0 8px 40px color-mix(in srgb, var(--ink) 28%, transparent);
+    box-shadow: 0 8px 40px color-mix(in srgb, var(--ink) 0%, transparent);
     backdrop-filter: blur(18px) saturate(120%);
+    animation: header-in 900ms var(--ease-reveal) backwards;
+    transition: background-color var(--duration-reveal) var(--ease-standard), box-shadow var(--duration-reveal) var(--ease-standard);
   }
+  .site-header[data-scrolled="true"] {
+    background: color-mix(in srgb, var(--ink) 94%, transparent);
+    box-shadow: 0 8px 40px color-mix(in srgb, var(--ink) 28%, transparent);
+  }
+  @keyframes header-in { from { opacity: 0; } }
   .header-inner {
     width: 100%;
     max-width: var(--content-wide);
@@ -86,7 +133,7 @@
       background: var(--apricot-soft);
       color: var(--espresso);
       box-shadow: 0 8px 20px color-mix(in srgb, var(--apricot-soft) 35%, transparent);
-      transform: translateY(-2px);
+      transform: translate(var(--mx, 0px), calc(var(--my, 0px) - 2px));
     }
   }
   .menu-toggle {
@@ -99,6 +146,8 @@
     letter-spacing: .12em;
     text-transform: uppercase;
   }
+  /* Persistent mobile reserve action; hidden on desktop where the header's own button is always visible. */
+  .mobile-reserve-bar { display: none; }
   .mobile-navigation {
     position: fixed;
     inset: var(--nav-height) 0 0;
@@ -107,6 +156,26 @@
     overflow-y: auto;
     background: var(--espresso);
     color: var(--ivory);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-.5rem);
+    transition: opacity var(--duration-reveal) var(--ease-reveal), transform var(--duration-reveal) var(--ease-reveal), visibility 0s linear var(--duration-reveal);
+  }
+  .mobile-navigation[data-open="true"] {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: opacity var(--duration-reveal) var(--ease-reveal), transform var(--duration-reveal) var(--ease-reveal), visibility 0s;
+  }
+  .mobile-navigation > * {
+    opacity: 0;
+    transform: translateY(.75rem);
+    transition: opacity var(--duration-reveal) var(--ease-reveal), transform var(--duration-reveal) var(--ease-reveal);
+  }
+  .mobile-navigation[data-open="true"] > * {
+    opacity: 1;
+    transform: none;
+    transition-delay: calc(var(--i, 0) * var(--stagger) + 80ms);
   }
   .mobile-navigation a {
     display: grid;
@@ -120,7 +189,9 @@
     text-decoration: none;
   }
   .mobile-navigation > a:last-of-type { color: var(--apricot); }
-  .mobile-navigation p { margin-top: 2rem; color: var(--muted-foreground); }
+  /* Warm Stone, not --muted-foreground (brown): brown is the light-surface muted text
+     token and measures ~1.7:1 on this dark espresso overlay, well under WCAG AA. */
+  .mobile-navigation p { margin-top: 2rem; color: var(--warm-stone); }
 
   .text-link {
     display: inline-flex;
@@ -162,19 +233,26 @@
   .cinematic-slideshow { position: relative; margin: 0; isolation: isolate; }
   .cinematic-frames,
   .cinematic-frame { position: absolute; inset: 0; }
+  /* Incoming frame is raised and fades in over the still-opaque outgoing frame,
+     so wrapping from the last slide back to the first never dips or ghosts. */
   .cinematic-frame {
-    z-index: 0;
+    z-index: 1;
     opacity: 0;
     transition: opacity var(--duration-cinematic) var(--ease-standard);
   }
-  .cinematic-frame.is-active { z-index: 1; opacity: 1; }
+  .cinematic-frame.is-active { z-index: 2; opacity: 1; }
+  .cinematic-frame:nth-child(even) { --frame-motion: cinematic-frame-motion-alt; }
   .cinematic-frame img { object-fit: cover; }
   .cinematic-frame.is-active img {
-    animation: cinematic-frame-motion 6.2s var(--ease-standard) both;
+    animation: var(--frame-motion, cinematic-frame-motion) 6.8s linear both;
   }
   @keyframes cinematic-frame-motion {
-    from { transform: scale(1.01) translate3d(-.4%, .3%, 0); }
-    to { transform: scale(1.07) translate3d(.5%, -.4%, 0); }
+    from { transform: scale(1.02) translate3d(-.5%, .4%, 0); }
+    to { transform: scale(1.09) translate3d(.6%, -.5%, 0); }
+  }
+  @keyframes cinematic-frame-motion-alt {
+    from { transform: scale(1.09) translate3d(.5%, -.4%, 0); }
+    to { transform: scale(1.02) translate3d(-.6%, .5%, 0); }
   }
   .cinematic-controls {
     position: absolute;
@@ -244,12 +322,53 @@
     letter-spacing: 0.15em;
   }
 
+  /* Full-bleed hero: the photograph is the entire section, not a boxed
+     illustration beside the type. Text and controls float over it on a scrim. */
   .hero {
+    position: relative;
+    isolation: isolate;
     max-width: none;
-    padding-top: clamp(2.5rem, 5vw, 5rem);
-    padding-bottom: 1.5rem;
-    background: var(--gold-wine);
-    color: var(--espresso);
+    min-height: 100svh;
+    overflow: hidden;
+    color: var(--cream);
+    background: var(--ink);
+  }
+  .hero-media { position: absolute; inset: 0; z-index: 0; background: var(--chocolate); }
+  .hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .hero-video-pause {
+    position: absolute;
+    z-index: 2;
+    inset: auto clamp(.85rem, 3vw, 1.5rem) clamp(6rem, 13vw, 9rem) auto;
+  }
+  .hero-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--ink) 58%, transparent) 0%, color-mix(in srgb, var(--ink) 20%, transparent) 42%, color-mix(in srgb, var(--ink) 80%, transparent) 100%);
+    pointer-events: none;
+  }
+  .room-section > .editorial-photo img {
+    animation: cinematic-drift 14s var(--ease-standard) infinite alternate;
+  }
+  @keyframes cinematic-drift {
+    from { transform: scale(1.015) translate3d(-.35%, 0, 0); }
+    to { transform: scale(1.055) translate3d(.35%, -.3%, 0); }
+  }
+  .room-section > .editorial-photo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 55%, color-mix(in srgb, var(--ink) 38%, transparent));
+    pointer-events: none;
+  }
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 100svh;
+    padding-block: clamp(1.75rem, 4vw, 3rem) clamp(1.5rem, 4vw, 2.5rem);
   }
   .hero-topline,
   .hero-foot {
@@ -258,47 +377,45 @@
     justify-content: space-between;
     gap: 1.5rem;
   }
-  .hero-topline { padding-bottom: 2rem; border-bottom: 1px solid color-mix(in srgb, var(--espresso) 22%, transparent); }
-  .hero-composition {
-    display: grid;
-    grid-template-columns: minmax(0, .85fr) minmax(28rem, 1.15fr);
-    gap: clamp(2rem, 5vw, 8rem);
-    align-items: center;
-    min-height: calc(100svh - var(--nav-height) - 9rem);
-    padding-block: clamp(3rem, 6vw, 7rem);
+  .hero-topline {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--cream) 22%, transparent);
+    color: color-mix(in srgb, var(--cream) 92%, transparent);
   }
+  .hero-topline .type-eyebrow { color: var(--apricot-soft); }
+  .hero-copy { max-width: 62rem; }
   .hero-copy h1 {
-    color: var(--espresso);
-    font-size: clamp(4.5rem, 7.5vw, 9.5rem);
-    line-height: .85;
-    letter-spacing: -.06em;
-    text-shadow: 0 2px 40px color-mix(in srgb, var(--ink) 15%, transparent);
+    color: var(--cream);
+    font-size: clamp(4.5rem, 8.5vw, 10rem);
+    line-height: .87;
+    letter-spacing: -.05em;
+    text-shadow: 0 8px 40px color-mix(in srgb, var(--ink) 55%, transparent);
   }
   .hero-copy h1 em { font-weight: 600; }
-  .hero-bottom { display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: end; margin-top: clamp(2rem, 5vw, 5rem); }
-  .hero-bottom p { max-width: 25ch; font-size: clamp(1rem, 1.4vw, 1.25rem); }
-  .hero-image-wrap { position: relative; }
-  .hero-photo { aspect-ratio: 4 / 5; max-height: 70svh; }
-  .room-section > .editorial-photo img {
-    animation: cinematic-drift 14s var(--ease-standard) infinite alternate;
+  .hero-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1.5rem 2rem;
+    margin-top: clamp(2rem, 5vw, 3.5rem);
   }
-  @keyframes cinematic-drift {
-    from { transform: scale(1.015) translate3d(-.35%, 0, 0); }
-    to { transform: scale(1.055) translate3d(.35%, -.3%, 0); }
+  .hero-bottom p {
+    max-width: 28ch;
+    color: color-mix(in srgb, var(--cream) 90%, transparent);
+    font-size: clamp(1rem, 1.4vw, 1.25rem);
+    text-shadow: 0 2px 16px color-mix(in srgb, var(--ink) 45%, transparent);
   }
-  .hero-photo::after,
-  .room-section > .editorial-photo::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, transparent 55%, color-mix(in srgb, var(--ink) 38%, transparent));
-    pointer-events: none;
-  }
-  .hero-image-caption { display: flex; justify-content: space-between; gap: 1rem; margin-top: .75rem; font-size: .58rem; font-weight: 700; letter-spacing: .17em; }
   .hero-stamp {
+    /* Referenced by both this resting transform and the hero-stamp-in keyframe below,
+       so the entrance animation always ends exactly where the breakpoint expects it -
+       redefine this variable per breakpoint instead of the transform itself. */
+    --stamp-rest: translateY(-50%) rotate(-8deg);
     position: absolute;
-    inset: auto auto -1.5rem -2.5rem;
-    width: 10rem;
+    z-index: 2;
+    inset: 50% clamp(1.25rem, 4vw, 3rem) auto auto;
+    transform: var(--stamp-rest);
+    width: 9rem;
     aspect-ratio: 1;
     display: grid;
     place-content: center;
@@ -308,12 +425,40 @@
     color: var(--gold-wine);
     outline: 1px solid color-mix(in srgb, var(--gold-wine) 55%, transparent);
     outline-offset: -10px;
-    transform: rotate(-8deg);
+    box-shadow: 0 12px 32px color-mix(in srgb, var(--ink) 40%, transparent);
   }
-  .hero-stamp span { font-size: .48rem; font-weight: 700; letter-spacing: .18em; }
-  .hero-stamp strong { margin-block: .3rem; font-family: var(--font-editorial); font-size: 1.35rem; font-weight: 500; line-height: .8; }
-  .hero-foot { padding-top: 1.35rem; border-top: 1px solid color-mix(in srgb, var(--espresso) 22%, transparent); font-size: .63rem; font-weight: 700; letter-spacing: .14em; }
-  .hero-foot a { margin-left: auto; color: currentColor; text-decoration: none; }
+  .hero-stamp span { font-size: .46rem; font-weight: 700; letter-spacing: .17em; }
+  .hero-stamp strong { margin-block: .3rem; font-family: var(--font-editorial); font-size: 1.25rem; font-weight: 500; line-height: .8; }
+  .hero-foot {
+    padding-top: 1.35rem;
+    border-top: 1px solid color-mix(in srgb, var(--cream) 20%, transparent);
+    color: color-mix(in srgb, var(--cream) 85%, transparent);
+    font-size: .63rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+  }
+  .hero-foot a { margin-left: auto; color: var(--apricot-soft); text-decoration: none; }
+
+  /* Opening choreography. Padding/negative-margin pairs give the clipped lines
+     room for ascenders, descenders and italic overhang without moving layout. */
+  .hero-line { display: block; overflow: clip; padding: .1em .06em .16em; margin: -.1em -.06em -.16em; }
+  .hero-line-inner { display: block; animation: hero-line-rise 1000ms var(--ease-reveal) 350ms backwards; }
+  .hero-line:nth-child(2) .hero-line-inner { animation-delay: 500ms; }
+  .hero-topline,
+  .hero-bottom,
+  .hero-foot { animation: hero-rise var(--duration-reveal) var(--ease-reveal) backwards; }
+  .hero-topline { animation-delay: 250ms; }
+  .hero-bottom { animation-delay: 800ms; }
+  .hero-foot { animation-delay: 1050ms; }
+  .hero-media { animation: hero-image-in 1400ms var(--ease-reveal) 300ms backwards; }
+  .hero-stamp { animation: hero-stamp-in var(--duration-reveal) var(--ease-reveal) 950ms backwards; }
+  @keyframes hero-rise { from { opacity: 0; transform: translateY(var(--reveal-distance)); } }
+  @keyframes hero-line-rise { from { transform: translateY(120%); } }
+  @keyframes hero-image-in { from { opacity: 0; transform: scale(1.04); } }
+  @keyframes hero-stamp-in {
+    from { opacity: 0; transform: var(--stamp-rest) scale(.9); }
+    to { opacity: 1; transform: var(--stamp-rest) scale(1); }
+  }
 
   .welcome-section {
     background: var(--cream);
@@ -358,11 +503,6 @@
     color: var(--apricot-rich);
     font-size: 3.5rem;
     line-height: 1;
-    animation: editorial-star-pulse 3s ease-in-out infinite;
-  }
-  @keyframes editorial-star-pulse {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 1; }
   }
 
   .signature-section {
@@ -439,6 +579,17 @@
     aspect-ratio: 4 / 5;
     box-shadow: inset 0 0 30px color-mix(in srgb, var(--ink) 8%, transparent);
   }
+  /* A second, smaller print overlapping the corner: photography as a composed
+     arrangement, not a single rectangle in a card. */
+  .story-image-accent {
+    position: absolute;
+    left: -2.5rem;
+    bottom: -2.5rem;
+    z-index: 3;
+    width: clamp(8rem, 20vw, 13rem);
+    border: 6px solid var(--cream);
+    box-shadow: 0 24px 48px color-mix(in srgb, var(--ink) 30%, transparent);
+  }
   .photo-note {
     position: absolute;
     right: -2rem;
@@ -460,7 +611,8 @@
     letter-spacing: -.02em;
   }
   .story-copy > p:not(.type-eyebrow) { max-width: 38rem; margin-bottom: 1.5rem; }
-  .story-copy .type-body-lg { color: var(--apricot-soft); }
+  /* Brown, not apricot: this sits on the cream page background, where apricot text fails contrast. */
+  .story-copy .type-body-lg { color: var(--brown); }
 
   .recognition {
     padding-block: clamp(4rem, 8vw, 7rem);
@@ -494,7 +646,8 @@
   @media (hover: hover) {
     .recognition > div span:hover {
       transform: translateY(-2px);
-      color: var(--apricot-soft);
+      /* Brown, not apricot: this sits on the cream page background, where apricot text fails contrast. */
+      color: var(--brown);
     }
   }
   .recognition > div span:last-child { border-right: 0; }
@@ -519,6 +672,18 @@
     inset: 0;
     filter: brightness(0.75) contrast(1.1);
   }
+  /* Compositor-driven parallax; browsers without scroll timelines get a still image. */
+  @supports (animation-timeline: view()) {
+    .room-section > .editorial-photo {
+      inset: -12% 0;
+      animation: room-parallax linear both;
+      animation-timeline: view();
+    }
+    @keyframes room-parallax {
+      from { transform: translateY(-9%); }
+      to { transform: translateY(9%); }
+    }
+  }
   .room-copy {
     position: relative;
     z-index: 2;
@@ -526,6 +691,17 @@
     padding: var(--gutter);
     color: var(--ivory);
     text-align: center;
+  }
+  /* Golden Apricot as a light source: a soft glow behind the text, like a single
+     warm lamp in an otherwise dark room, rather than a fill or a button color. */
+  .room-copy::before {
+    content: "";
+    position: absolute;
+    inset: -20% -10%;
+    z-index: -1;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--apricot) 35%, transparent), transparent 72%);
+    filter: blur(48px);
+    pointer-events: none;
   }
   .room-copy h2 {
     margin: 1.5rem 0 2rem;
@@ -575,7 +751,7 @@
   .gallery-motion { overflow: hidden; padding-block: 1rem 3rem; background: var(--gold-wine); color: var(--espresso); }
   .gallery-motion-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
   .motion-control { min-height: 2.75rem; padding-inline: .75rem; border-bottom: 1px solid currentColor; font-size: .65rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
-  .gallery-window { overflow: hidden; }
+  .gallery-window { overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
   .gallery-track { width: max-content; display: flex; animation: gallery-marquee 34s linear infinite; }
   .gallery-track.is-paused { animation-play-state: paused; }
   .gallery-group { display: flex; gap: 1rem; padding-right: 1rem; }
@@ -599,10 +775,145 @@
   }
   @media (hover: hover) {
     .gallery-group figure:hover figcaption {
-      color: var(--apricot-soft);
+      /* Brown, not apricot: this sits on the gold-wine section background, where apricot-soft nearly disappears. */
+      color: var(--brown);
     }
   }
   @keyframes gallery-marquee { to { transform: translateX(-50%); } }
+
+  .hover-gallery {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(21rem, .95fr);
+    gap: clamp(2rem, 5vw, 5rem);
+    align-items: stretch;
+  }
+  .hover-gallery-preview {
+    position: relative;
+    margin: 0;
+    aspect-ratio: 4 / 5;
+    overflow: clip;
+    background: var(--chocolate);
+    box-shadow:
+      0 2px 8px color-mix(in srgb, var(--ink) 12%, transparent),
+      0 30px 70px color-mix(in srgb, var(--ink) 22%, transparent);
+  }
+  /* The incoming frame is raised above the outgoing one and fades in over it, so
+     the pair never dips below full coverage however fast the pointer sweeps. */
+  .hover-gallery-frame {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity var(--duration-reveal) var(--ease-standard);
+  }
+  .hover-gallery-frame.is-active { z-index: 2; opacity: 1; }
+  .hover-gallery-frame::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 45%, color-mix(in srgb, var(--ink) 74%, transparent));
+    pointer-events: none;
+  }
+  .hover-gallery-frame img {
+    object-fit: cover;
+    transform: scale(1.06);
+    transition: transform var(--duration-cinematic) var(--ease-reveal);
+  }
+  .hover-gallery-frame.is-active img { transform: scale(1); }
+  .hover-gallery-caption {
+    position: absolute;
+    inset: auto 0 0;
+    display: grid;
+    gap: .4rem;
+    padding: clamp(1.25rem, 3vw, 2.25rem);
+    color: var(--cream);
+    transform: translateY(12px);
+    transition: transform var(--duration-reveal) var(--ease-reveal);
+  }
+  .hover-gallery-frame.is-active .hover-gallery-caption { transform: translateY(0); }
+  .hover-gallery-caption .type-caption {
+    color: color-mix(in srgb, var(--cream) 75%, transparent);
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  .hover-gallery-caption strong {
+    font-family: var(--font-editorial);
+    font-size: clamp(1.75rem, 3vw, 2.75rem);
+    font-weight: 500;
+    line-height: 1.05;
+  }
+  .hover-gallery-list {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .hover-gallery-item {
+    position: relative;
+    display: grid;
+    grid-template-columns: clamp(3.5rem, 6vw, 4.75rem) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: clamp(1rem, 2.2vw, 1.75rem);
+    width: 100%;
+    padding: clamp(.85rem, 2vw, 1.15rem) .5rem clamp(.85rem, 2vw, 1.15rem) 1.25rem;
+    border-top: 1px solid color-mix(in srgb, var(--espresso) 16%, transparent);
+    color: var(--espresso);
+    text-align: left;
+    transition: background-color var(--duration-ui) var(--ease-standard);
+  }
+  .hover-gallery-list li:last-child .hover-gallery-item {
+    border-bottom: 1px solid color-mix(in srgb, var(--espresso) 16%, transparent);
+  }
+  .hover-gallery-item::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 2px;
+    background: var(--espresso);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform var(--duration-ui) var(--ease-reveal);
+  }
+  .hover-gallery-item.is-active { background: color-mix(in srgb, var(--espresso) 5%, transparent); }
+  .hover-gallery-item.is-active::before { transform: scaleY(1); transform-origin: top; }
+  .hover-gallery-thumb {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: clip;
+    background: var(--chocolate);
+  }
+  .hover-gallery-thumb img {
+    object-fit: cover;
+    filter: saturate(.75) brightness(.96);
+    transition: transform var(--duration-reveal) var(--ease-reveal), filter var(--duration-reveal) var(--ease-standard);
+  }
+  .hover-gallery-item.is-active .hover-gallery-thumb img {
+    filter: none;
+    transform: scale(var(--image-scale));
+  }
+  .hover-gallery-text { display: grid; gap: .2rem; }
+  .hover-gallery-name {
+    color: color-mix(in srgb, var(--espresso) 70%, transparent);
+    font-family: var(--font-editorial);
+    font-size: clamp(1.15rem, 1.9vw, 1.7rem);
+    line-height: 1.1;
+    letter-spacing: -.01em;
+    transition: color var(--duration-ui) var(--ease-standard);
+  }
+  .hover-gallery-item.is-active .hover-gallery-name { color: var(--espresso); }
+  .hover-gallery-text .type-caption {
+    color: var(--brown);
+    font-size: .62rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+  .hover-gallery-index {
+    color: var(--brown);
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    transition: color var(--duration-ui) var(--ease-standard);
+  }
+  .hover-gallery-item.is-active .hover-gallery-index { color: var(--espresso); }
 
   .visit-section {
     background: var(--cream);
@@ -636,7 +947,9 @@
   .visit-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(18rem, .55fr); gap: clamp(2rem, 5vw, 5rem); align-items: center; }
   .neighborhood-map { border: 1px solid var(--border); background: var(--espresso); }
   .neighborhood-map svg { display: block; width: 100%; height: auto; }
-  .neighborhood-map figcaption { display: flex; justify-content: space-between; gap: 1rem; padding: .9rem 1rem; border-top: 1px solid var(--border); color: var(--muted-foreground); font-size: .6rem; letter-spacing: .12em; text-transform: uppercase; }
+  /* Warm Stone, not --muted-foreground (brown): brown is the light-surface muted text
+     token and measures ~1.7:1 on this dark espresso panel, well under WCAG AA. */
+  .neighborhood-map figcaption { display: flex; justify-content: space-between; gap: 1rem; padding: .9rem 1rem; border-top: 1px solid var(--border); color: var(--warm-stone); font-size: .6rem; letter-spacing: .12em; text-transform: uppercase; }
   .neighborhood-map figcaption a { color: var(--apricot-soft); }
   .map-neighborhood { fill: color-mix(in srgb, var(--gold-wine) 8%, transparent); font: 700 64px/1 var(--font-functional); letter-spacing: .06em; }
   .map-blocks { fill: color-mix(in srgb, var(--brown) 20%, var(--espresso)); stroke: color-mix(in srgb, var(--apricot) 15%, transparent); }
@@ -676,6 +989,7 @@
     letter-spacing: 0.15em;
     font-size: 0.8rem;
   }
+  .reservation-rule { margin: 1.5rem auto 0; background: color-mix(in srgb, var(--espresso) 18%, transparent); }
   .reservation-band h2 {
     margin: 1.5rem 0 2.5rem;
     color: var(--espresso);
@@ -724,8 +1038,20 @@
     border-bottom: 1px solid color-mix(in srgb, var(--apricot) 15%, transparent);
   }
   .footer-top .wordmark {
+    position: relative;
     font-size: clamp(3.75rem, 8vw, 7.5rem);
     letter-spacing: -.02em;
+  }
+  /* Golden Apricot as a light source, not a fill: the site's closing moment gets a
+     single warm glow behind its name rather than another apricot-colored surface. */
+  .footer-top .wordmark::before {
+    content: "";
+    position: absolute;
+    inset: -60% -20%;
+    z-index: -1;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--apricot) 25%, transparent), transparent 70%);
+    filter: blur(40px);
+    pointer-events: none;
   }
   .footer-top > p {
     font-family: var(--font-editorial);
@@ -740,7 +1066,11 @@
   .footer-grid .type-eyebrow { margin-bottom: .5rem; color: var(--apricot); }
   .footer-grid address { font-style: normal; }
   .footer-grid a { text-underline-offset: .3em; }
-  .footer-bottom { display: flex; justify-content: space-between; gap: 1rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--muted-foreground); font-size: .65rem; letter-spacing: .08em; text-transform: uppercase; }
+  /* Warm Stone, not --muted-foreground (brown): brown is the light-surface muted text
+     token and measures ~1.8:1 on this dark ink footer, well under WCAG AA. */
+  .footer-bottom { display: flex; justify-content: space-between; gap: 1rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--warm-stone); font-size: .65rem; letter-spacing: .08em; text-transform: uppercase; }
+  .footer-bottom a { color: inherit; text-underline-offset: .2em; }
+  @media (hover: hover) { .footer-bottom a:hover { color: var(--apricot-soft); } }
 
   .page-intro {
     max-width: none;
@@ -763,9 +1093,10 @@
     letter-spacing: 0.15em;
     font-size: 0.8rem;
   }
+  .page-intro .apricot-rule { margin-top: 1.25rem; background: color-mix(in srgb, var(--espresso) 22%, transparent); }
   .page-intro h1 {
     max-width: 1300px;
-    margin-top: 1.8rem;
+    margin-top: 1.5rem;
     color: var(--espresso);
     font-size: clamp(4.5rem, 10vw, 10.5rem);
     line-height: .95;
@@ -788,11 +1119,14 @@
   .vegetarian-filter input,
   .consent input { width: 1rem; height: 1rem; }
   .menu-count { margin-block: 1.5rem 2.5rem; color: var(--muted-foreground); text-transform: uppercase; letter-spacing: .12em; }
-  .menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(2rem, 4vw, 4rem) clamp(1rem, 2.5vw, 2.5rem); animation: menu-in var(--duration-reveal) var(--ease-reveal); }
-  @keyframes menu-in { from { opacity: 0; transform: translateY(12px); } }
+  .menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(2rem, 4vw, 4rem) clamp(1rem, 2.5vw, 2.5rem); }
+  /* Each dish arrives in its own beat rather than the whole grid fading as one flat block. */
   .dish-card {
+    animation: dish-in var(--duration-reveal) var(--ease-reveal) backwards;
+    animation-delay: calc(var(--i, 0) * 55ms);
     transition: transform var(--duration-ui) var(--ease-reveal);
   }
+  @keyframes dish-in { from { opacity: 0; transform: translateY(16px); } }
   @media (hover: hover) {
     .dish-card:hover {
       transform: translateY(-4px);
@@ -850,10 +1184,74 @@
   .gallery-grid figcaption span { padding-top: .3rem; color: var(--muted-foreground); font-family: var(--font-functional); font-size: .65rem; }
   @media (hover: hover) {
     .gallery-grid figure:hover figcaption {
-      color: var(--apricot-soft);
+      /* Brown, not apricot: this sits on the cream page background, where apricot-soft text fails contrast. */
+      color: var(--brown);
     }
   }
   .gallery-disclosure { grid-column: 1 / -1; padding-top: 1rem; border-top: 1px solid var(--border); color: var(--muted-foreground); }
+
+  .gallery-grid-trigger { all: unset; display: block; width: 100%; cursor: pointer; }
+  .gallery-grid-trigger:focus-visible { outline: var(--focus-width) solid var(--focus); outline-offset: var(--focus-offset); }
+
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-dialog);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: clamp(.5rem, 2vw, 1.5rem);
+    padding: clamp(1rem, 4vw, 3rem);
+    background: color-mix(in srgb, var(--ink) 92%, transparent);
+    backdrop-filter: blur(16px);
+    animation: lightbox-in var(--duration-ui) var(--ease-standard);
+  }
+  @keyframes lightbox-in { from { opacity: 0; } }
+  .lightbox-figure {
+    position: relative;
+    margin: 0;
+    height: min(78svh, 100%);
+    aspect-ratio: 4 / 5;
+    justify-self: center;
+    overflow: clip;
+    background: var(--chocolate);
+    animation: lightbox-figure-in var(--duration-reveal) var(--ease-reveal);
+  }
+  @keyframes lightbox-figure-in { from { opacity: 0; transform: scale(0.98); } }
+  .lightbox-figure img { object-fit: cover; }
+  .lightbox-figure figcaption {
+    position: absolute;
+    inset: auto 0 0;
+    display: flex;
+    align-items: baseline;
+    gap: .75rem;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--ink) 80%, transparent));
+    color: var(--cream);
+    font-family: var(--font-editorial);
+    font-size: 1.15rem;
+  }
+  .lightbox-figure figcaption .type-caption { color: color-mix(in srgb, var(--cream) 70%, transparent); font-family: var(--font-functional); letter-spacing: .14em; }
+  .lightbox-close,
+  .lightbox-nav {
+    min-height: 3rem;
+    min-width: 3rem;
+    display: grid;
+    place-items: center;
+    color: var(--cream);
+    background: color-mix(in srgb, var(--espresso) 55%, transparent);
+    border: 1px solid color-mix(in srgb, var(--cream) 25%, transparent);
+    border-radius: 50%;
+    font-size: 1.1rem;
+    transition: background-color var(--duration-ui) var(--ease-standard), border-color var(--duration-ui) var(--ease-standard), transform var(--duration-ui) var(--ease-standard);
+  }
+  @media (hover: hover) {
+    .lightbox-close:hover,
+    .lightbox-nav:hover { background: color-mix(in srgb, var(--apricot) 55%, var(--espresso)); border-color: var(--apricot); }
+  }
+  .lightbox-close { position: absolute; top: clamp(1rem, 3vw, 2rem); right: clamp(1rem, 3vw, 2rem); font-size: .85rem; }
+  .lightbox-nav:active,
+  .lightbox-close:active { transform: scale(.92); }
 
   .contact-section { display: grid; grid-template-columns: 1fr 1fr; gap: var(--layout-gap); padding-block: var(--section-space); border-top: 1px solid var(--border); }
   .contact-section > div:last-child { display: flex; flex-direction: column; align-items: start; gap: 1rem; }
@@ -866,10 +1264,27 @@
   .faq-list details:last-child { border-bottom: 1px solid var(--border); }
   .faq-list summary { display: grid; grid-template-columns: 3rem 1fr auto; align-items: center; gap: 1rem; padding-block: 1.5rem; color: var(--espresso); font-family: var(--font-editorial); font-size: clamp(1.5rem, 3.2vw, 3.25rem); list-style: none; }
   .faq-list summary::-webkit-details-marker { display: none; }
-  .faq-list summary .type-caption { color: var(--apricot); font-family: var(--font-functional); }
+  /* Brown, not apricot: this small caption sits on the cream page background, where apricot text fails contrast. */
+  .faq-list summary .type-caption { color: var(--brown); font-family: var(--font-functional); }
   .faq-icon { transition: transform var(--duration-ui) var(--ease-reveal); }
   .faq-list details[open] .faq-icon { transform: rotate(45deg); }
   .faq-list details p { max-width: 55rem; margin: 0 3rem 2rem; color: var(--muted-foreground); }
+  /* Animated disclosure where ::details-content is supported; elsewhere it opens instantly as before. */
+  .faq-list { interpolate-size: allow-keywords; }
+  .faq-list details::details-content {
+    block-size: 0;
+    overflow-y: clip;
+    transition: block-size var(--duration-reveal) var(--ease-reveal), content-visibility var(--duration-reveal) allow-discrete;
+  }
+  .faq-list details[open]::details-content { block-size: auto; }
+
+  .legal-content { max-width: var(--content-prose); padding-block: var(--section-space); }
+  .legal-content h2 { margin-top: clamp(2.5rem, 5vw, 3.5rem); font-size: clamp(1.75rem, 3vw, 2.5rem); }
+  .legal-content h2:first-child { margin-top: 0; }
+  .legal-content p { margin-top: 1rem; color: var(--muted-foreground); }
+  .legal-content p .type-caption,
+  .legal-content .type-caption { display: block; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--muted-foreground); }
+  .legal-content a { color: var(--brown); }
 
   .private-dining { display: grid; grid-template-columns: minmax(0, 1fr) minmax(22rem, .85fr); gap: clamp(3rem, 7vw, 8rem); padding-block: var(--section-space); align-items: start; }
   .private-dining > div > .editorial-photo { aspect-ratio: 4 / 5; }
@@ -893,7 +1308,8 @@
     }
   }
   .form-intro { margin-bottom: clamp(2rem, 4vw, 2.5rem); }
-  .form-intro .type-eyebrow { color: var(--apricot); }
+  /* Brown, not apricot: this small eyebrow sits on the ivory form background, where apricot text fails contrast. */
+  .form-intro .type-eyebrow { color: var(--brown); }
   .enquiry-form h2 {
     color: var(--espresso);
     margin: 0.8rem 0 1rem;
@@ -987,7 +1403,8 @@
   }
   .form-status p { margin: 0 0 0.6rem; }
   .form-status p:last-child { margin-bottom: 0; }
-  .form-status a { color: var(--apricot); font-weight: 600; text-decoration: none; }
+  /* Brown, not apricot: this link sits on a near-ivory background, where apricot text fails contrast. */
+  .form-status a { color: var(--brown); font-weight: 600; text-decoration: underline; }
 }
 
 @media (max-width: 64rem) {
@@ -995,7 +1412,29 @@
   .desktop-nav { display: none; }
   .header-actions .button { display: none; }
   .menu-toggle { display: block; }
-  .hero-composition { grid-template-columns: minmax(0, 1fr) minmax(21rem, .8fr); }
+  body { padding-bottom: 3.75rem; }
+  .mobile-reserve-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .6rem;
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: var(--z-raised);
+    min-height: 3.75rem;
+    padding: .9rem var(--gutter) calc(.9rem + env(safe-area-inset-bottom, 0px));
+    background: var(--apricot);
+    color: var(--espresso);
+    box-shadow: 0 -8px 24px color-mix(in srgb, var(--ink) 22%, transparent);
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background-color var(--duration-ui) var(--ease-standard);
+  }
+  .mobile-reserve-bar:active { background: var(--apricot-soft); }
   .hero-copy h1 { font-size: clamp(3.5rem, 8vw, 6.5rem); }
   .menu-grid { grid-template-columns: repeat(2, 1fr); }
 }
@@ -1006,20 +1445,18 @@
   .hero-topline { align-items: start; flex-direction: column; }
   .section-heading { margin-bottom: 3rem; padding-bottom: 2rem; }
   .section-heading h2 { font-size: clamp(2.5rem, 10vw, 4rem); }
-  .hero { padding-top: 2rem; }
   .hero-topline > span { display: none; }
-  .hero-composition { grid-template-columns: 1fr; min-height: auto; gap: 2.5rem; padding-block: 3rem; }
+  .hero-copy { max-width: none; }
   .hero-copy h1 {
     font-size: clamp(3.75rem, 18vw, 6.5rem);
     line-height: .9;
     letter-spacing: -.025em;
   }
-  .hero-bottom { grid-template-columns: 1fr; margin-top: 2.5rem; }
-  .hero-image-wrap { width: calc(100% + var(--gutter)); }
-  .hero-photo { aspect-ratio: 4 / 5; }
-  .hero-stamp { left: -1rem; bottom: -1.5rem; width: 8rem; }
+  .hero-bottom { flex-direction: column; align-items: start; margin-top: 2.5rem; }
+  .hero-bottom .button { width: 100%; }
+  .hero-stamp { --stamp-rest: rotate(-8deg); inset: auto clamp(1rem, 4vw, 1.5rem) clamp(6.5rem, 20vw, 8rem) auto; width: 7rem; }
   .hero-foot { align-items: start; flex-wrap: wrap; }
-  .hero-foot a { width: 100%; margin: .75rem 0 0; padding-top: .75rem; border-top: 1px solid color-mix(in srgb, var(--espresso) 18%, transparent); }
+  .hero-foot a { width: 100%; margin: .75rem 0 0; padding-top: .75rem; border-top: 1px solid color-mix(in srgb, var(--cream) 18%, transparent); }
   .welcome-section h2 { font-size: clamp(2.75rem, 10vw, 4.5rem); }
   .welcome-bottom { grid-template-columns: 1fr; text-align: center; }
   .editorial-star { font-size: 2.75rem; }
@@ -1034,12 +1471,22 @@
   .private-dining,
   .contact-section { grid-template-columns: 1fr; }
   .story-copy h2 { font-size: clamp(4rem, 20vw, 6.5rem); }
+  /* Keeps the overlapping print inside the gutter instead of causing horizontal overflow. */
+  .story-image-accent { left: -.75rem; bottom: -1.5rem; width: clamp(6rem, 28vw, 8rem); border-width: 4px; }
   .recognition > div { grid-template-columns: 1fr 1fr; }
   .recognition > div span:nth-child(2) { border-right: 0; }
   .recognition > div span:nth-child(n + 3) { border-top: 1px solid var(--border); }
   .room-section { min-height: 75svh; }
   .gallery-group figure { width: 74vw; }
   .gallery-track { animation-duration: 25s; }
+  .hover-gallery { grid-template-columns: 1fr; gap: 1.25rem; }
+  .hover-gallery-preview {
+    position: sticky;
+    top: calc(var(--nav-height) + .75rem);
+    z-index: 1;
+    aspect-ratio: 4 / 3;
+  }
+  .hover-gallery-list { justify-content: flex-start; }
   .visit-section .section-heading { text-align: left; }
   .visit-info { padding-inline: .25rem; }
   .footer-top { align-items: start; }
@@ -1054,15 +1501,18 @@
   .menu-grid { grid-template-columns: 1fr; }
   .gallery-grid { grid-template-columns: 1fr; }
   .gallery-grid figure:nth-child(3n + 2) { margin-top: 0; }
+  .lightbox { grid-template-columns: 1fr; padding: 1rem; }
+  .lightbox-figure { height: auto; width: 100%; }
+  .lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); }
+  .lightbox-prev { left: .5rem; }
+  .lightbox-next { right: .5rem; }
+  .lightbox-close { top: .75rem; right: .75rem; }
   .contact-section > div:last-child > a { overflow-wrap: anywhere; }
   .faq-list summary { grid-template-columns: 2rem 1fr auto; }
   .faq-list details p { margin-inline: 2rem 0; }
   .form-grid { grid-template-columns: 1fr; }
-  .form-occasion-grid { grid-template-columns: 1fr; }
   .enquiry-form { position: static; padding: clamp(2rem, 5vw, 3rem); }
   .enquiry-form h2 { font-size: clamp(2rem, 8vw, 3.5rem); }
-  .form-legend { font-size: clamp(1.25rem, 4vw, 1.75rem); }
-  .form-footer { flex-direction: column; }
 }
 
 @media (max-width: 25rem) {
@@ -1076,9 +1526,26 @@
 @media (prefers-reduced-motion: reduce) {
   .gallery-track { animation: none; transform: none; }
   .gallery-group[aria-hidden="true"] { display: none; }
+  .hover-gallery-frame { transition: none; }
+  .hover-gallery-frame img { transform: none; }
+  .hover-gallery-caption { transform: none; }
   .map-halo { animation: none; }
   .cinematic-frame { transition: none; }
   .cinematic-frame.is-active img,
   .room-section > .editorial-photo img { animation: none; transform: none; }
+  .room-section > .editorial-photo { animation: none; inset: 0; }
+  .mobile-navigation,
+  .mobile-navigation > * { transition: none; }
+  .hero-line-inner,
+  .hero-topline,
+  .hero-bottom,
+  .hero-foot,
+  .hero-stamp,
+  .hero-media,
+  .page-enter,
+  .site-header,
+  .mask-reveal-inner,
+  .apricot-rule::after { animation: none; }
+  .apricot-rule::after { transform: scaleX(1); }
 }
 

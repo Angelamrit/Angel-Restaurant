@@ -18,7 +18,7 @@ export function EnquiryForm() {
       <div className="form-intro">
         <p className="type-eyebrow">Private dining</p>
         <h2>Make it <em>an occasion.</em></h2>
-        <p>Tell us about your celebration and we'll create something unforgettable.</p>
+        <p>Tell us about your celebration and we’ll create something unforgettable.</p>
       </div>
 
       <div className="form-grid">

@@ -15,6 +15,8 @@ Sources: [home](https://angel-indian-restaurant-qucc.vercel.app/) and [story](ht
 
 ## Signature dishes and menu
 
+> **Superseded for site content, 17 September 2026.** The client supplied printed menu artwork carrying the full card; `lib/restaurant.ts` is now transcribed from that artwork, not from the table below. See "Client menu" beneath the table. The capture below is retained as the record of what the old site showed.
+
 Source: [menu](https://angel-indian-restaurant-qucc.vercel.app/menu), displaying an update date of 4 September 2026. The page lists eight dishes, not evidence of a complete restaurant menu. The vegan filter is not evidence that a specific dish is vegan.
 
 | Category | Dish | Listed price | Source description / dietary label |
@@ -29,6 +31,31 @@ Source: [menu](https://angel-indian-restaurant-qucc.vercel.app/menu), displaying
 | Curries | Dal Makhni & Garlic Naan | Ask your server | Served with basmati rice; vegetarian, chef's pick |
 
 Homepage signatures: Tandoori Chicken, Lamb Curry, Dal Makhni & Garlic Naan. The homepage's goat-biryani image alt text mentions mirchi ka salan, while its dish description says raita: confirm before writing expanded copy. All prices and availability remain subject to change. No allergen or cross-contamination guarantees are provided.
+
+### Client menu
+
+Source: printed menu artwork supplied by the client on 17 September 2026 (two trifold panels). Transcribed in full into `lib/restaurant.ts`, which is the machine-readable copy of record; this section documents provenance and shape, and is deliberately not a second copy of the 84 rows.
+
+| Section | Items | Price range |
+| --- | --- | --- |
+| Appetizers — vegetarian | 11 | $5.99–$14.99 |
+| Appetizers — non-vegetarian | 10 | $12.99–$22.99 |
+| Main course — vegetarian | 16 | $17.99–$21.99 |
+| Main course — non-vegetarian | 17 | $19.99–$22.99 |
+| Chef's special | 7 | $16.99–$25.99 |
+| Bread & sides | 10 | $4.00–$7.00 |
+| Drinks | 9 | $2.00–$5.00 |
+| Dessert | 4 | $6.00 |
+
+Notes on the transcription:
+
+- Dietary marks are the client's own. The artwork labels specific dishes `VEGAN`; those became `vegan: true`. Vegetarian status is taken from the section a dish is printed under, so the vegan mark is evidence and the vegetarian flag is inference from placement — neither is a certification, and neither covers preparation or cross-contamination.
+- Palak Paneer / Tofu is printed with the vegan mark; it is the tofu preparation that carries it, and the description says so.
+- The non-vegetarian appetizer list skips printed number 10; ten dishes are printed and ten are transcribed. Numbers are not shown on the site.
+- Every dish now carries a listed price. "Ask your server" no longer appears anywhere in the menu data.
+- The artwork's closing notice is reproduced on the menu page: tell us about a food allergy or special dietary requirement before ordering.
+- Dishes that changed name against the old capture: "Lamb Curry" is not on the card — the nearest listed lamb dishes are Rogan Josh, Bhuna, Vindaloo, Madras and Korma; "Dal Makhni & Garlic Naan" is now Dal Makhni (main course) and Garlic Naan (bread & sides) as separate items. Chole Bhatura and Amritsari Paneer Kulcha moved into Chef's Special.
+- Only eight dishes have photography, so the menu page shows those as signature plates and renders the remaining card as a typographic price list. Do not commission or imply photography for the rest.
 
 ## Visit and reservations
 

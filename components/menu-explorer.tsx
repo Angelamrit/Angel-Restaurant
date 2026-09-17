@@ -1,14 +1,108 @@
 "use client";
 
-import Image from "next/image";
-import { useState, type CSSProperties } from "react";
-import { categories, dishes } from "@/lib/restaurant";
+import { useMemo, useState, type CSSProperties } from "react";
+import { categories, menu } from "@/lib/restaurant";
 
 const order = (index: number) => ({ "--i": index } as CSSProperties);
 
+const diets = [
+  { id: "all", label: "Everything" },
+  { id: "vegetarian", label: "Vegetarian" },
+  { id: "vegan", label: "Vegan" },
+] as const;
+
+type Diet = (typeof diets)[number]["id"];
+
 export function MenuExplorer() {
   const [category, setCategory] = useState("All dishes");
-  const [vegetarian, setVegetarian] = useState(false);
-  const visible = dishes.filter((dish) => (category === "All dishes" || dish.category === category) && (!vegetarian || dish.vegetarian));
-  return <div className="menu-explorer"><div className="menu-controls"><div className="menu-categories" aria-label="Filter dishes by category">{categories.map((name) => <button key={name} aria-pressed={category === name} onClick={() => setCategory(name)}>{name}</button>)}</div><label className="vegetarian-filter"><input type="checkbox" checked={vegetarian} onChange={(event) => setVegetarian(event.target.checked)} />Vegetarian only</label></div><p className="type-caption menu-count" aria-live="polite">{visible.length} dishes · {category}</p><div className="menu-grid" key={`${category}-${vegetarian}`}>{visible.map((dish, index) => <article className="dish-card" style={order(index)} key={dish.name}><div className="dish-image"><Image src={`/angel/${dish.image}.webp`} alt={dish.stock ? `${dish.name} — illustrative food photograph` : `${dish.name} — editorial image from Angel’s collection`} fill sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw" />{dish.vegetarian && <span className="dish-tag">Vegetarian</span>}</div><div className="dish-heading"><h3>{dish.name}</h3><span>{dish.price}</span></div><p>{dish.description}</p></article>)}</div>{visible.length === 0 && <p className="empty-menu">No vegetarian dishes in this category. Try Vegetarian mains or All dishes.</p>}<p className="menu-note type-caption">Prices and availability may change. Please ask our team about dietary requirements. Some photographs are illustrative; presentation may vary.</p></div>;
+  const [diet, setDiet] = useState<Diet>("all");
+  const [query, setQuery] = useState("");
+
+  const sections = useMemo(() => {
+    const search = query.trim().toLowerCase();
+    return menu
+      .filter((section) => category === "All dishes" || section.filter === category)
+      .map((section) => ({
+        ...section,
+        // A diet badge only earns its place where the section is mixed; "Vegan" always does.
+        mixed: section.items.some((item) => !item.vegetarian),
+        items: section.items.filter((item) => {
+          if (diet === "vegetarian" && !item.vegetarian) return false;
+          if (diet === "vegan" && !item.vegan) return false;
+          if (!search) return true;
+          return `${item.name} ${item.description ?? ""}`.toLowerCase().includes(search);
+        }),
+      }))
+      .filter((section) => section.items.length > 0);
+  }, [category, diet, query]);
+
+  const count = sections.reduce((total, section) => total + section.items.length, 0);
+
+  return (
+    <div className="menu-explorer">
+      <div className="menu-controls">
+        <div className="menu-categories" aria-label="Filter dishes by course">
+          {categories.map((name) => (
+            <button key={name} type="button" aria-pressed={category === name} onClick={() => setCategory(name)}>
+              {name}
+            </button>
+          ))}
+        </div>
+        <div className="menu-filters">
+          <div className="diet-filter" role="group" aria-label="Filter dishes by diet">
+            {diets.map((option) => (
+              <button key={option.id} type="button" aria-pressed={diet === option.id} onClick={() => setDiet(option.id)}>
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <div className="menu-search">
+            <span aria-hidden="true">⌕</span>
+            <input type="search" value={query} aria-label="Search the menu" placeholder="Search a dish" onChange={(event) => setQuery(event.target.value)} />
+          </div>
+        </div>
+      </div>
+
+      <p className="type-caption menu-count" aria-live="polite">
+        {count} {count === 1 ? "dish" : "dishes"} · {category}
+        {diet !== "all" && ` · ${diet === "vegan" ? "Vegan" : "Vegetarian"}`}
+      </p>
+
+      {/* Keyed on the filters so every change replays the arrival, the way .dish-card does. */}
+      <div className="menu-list" key={`${category}-${diet}-${query}`}>
+        {sections.map((section, index) => (
+          <section className="menu-list-section" key={section.id} aria-labelledby={`${section.id}-title`}>
+            <header className="menu-list-head">
+              <span className="menu-list-num" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+              <h2 id={`${section.id}-title`}>{section.title}</h2>
+              {section.kicker && <p className="type-eyebrow">{section.kicker}</p>}
+            </header>
+            <ul className="menu-items">
+              {section.items.map((item, position) => (
+                <li className="menu-item" style={order(position)} key={`${section.id}-${item.name}`}>
+                  <div className="menu-item-head">
+                    <h3>
+                      {item.name}
+                      {item.tag && <span className="menu-item-note"> ({item.tag})</span>}
+                    </h3>
+                    <span className="menu-item-leader" aria-hidden="true" />
+                    <span className="menu-item-price">{item.price}</span>
+                  </div>
+                  {item.description && <p>{item.description}</p>}
+                  {item.vegan && <span className="menu-item-diet">Vegan</span>}
+                  {!item.vegan && item.vegetarian && section.mixed && <span className="menu-item-diet">Vegetarian</span>}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+
+      {count === 0 && <p className="empty-menu">Nothing matches that yet. Try another course, or clear the search.</p>}
+
+      <p className="menu-note type-caption">
+        If you have a food allergy or a special dietary requirement, please tell us before placing your order. Prices and availability may change.
+      </p>
+    </div>
+  );
 }

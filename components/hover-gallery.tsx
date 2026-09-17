@@ -4,12 +4,12 @@ import Image from "next/image";
 import { useState } from "react";
 
 const dishes = [
-  { name: "Tandoori Chicken", image: "tandoori-aceva", note: "From the tandoor", alt: "Tandoori chicken and kebabs from the clay oven" },
+  { name: "Tandoori Chicken", image: "tandoori-aceva", note: "Appetizers", alt: "Tandoori chicken and kebabs from the clay oven" },
   { name: "Chicken Dum Biryani", image: "chicken-biryani-stock", note: "Chef’s special", alt: "Chicken dum biryani with saffron and basmati rice" },
-  { name: "Lamb Curry", image: "lamb-curry-aceva", note: "Curries", alt: "Aromatic lamb curry finished with fresh herbs" },
-  { name: "Dal Makhni & Garlic Naan", image: "dal-naan-aceva", note: "Made to share", alt: "Dal makhni, garlic naan and basmati rice" },
-  { name: "Chole Bhatura", image: "chole-bhature-stock", note: "Vegetarian starters", alt: "Spiced chickpeas with golden, freshly fried flatbread" },
-  { name: "Amritsari Paneer Kulcha", image: "amritsari-kulcha-stock", note: "Vegetarian mains", alt: "Paneer-stuffed kulcha with chickpeas, pickle and yogurt" },
+  { name: "Lamb Rogan Josh", image: "lamb-curry-aceva", note: "Main course", alt: "Lamb rogan josh, cooked in a tomato and onion sauce" },
+  { name: "Dal Makhni", image: "dal-naan-aceva", note: "Main course", alt: "Dal makhni, garlic naan and basmati rice" },
+  { name: "Chole Bhatura", image: "chole-bhature-stock", note: "Chef’s special", alt: "Spiced chickpeas with golden, freshly fried flatbread" },
+  { name: "Amritsari Paneer Kulcha", image: "amritsari-kulcha-stock", note: "Chef’s special", alt: "Paneer-stuffed kulcha with chickpeas, pickle and yogurt" },
 ];
 
 export function HoverPreviewGallery() {

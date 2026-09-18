@@ -74,7 +74,8 @@ export function HeroVideo({ src, poster, posterAlt }: { src: string; poster: str
         src={poster}
         alt={showVideo ? "" : posterAlt}
         fill
-        priority
+        loading="eager"
+        fetchPriority="high"
         sizes="100vw"
         style={{ objectFit: "cover", opacity: showVideo ? 0 : 1 }}
       />

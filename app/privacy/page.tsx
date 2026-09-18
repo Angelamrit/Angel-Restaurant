@@ -1,32 +1,40 @@
-import type { Metadata } from "next";
 import { PageIntro } from "@/components/editorial";
 import { restaurant } from "@/lib/restaurant";
+import { JsonLd } from "@/components/json-ld";
+import { pageMetadata, breadcrumbList } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Privacy & terms",
-  description: "How angelindianrestaurant.com handles the information you share, and the terms for using this website.",
-  alternates: { canonical: "/privacy" },
-};
+export const metadata = pageMetadata({
+  title: "Privacy & Terms",
+  description: "How angelindianrestaurant.com handles the information you share, uses analytics, and the terms for using this website.",
+  path: "/privacy",
+});
+const breadcrumbs = breadcrumbList([{ name: "Privacy & terms", path: "/privacy" }]);
 
 export default function PrivacyPage() {
   return (
     <main id="main-content" tabIndex={-1}>
+      <JsonLd data={breadcrumbs} />
       <PageIntro
         eyebrow="The fine print"
         title="Privacy"
         italic="& terms."
-        description="How this website handles the information you share with us, and the terms for using it. Last updated 17 September 2026."
+        description="How this website handles the information you share with us, and the terms for using it. Last updated 18 September 2026."
       />
       <section className="legal-content container-shell" aria-label="Privacy policy and terms of use">
         <h2>What this website collects</h2>
         <p>
-          The private dining enquiry form asks for your name, email, phone, party size, date, occasion, and message. This
-          website does not send that information to a server or store it anywhere. Submitting the form opens a draft email
-          in your own email app, addressed to {restaurant.email}; nothing is transmitted until you choose to send it.
+          The private dining enquiry form asks for your name, email, phone, party size, date, occasion, and message. When
+          you submit it, that information is sent securely to our email delivery provider, Resend, and emailed to our
+          team at {restaurant.email} so we can respond to your enquiry. We do not sell or share this information with
+          anyone else, and we use it only to respond to your enquiry.
         </p>
         <p>
-          Angel does not currently use cookies, analytics, or advertising trackers on this website. If that changes, this
-          page will be updated to describe what is collected and why.
+          This website uses Google Analytics and Vercel Analytics to understand how visitors use the site, such as which
+          pages are viewed and roughly how many people visit. These tools use cookies or similar technology and collect
+          information like your approximate location, device and browser type, and the pages you view; they do not
+          collect your name or contact details unless you choose to give them to us through the enquiry form. You can
+          block this kind of tracking using your browser&rsquo;s privacy settings or an ad blocker without affecting your
+          ability to use the site.
         </p>
         <h2>Reservations</h2>
         <p>
@@ -37,7 +45,7 @@ export default function PrivacyPage() {
         <h2>Questions about your information</h2>
         <p>
           Contact us directly at <a href={`mailto:${restaurant.email}`}>{restaurant.email}</a> or{" "}
-          <a href="tel:3478480098">{restaurant.phone}</a>.
+          <a href={`tel:${restaurant.phoneHref}`}>{restaurant.phone}</a>.
         </p>
         <h2>Website terms of use</h2>
         <p>

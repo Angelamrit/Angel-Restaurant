@@ -84,3 +84,64 @@ Useful responsibilities include menu filtering, mobile navigation, clear externa
 ## Media provenance
 
 Delivered home markup references /angel/interior-aceva.png, tandoori-aceva.png, lamb-curry-aceva.png, dal-naan-aceva.png, feast-aceva.png, and biryani filenames marked as stock. Captions identify some restaurant images as editorial relights. Preserve that distinction; do not represent stock or generated material as documentary Angel photography. No third-party imagery was copied into this repository.
+
+## Client Information Required — 18 September 2026 security/SEO/contact-form pass
+
+The following were found while auditing the codebase against the live site at
+`www.angelindianrestaurant.com` (a different, currently-live Next.js build on the same
+domain that this repository is intended to replace). None of these are implemented as
+code changes; they need client sign-off first.
+
+### Menu: live old site (captured 15 Sep 2026) vs. printed artwork (transcribed into `lib/restaurant.ts`)
+
+`lib/restaurant.ts` was deliberately kept as the printed-artwork transcription per the
+"Client menu" section above. The old site's live menu differs from it as follows —
+confirm which is current before launch:
+
+| Section | On old live site only | On printed artwork only | Same dish, different name/price |
+| --- | --- | --- | --- |
+| Appetizers, vegetarian | Lakhanpur De Bhalle $11.99 | — | "Veg Pakoda" (old, $10.99) vs. "Onion Pakoda" (artwork, $10.99) |
+| Appetizers, non-vegetarian | Garlic Fried Chicken $22.99; Keema Pav $14.99; Fish Fry $22.99 | Tawa Chicken $22.99; Tawa Kaleji Masala $15.99 | "Lamb Chops (3 PCS)" vs. "Adraki Lamb Chop" ($20.99); "Seekh Kebab" vs. "Chicken Seekh Kabab" ($20.99) |
+| Main course, vegetarian | — | — | "Paneer Kadai" vs. "Paneer Khurchan" ($18.99); "Mix Vegetable" vs. "Vegetable Korma" ($18.99); "Saag Paneer / Tofu" vs. "Palak Paneer / Tofu" |
+| Main course, non-vegetarian | Prawn Chettinad $22.99 | Chicken Korma $19.99; Lamb Korma $21.99; Goat Korma $22.99 | "Chicken Saag" vs. "Palak Chicken" ($19.99) |
+| Chef's special | — | Mix Veg Kulcha $18.99 | — |
+| Drinks | — | — | Mango Lassi, Punjabi Lassi, Fresh Lime Soda: $4.00 (old) vs. $5.00 (artwork); "Coke / Coke Zero" vs. "Coke / Diet Coke" |
+| Dessert | — | Ice Cream $6.00 | — |
+
+### Structured-data facts to confirm
+
+- **Geo coordinates**: this build's Restaurant JSON-LD (`app/layout.tsx`) uses
+  `40.7498, -73.8846`; the old site's uses `40.7505, -73.8865`. These are close but not
+  identical — confirm which matches the actual Google Business Profile pin for
+  75-18 37th Avenue, and correct the other.
+- **`priceRange`**: old site publishes `"$$"`. Not yet added to this build's JSON-LD.
+- **`paymentAccepted`**: old site publishes Cash, Credit Card, Debit Card. Not yet added.
+- **`alternateName`**: old site publishes `"Angel Indian"`. Not yet added.
+- **Award claim**: old site's `/press` page separately lists "Michelin Bib Gourmand
+  (2021)" as a recognition (distinct from the homepage's Bib Gourmand badge, which this
+  build already carries). Confirm before adding `award` to the Restaurant JSON-LD.
+- **Do not carry over**: the old site's JSON-LD `aggregateRating` (4.8 / 150 reviews) and
+  its embedded five-star "Sarah M." review. Publishing invented or unverifiable reviews
+  as structured data risks a Google Search manual action; if real aggregate ratings
+  exist (Google Business Profile, Yelp, etc.), source them from there with permission,
+  not from the old site's markup.
+- **`(718) 727-0000`**: appears in the old site's `/privacy` and `/terms` pages as a
+  contact number, distinct from the `347-848-0098` used everywhere else on both sites.
+  Likely a stale placeholder — confirm before using it anywhere.
+
+### Other open items
+
+- A logo file (PNG/SVG) has not been supplied. `app/icon.tsx`, `app/apple-icon.tsx`, and
+  `app/opengraph-image.tsx` currently render a typographic placeholder in the site's own
+  color tokens; swap these for the real mark once received.
+- Takeout/delivery availability and any third-party ordering links (DoorDash, Uber Eats,
+  Grubhub, Seamless) are not mentioned on the new build. The old site's JSON-LD claims
+  "Dine-in, Takeout, Delivery" but links no ordering platform; Uber Eats appears only as
+  a customer-reviews page. Confirm actual availability before adding an "Order online"
+  link anywhere.
+- Deployment/DNS: apex `angelindianrestaurant.com` must redirect to `www` with a 308 (the
+  current live site's apex redirect is a 307); this is a Vercel domain-settings change,
+  not a code change. `NEXT_PUBLIC_SITE_URL`, `RESEND_API_KEY`, `CONTACT_FROM_EMAIL`,
+  `CONTACT_TO_EMAIL`, `NEXT_PUBLIC_GA_MEASUREMENT_ID`, and
+  `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` must be set in the Vercel production
+  environment (see `.env.example`).

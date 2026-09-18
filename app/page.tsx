@@ -5,6 +5,14 @@ import { VisitSection } from "@/components/neighborhood-map";
 import { restaurant } from "@/lib/restaurant";
 import { CinematicSlideshow } from "@/components/cinematic-slideshow";
 import { HeroVideo } from "@/components/hero-video";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
+  title: { absolute: "Angel Indian Restaurant | Indian Food in Jackson Heights, Queens" },
+  description:
+    "Punjabi-rooted Indian cooking by Chef Amrit Pal Singh at 75-18 37th Avenue, Jackson Heights. Michelin Bib Gourmand recognition, 100% halal food, full bar. Tuesday–Sunday, 12 PM–10 PM.",
+  path: "/",
+});
 
 export default function Home() {
   return (

@@ -615,50 +615,76 @@
   .story-copy .type-body-lg { color: var(--brown); }
 
   .recognition {
-    padding-block: clamp(4rem, 8vw, 7rem);
-    border-top: 1px solid color-mix(in srgb, var(--espresso) 8%, transparent);
-    border-bottom: 1px solid color-mix(in srgb, var(--espresso) 8%, transparent);
-    text-align: center;
+    background: var(--wine);
+    color: var(--cream);
     position: relative;
   }
-  .recognition .type-eyebrow {
-    letter-spacing: 0.15em;
-    color: var(--brown);
-    font-size: 0.8rem;
+  .recognition-inner {
+    display: grid;
+    grid-template-columns: minmax(14rem, .85fr) minmax(0, 1.4fr);
+    align-items: center;
+    gap: clamp(2.5rem, 6vw, 5rem) clamp(2rem, 8vw, 6rem);
+    padding-block: clamp(4.5rem, 11vw, 8rem);
   }
-  .recognition > div {
-    margin-top: 3rem;
+  .michelin-mark {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: clamp(11rem, 20vw, 15rem);
+    aspect-ratio: 1;
+    margin-inline: auto;
+    border: 1px solid color-mix(in srgb, var(--gold-wine) 48%, transparent);
+    border-radius: 50%;
+    box-shadow: 0 0 0 12px color-mix(in srgb, var(--gold-wine) 5%, transparent);
+    color: var(--gold-wine);
+    text-align: center;
+  }
+  .michelin-mark span { font-size: .8rem; font-weight: 700; letter-spacing: .28em; margin-left: .28em; }
+  .michelin-mark strong { margin-block: .6rem; font-family: var(--font-editorial); font-size: clamp(1.35rem, 2vw, 1.6rem); font-weight: 500; line-height: 1.05; }
+  .michelin-mark small { font-size: .55rem; font-weight: 700; letter-spacing: .23em; }
+  .recognition-copy .type-eyebrow { color: var(--gold-wine); }
+  .recognition-copy h2 {
+    margin: 1.25rem 0 1.5rem;
+    color: var(--cream);
+    font-size: clamp(2.75rem, 6vw, 5.25rem);
+    line-height: .95;
+    letter-spacing: -.02em;
+  }
+  .recognition-copy > p:last-child {
+    max-width: 34rem;
+    color: color-mix(in srgb, var(--cream) 72%, transparent);
+    font-family: var(--font-editorial);
+    font-size: var(--type-body-lg);
+    line-height: 1.6;
+  }
+  .recognition-press {
+    grid-column: 1 / -1;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     align-items: center;
-    gap: 0;
+    min-height: 6.25rem;
+    border-top: 1px solid color-mix(in srgb, var(--cream) 24%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--cream) 24%, transparent);
+    text-align: center;
   }
-  .recognition > div span {
+  .recognition-press span {
     padding: 1.5rem 1rem;
-    border-right: 1px solid color-mix(in srgb, var(--espresso) 10%, transparent);
-    color: var(--espresso);
+    border-right: 1px solid color-mix(in srgb, var(--cream) 24%, transparent);
+    color: var(--cream);
     font-family: var(--font-editorial);
-    font-size: clamp(1.35rem, 2.5vw, 2.5rem);
+    font-size: clamp(1rem, 1.6vw, 1.4rem);
     line-height: 1.1;
     font-weight: 600;
     transition: transform var(--duration-ui) var(--ease-reveal), color var(--duration-ui) var(--ease-standard);
   }
   @media (hover: hover) {
-    .recognition > div span:hover {
+    .recognition-press span:hover {
       transform: translateY(-2px);
-      /* Brown, not apricot: this sits on the cream page background, where apricot text fails contrast. */
-      color: var(--brown);
+      color: var(--gold-wine);
     }
   }
-  .recognition > div span:last-child { border-right: 0; }
-  .recognition small {
-    display: block;
-    margin-top: .6rem;
-    font-family: var(--font-functional);
-    font-size: .45em;
-    letter-spacing: .15em;
-    color: var(--brown);
-  }
+  .recognition-press span:last-child { border-right: 0; }
 
   .room-section {
     position: relative;
@@ -1658,9 +1684,10 @@
   .dish-index-item { min-height: 3.25rem; }
   /* Keeps the overlapping print inside the gutter instead of causing horizontal overflow. */
   .story-image-accent { left: -.75rem; bottom: -1.5rem; width: clamp(6rem, 28vw, 8rem); border-width: 4px; }
-  .recognition > div { grid-template-columns: 1fr 1fr; }
-  .recognition > div span:nth-child(2) { border-right: 0; }
-  .recognition > div span:nth-child(n + 3) { border-top: 1px solid var(--border); }
+  .recognition-inner { grid-template-columns: 1fr; text-align: center; }
+  .recognition-press { grid-template-columns: 1fr 1fr; }
+  .recognition-press span:nth-child(2) { border-right: 0; }
+  .recognition-press span:nth-child(n + 3) { border-top: 1px solid color-mix(in srgb, var(--cream) 24%, transparent); }
   .room-section { min-height: 75svh; }
   .gallery-group figure { width: 74vw; }
   .gallery-track { animation-duration: 25s; }
@@ -1707,9 +1734,9 @@
 
 @media (max-width: 25rem) {
   .footer-grid { grid-template-columns: 1fr; }
-  .recognition > div { grid-template-columns: 1fr; }
-  .recognition > div span { border-right: 0; border-top: 1px solid var(--border); }
-  .recognition > div span:first-child { border-top: 0; }
+  .recognition-press { grid-template-columns: 1fr; }
+  .recognition-press span { border-right: 0; border-top: 1px solid color-mix(in srgb, var(--cream) 24%, transparent); }
+  .recognition-press span:first-child { border-top: 0; }
   .neighborhood-map figcaption { flex-direction: column; }
 }
 

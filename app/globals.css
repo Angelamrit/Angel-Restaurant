@@ -16,6 +16,10 @@
   --cream: #eaded2;
   --warm-stone: #b99b83;
   --ink: #160c08;
+  /* One-off dark field for the homepage Michelin/press recognition band, matching
+     the client-approved demo (see DESIGN_SPEC.md palette table). Not part of the
+     general light/dark surface system above. */
+  --wine: #7b211c;
 
   --background: var(--cream);
   --foreground: var(--espresso);

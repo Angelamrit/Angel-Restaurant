@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import "./site.css";
 import { Header } from "@/components/header";
@@ -23,6 +25,11 @@ const functional = Manrope({
 
 const description =
   "Authentic Punjabi-rooted Indian cooking by Chef Amrit Pal Singh in Jackson Heights, Queens. Michelin Bib Gourmand recognition, 100% halal food, full bar. Tuesday–Sunday, 12 PM–10 PM.";
+
+const isProduction = process.env.VERCEL_ENV
+  ? process.env.VERCEL_ENV === "production"
+  : process.env.NODE_ENV === "production";
+const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
 export const metadata: Metadata = {
   metadataBase: new URL(restaurant.siteUrl),
@@ -52,12 +59,18 @@ export const metadata: Metadata = {
     title: "Angel Indian Restaurant | Jackson Heights, Queens",
     description,
   },
+  // Deliberately just the card type here: leaving title/description off lets
+  // Next's metadata resolver auto-fill twitter:title/description/image from
+  // each page's own openGraph fields (see resolve-metadata.js `postProcessMetadata`).
+  // Setting them here would be inherited by every route and block that auto-fill.
   twitter: {
     card: "summary_large_image",
-    title: "Angel Indian Restaurant | Jackson Heights, Queens",
-    description,
   },
-  robots: { index: true, follow: true },
+  // Only rendered when the env var is set (Search Console verification via a
+  // meta tag). Verifying the domain via a DNS TXT record instead needs no code.
+  verification: { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION },
+  robots: isProduction ? { index: true, follow: true } : { index: false, follow: false },
+  manifest: "/manifest.webmanifest",
 };
 
 export const viewport: Viewport = {
@@ -68,7 +81,10 @@ export const viewport: Viewport = {
 };
 
 // Restaurant schema, sourced only from CONTENT_REFERENCE.md's verified facts.
-// Do not add ratings, price range, or menu items here without client confirmation.
+// Do not add ratings, price range, payment methods, or menu items here without
+// client confirmation — see CONTENT_REFERENCE.md "Client Information Required"
+// for the specific old-site values (priceRange "$$", paymentAccepted, geo pin)
+// awaiting sign-off.
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "Restaurant",
@@ -119,7 +135,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\u003c") }}
         />
       </head>
       <body>
@@ -130,6 +146,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {children}
         <Footer />
         <Motion />
+        {isProduction && <Analytics />}
+        {isProduction && gaId && <GoogleAnalytics gaId={gaId} />}
       </body>
     </html>
   );

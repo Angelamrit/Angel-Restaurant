@@ -4,7 +4,7 @@ Complete restaurant website built with Next.js App Router, TypeScript, and Tailw
 
 Before implementing components, read [DESIGN_SPEC.md](./DESIGN_SPEC.md). Restaurant content and unresolved facts are preserved in [CONTENT_REFERENCE.md](./CONTENT_REFERENCE.md). Global tokens and reusable styles live in `app/globals.css`; fonts are configured through `next/font` in `app/layout.tsx`.
 
-Validation: `npm run lint`, `npm run build`, then `npx tsc --noEmit`. Google fonts are fetched at build time and self-hosted for visitors. Every future route should provide `main#main-content` for the root skip link. The private-dining form intentionally opens a prepared email because no form-delivery service is configured.
+Validation: `npm run lint`, `npm run build`, then `npx tsc --noEmit`. Google fonts are fetched at build time and self-hosted for visitors. Every future route should provide `main#main-content` for the root skip link. The private-dining form is delivered server-side via a Server Action and Resend (see `app/private-dining/actions.ts`, `lib/enquiry.ts`); it falls back to a prepared email only if delivery fails or `RESEND_API_KEY` is unset. See `.env.example` for required environment variables.
 
 ## Getting Started
 

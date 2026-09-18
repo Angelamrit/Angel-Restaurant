@@ -3,29 +3,24 @@
 import { useEffect, useRef, useState } from "react";
 
 // Muted/looped/playsInline background footage, with everything DESIGN_SPEC's
-// video section asks for: a stable poster, a manual pause control, no autoplay
-// under reduced motion, and pausing when the tab is hidden. No information
-// here is conveyed only through motion — the real content is the text
-// overlay, not the footage.
+// video section asks for: a manual pause control, no autoplay under reduced
+// motion, and pausing when the tab is hidden. No information here is
+// conveyed only through motion — the real content is the text overlay, not
+// the footage.
 //
-// The video's own `poster` attribute is the still image: there is no separate
-// <Image> layered on top of it. An extra layered photo meant an instant,
-// network-timing-independent swap between "photo visible" and "video visible"
-// on every load — precisely the visible pop this was built to avoid. The
-// native poster has no such swap: the browser paints it immediately and only
-// replaces it with real frames once playback actually starts, and it stays
-// as the fallback on its own if the video fails or motion is reduced.
+// Deliberately no poster image on the normal path: a poster is a second,
+// distinct asset that the browser paints instantly, so there is always a
+// "photo, then video" moment as soon as the video has buffered enough to
+// play — no amount of preloading removes that, since the whole point of a
+// poster is to show something before the video can. Leaving it out means
+// the .hero-media container's own background color is what's behind the
+// video until its first real frame decodes; `poster` is only ever applied
+// if the video genuinely fails to load, as a fallback rather than a preview.
 export function HeroVideo({ src, poster, posterAlt }: { src: string; poster: string; posterAlt: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [reducedMotion, setReducedMotion] = useState(true);
   const [failed, setFailed] = useState(false);
   const [paused, setPaused] = useState(false);
-  // True only once the video has real frames on screen (the "playing" event).
-  // Drives whether the poster frame is the only thing a screen reader has to
-  // go on: while it is (reduced motion, still loading, or a failed load),
-  // the element carries posterAlt; once real motion is playing, the
-  // surrounding text overlay is the content and this goes back to decorative.
-  const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -39,11 +34,9 @@ export function HeroVideo({ src, poster, posterAlt }: { src: string; poster: str
   // conditionally mounted once JS confirms the motion preference — that
   // earlier approach meant the browser couldn't even discover the video
   // file, let alone start fetching it, until after hydration finished and
-  // this effect ran. Keeping the tag present (without a declarative
-  // `autoPlay`) lets the browser's preload scanner start on the file from
-  // the initial HTML, and playback is instead started/stopped imperatively
-  // here, which is what correctly keeps it paused for reduced-motion
-  // visitors and on a load failure.
+  // this effect ran. Playback is started/stopped imperatively here (not via
+  // a declarative `autoPlay`), which is what keeps it paused for
+  // reduced-motion visitors and after a load failure.
   useEffect(() => {
     const video = videoRef.current;
     if (!video || failed) return;
@@ -79,20 +72,19 @@ export function HeroVideo({ src, poster, posterAlt }: { src: string; poster: str
       <video
         ref={videoRef}
         className="hero-video"
-        poster={poster}
+        // Only set once the video has actually failed — see the file-level
+        // comment above. React adds/removes the attribute itself; no poster
+        // means none is fetched or painted on the ordinary path at all.
+        poster={failed ? poster : undefined}
         muted
         loop
         playsInline
         preload="auto"
-        aria-hidden={playing}
-        aria-label={playing ? undefined : posterAlt}
+        aria-hidden={!failed}
+        aria-label={failed ? posterAlt : undefined}
         onError={() => setFailed(true)}
-        onPlaying={() => setPlaying(true)}
         onPlay={() => setPaused(false)}
-        onPause={() => {
-          setPaused(true);
-          setPlaying(false);
-        }}
+        onPause={() => setPaused(true)}
       >
         <source src={src} type="video/mp4" />
       </video>

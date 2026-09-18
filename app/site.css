@@ -1609,6 +1609,50 @@
   .form-status p:last-child { margin-bottom: 0; }
   /* Brown, not apricot: this link sits on a near-ivory background, where apricot text fails contrast. */
   .form-status a { color: var(--brown); font-weight: 600; text-decoration: underline; }
+
+  .enquiry-steps { display: flex; flex-direction: column; }
+  .enquiry-step { border-top: 1px solid color-mix(in srgb, var(--apricot) 20%, transparent); }
+  .enquiry-step:last-child { border-bottom: 1px solid color-mix(in srgb, var(--apricot) 20%, transparent); }
+  .enquiry-step-header {
+    display: grid;
+    grid-template-columns: 2.25rem 1fr auto;
+    align-items: baseline;
+    gap: 1rem;
+    width: 100%;
+    padding-block: 1.1rem;
+    background: none;
+    border: 0;
+    color: var(--espresso);
+    font-family: var(--font-functional);
+    text-align: left;
+    cursor: pointer;
+  }
+  .enquiry-step-header:disabled { color: color-mix(in srgb, var(--espresso) 40%, transparent); cursor: not-allowed; }
+  @media (hover: hover) {
+    .enquiry-step-header:not(:disabled):hover .enquiry-step-title { color: var(--brown); }
+  }
+  .enquiry-step-num { font-size: .68rem; font-weight: 700; letter-spacing: .12em; color: color-mix(in srgb, var(--espresso) 45%, transparent); }
+  /* Brown, not apricot: these small labels sit on the ivory form background, where apricot text fails contrast. */
+  .enquiry-step.is-open .enquiry-step-num,
+  .enquiry-step.is-done .enquiry-step-num { color: var(--brown); }
+  .enquiry-step-title { font-size: 1rem; font-weight: 600; letter-spacing: .01em; transition: color var(--duration-ui) var(--ease-standard); }
+  .enquiry-step-summary {
+    overflow: hidden;
+    color: var(--muted-foreground);
+    font-size: .82rem;
+    font-weight: 400;
+    letter-spacing: normal;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* grid-template-rows 0fr/1fr rather than max-height: an accordion panel of
+     unknown content height animates cleanly with this trick, no JS measuring. */
+  .enquiry-step-panel { display: grid; grid-template-rows: 1fr; transition: grid-template-rows var(--duration-reveal) var(--ease-reveal); }
+  .enquiry-step-panel[inert] { grid-template-rows: 0fr; }
+  .enquiry-step-panel-inner { overflow: hidden; padding-bottom: clamp(1.5rem, 3vw, 2rem); }
+  .enquiry-step-nav { margin-top: .25rem; }
+  .enquiry-step-nav .button { padding: .65rem 1.75rem; }
 }
 
 @media (max-width: 64rem) {
@@ -1738,6 +1782,7 @@
   .recognition-press span { border-right: 0; border-top: 1px solid color-mix(in srgb, var(--cream) 24%, transparent); }
   .recognition-press span:first-child { border-top: 0; }
   .neighborhood-map figcaption { flex-direction: column; }
+  .enquiry-step-summary { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

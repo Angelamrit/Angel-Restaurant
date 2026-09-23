@@ -17,7 +17,7 @@ export function CinematicSlideshow({
   priority?: boolean;
 }) {
   const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const [paused, setPaused] = useState(true);
   const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
@@ -45,7 +45,7 @@ export function CinematicSlideshow({
             aria-hidden={index !== active}
             key={slide.name}
           >
-            <Image
+            {index === active && <Image
               src={`/angel/${slide.name}.webp`}
               alt={index === active ? slide.alt : ""}
               fill
@@ -53,7 +53,7 @@ export function CinematicSlideshow({
               // Next 16: `loading="eager"` (not `preload`) is what the LCP heuristic
               // checks on the rendered <img>, so only the real first slide gets it.
               loading={priority && index === 0 ? "eager" : undefined}
-            />
+            />}
           </div>
         ))}
       </div>

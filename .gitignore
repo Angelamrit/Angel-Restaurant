@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+/.data/
+/test-results/
 
 # next.js
 /.next/
@@ -42,3 +44,5 @@ yarn-error.log*
 next-env.d.ts
 node_modules
 .next
+
+/.next-e2e/

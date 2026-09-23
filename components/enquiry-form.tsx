@@ -139,9 +139,9 @@ export function EnquiryForm() {
   }
 
   return (
-    <form id="enquiry" className="enquiry-form" action={formAction} noValidate ref={formRef}>
-      <div className="form-intro">
-        <p className="type-eyebrow">Private dining</p>
+    <form id="enquiry" className="enquiry-form frame frame-strong" action={formAction} noValidate ref={formRef}>
+      <div className="form-intro" data-reveal>
+        <p className="eyebrow eyebrow-rule">Private dining</p>
         <h2>Make it <em>an occasion.</em></h2>
         <p>Tell us about your celebration and we’ll create something unforgettable.</p>
       </div>
@@ -158,7 +158,7 @@ export function EnquiryForm() {
       </div>
       <input type="hidden" name="_t" ref={startedAtRef} defaultValue={0} />
 
-      <div className="enquiry-steps">
+      <div className="enquiry-steps" data-reveal data-stagger-children>
         {STEPS.map((step) => {
           const isOpen = !enhanced || openStep === step.id;
           const isReachable = step.id <= maxStepReached;

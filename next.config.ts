@@ -7,7 +7,7 @@ const isPreview = process.env.VERCEL_ENV === "preview";
 // dynamically (see node_modules/next/dist/docs/01-app/02-guides/content-security-policy.md),
 // which this brochure site does not need. 'unsafe-inline' on script-src is required
 // because Next emits inline RSC payload scripts on every page, and app/layout.tsx
-// ships two inline <script> tags of its own (anti-FOUC flag, Restaurant JSON-LD).
+// ships an inline Restaurant JSON-LD script.
 // Do not add script hashes alongside 'unsafe-inline' — browsers drop 'unsafe-inline'
 // the moment any hash or nonce is present, which would break Next's own inline scripts.
 const previewToolbar = isPreview ? " https://vercel.live" : "";
@@ -41,6 +41,13 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Isolated browser runs use fresh databases and do not need a persistent compiler cache.
+  ...(process.env.ANGEL_TEST_BUILD === "true" ? { experimental: { turbopackFileSystemCacheForDev: false } } : {}),
+  distDir: process.env.ANGEL_TEST_BUILD === "true" ? ".next-e2e" : ".next",
+  serverExternalPackages: ["postgres", "sharp", "node:sqlite"],
+  images: {
+    remotePatterns: process.env.BLOB_PUBLIC_HOST ? [{ protocol: "https", hostname: process.env.BLOB_PUBLIC_HOST, pathname: "/menu/**" }] : [],
+  },
   poweredByHeader: false,
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];

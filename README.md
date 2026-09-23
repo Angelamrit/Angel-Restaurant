@@ -1,5 +1,7 @@
 # Angel Indian Restaurant
 
+Dynamic menu/admin setup, deployment variables, migration commands and verification are documented in [ADMIN_SETUP.md](./ADMIN_SETUP.md).
+
 Complete restaurant website built with Next.js App Router, TypeScript, and Tailwind 4. It includes the homepage, menu, story, experience gallery, private dining, visit, FAQ, and privacy & terms routes.
 
 Before implementing components, read [DESIGN_SPEC.md](./DESIGN_SPEC.md). Restaurant content and unresolved facts are preserved in [CONTENT_REFERENCE.md](./CONTENT_REFERENCE.md). Global tokens and reusable styles live in `app/globals.css`; fonts are configured through `next/font` in `app/layout.tsx`.

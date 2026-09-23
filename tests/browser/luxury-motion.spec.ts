@@ -1,0 +1,32 @@
+﻿import { test, expect } from "@playwright/test";
+
+test("editorial motion preserves immediate content, navigation and reduced-motion access", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("/");
+  await expect(page.locator("main")).toHaveAttribute("data-motion-hydrated", "");
+  await expect(page.locator("h1")).toBeVisible();
+  await expect(page.locator(".hero-poster")).toBeVisible();
+  await expect(page.locator("video")).toHaveCount(0);
+  const card = page.locator(".signature-card").first();
+  await card.scrollIntoViewIfNeeded();
+  await card.hover();
+  await expect(card).toHaveCSS("translate", "0px -3px");
+  await expect.poll(() => page.locator(".signature-grid").evaluate(element => element.getAnimations({ subtree: true }).filter(animation => animation.playState === "running").length)).toBe(0);
+  await page.screenshot({ path: "test-results/luxury-motion-desktop.png" });
+  await card.click();
+  await expect(page).toHaveURL(/\/menu$/);
+  await expect(page.locator("h1")).toBeVisible();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await card.scrollIntoViewIfNeeded();
+  await card.hover();
+  await expect(card).toHaveCSS("translate", "none");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/story");
+  await expect(page.locator(".page-intro-inner")).toHaveCSS("animation-name", "none");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: "test-results/luxury-motion-mobile.png" });
+  expect(errors).toEqual([]);
+});

@@ -1,0 +1,96 @@
+# Angel menu management
+
+## What is implemented
+
+The existing Next.js 16.3.5 App Router site and brown/gold design remain in place. `/admin` adds an access screen, overview, searchable menu table, reusable create/edit form, image uploads, confirmation dialog, analytics configuration/reporting links and settings. Public `/menu`, its JSON-LD, and the homepage dish showcase use the database. `/about` and `/contact` retain their existing redirects to `/story` and `/visit`.
+
+The immutable migration snapshot is `db/original-menu.json`: **84 dishes, eight sections, six course filters, seven Chef Specials and eight previously featured plates**. Original names, prices, full-menu descriptions, dietary flags and separate featured descriptions are preserved. The two kulchas without individual photography use the existing illustrative kulcha photograph; replace these in the admin when photography is available. A regular dish can retain an existing featured image; ordinary regular dishes need none.
+
+## Local setup
+
+Use Node 24 LTS (minimum 22.18, for [native TypeScript script execution](https://nodejs.org/download/release/v22.18.0/docs/api/typescript.html)). Copy `.env.example` to `.env.local` and set `ADMIN_ACCESS_KEY` to at least 32 unpredictable characters. Generate a value with a password manager, or `node -p "require('node:crypto').randomBytes(32).toString('hex')"`. Never commit that value.
+
+Leave `DATABASE_URL` and Blob variables empty locally. Then run:
+
+```sh
+npm install
+npm run db:migrate
+npm run db:seed
+npm run db:verify
+npm run dev
+```
+
+Visit `/admin` and enter the configured key. Missing/short keys disable access; there is no default password or public development bypass. Local data persists in ignored `.data/angel.sqlite`; local uploads persist in `.data/uploads` and are served through a filename-validated route. The local database has already been migrated and seeded in this workspace.
+
+Seed runs are transactional and recorded in `migrations`. Re-running seed does not overwrite edits or resurrect deleted dishes. `db:verify` compares original content, so run it immediately after initial migration, before restaurant edits. Do not edit the archived snapshot to manage the menu.
+
+## Production setup
+
+Provision a managed PostgreSQL database with a pooled, TLS-enabled connection URL, and a public Vercel Blob store. No cloud resources, accounts or deployments were created by this implementation.
+
+Set these server environment variables before enabling the deployment:
+
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | PostgreSQL connection string, including provider TLS requirements |
+| `ADMIN_ACCESS_KEY` | Temporary shared administrator key, minimum 32 random characters |
+| `BLOB_READ_WRITE_TOKEN` | Server-only token for the public Blob store |
+| `BLOB_PUBLIC_HOST` | Exact store hostname, e.g. `your-store.public.blob.vercel-storage.com`; required at build time for image optimization |
+| `ADMIN_ORIGIN` | Optional canonical admin origin for reverse proxies; otherwise the incoming request URL origin is checked |
+| `NEXT_PUBLIC_SITE_URL` | Existing public canonical domain |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Optional existing GA4 property ID |
+
+Run `npm run db:migrate`, `npm run db:seed`, and `npm run db:verify` against the production database **before** switching traffic. Migration credentials may be separate from the runtime database user. Give the runtime user only the required table permissions. No schema writes or seeding occur during visitor requests or builds.
+
+Production refuses to fall back to SQLite or local uploads. `ALLOW_LOCAL_DATABASE=true` exists solely for an explicit local production-build smoke test; Vercel always requires cloud storage. SQLite is not a serverless deployment option.
+
+The three runtime dependencies added are `postgres` (parameterized SQL), `@vercel/blob` (durable image storage) and explicit `sharp` (image validation/re-encoding). There is no ORM or authentication provider.
+
+## Data and publishing
+
+`db/001-menu.sql` defines categories, menu items, media references, temporary login rate-limit buckets and migration markers. Prices are integer cents; boolean flags are checked 0/1 values. Categories are foreign keys and retain the original vegetarian/non-vegetarian section distinctions. Menu records include timestamps, sort order, regular/Chef Special type, publishing flags, image reference and dietary labels. `updated_at` is used for optimistic concurrency checks.
+
+Flow: admin form → same-origin, server-authorized route → validation → parameterized database mutation → route revalidation → refreshed admin list/public server render. Create IDs prevent accidental duplicate submissions. Conflicting updates/deletes ask the editor to reload. Public records always require both `visible` and `available`; this applies to featured cards, homepage and structured data. Public menu reads are request-time, with React memoization only within a render, so there is no persistent stale menu cache. Previously open menu/homepage tabs refresh when they become visible; no constant polling is used.
+
+## Images
+
+Uploads go through the protected `/api/admin/uploads` endpoint. JPEG, PNG and WebP are limited to 4 MiB and 40 megapixels, decoded, oriented, stripped of metadata, resized to at most 1600×1600 and re-encoded as WebP. SVG and other formats are rejected. This limit stays below Vercel's server-upload request limit ([Vercel server uploads](https://vercel.com/docs/vercel-blob/server-upload)).
+
+The immutable image URL is stored in `media`, and only registered URLs may be attached to dishes. Next Image continues to optimize presentation; remote access is restricted to the configured Blob host. Replacing an image creates a new URL, preventing stale image-cache reuse. A failed upload leaves the previous selection intact. Preview/remove changes are published only when the dish is saved. Chef Specials and explicitly featured regular dishes require an image.
+
+Old/replaced and abandoned uploads are retained rather than deleting a file that another editor may still be using. Storage garbage collection is an operational follow-up; URLs are not secrets, and hiding a dish does not revoke its public image URL.
+
+## Analytics
+
+The existing Vercel Analytics and optional GA4 are retained. `lib/analytics.ts` provides `trackEvent`; menu filters and homepage dish previews call it, and delegated link tracking captures reservation/directions/contact/call/WhatsApp clicks. Search terms, email addresses, telephone numbers and query strings are not sent. Admin routes are excluded, including after client-side navigation. Production collection respects Do Not Track; development dispatches `angel:analytics` DOM events for QA without sending provider traffic.
+
+`/admin/analytics` honestly shows configuration states and links to provider reports. It does **not** claim to import traffic totals or historical records. Enable Web Analytics in Vercel; custom events may require the applicable Vercel plan. Configure GA4 and verify production events in its DebugView/realtime reports. Provider reporting APIs/credentials are needed to bring daily/weekly visitor counts, trends and device reports into this workspace. Browser blocking or privacy settings can prevent delivery; local event dispatch cannot establish provider receipt.
+
+## Tomorrow's authentication work
+
+Replace the temporary session implementation in `lib/admin-access.ts` and `/api/admin/session` with the chosen provider's session/role checks. All private reads and mutations use the shared authorization seam; replacing it does not require rewriting the menu system. Add administrator identities, restaurant roles, recovery, MFA and per-user auditing. Public visitors continue to need no account.
+
+Temporary protection uses an eight-hour signed, HTTP-only, same-site session cookie; secure cookies in production; constant-time key comparison; database-backed login throttling; same-origin checks on mutations; and no secret in client code. Rotating the key invalidates all existing sessions. This is a temporary gate, not a finalized account system. Without Vercel's trusted client-IP header the login throttle deliberately uses a shared bucket.
+
+## Verification and files
+
+```sh
+npm run lint
+npm run typecheck
+npm test
+npm run test:e2e
+npm run build
+```
+
+Unit/integration tests cover validation, SQL constraints, migration fidelity and seed idempotence. Playwright uses an isolated database and `.next-e2e` build directory on port 3100; it never changes the development menu database. Tests use installed Microsoft Edge (`msedge`); change the channel or install that browser on CI. Browser tests cover public routes, responsive navigation, admin access, origin rejection, regular/Chef Special lifecycles, uploads/replacement and event dispatch. Screenshots/traces go to ignored `test-results`.
+
+Main implementation groups:
+
+- `app/admin`, `components/admin`: workspace routes, navigation, forms, list, dialog, states and styles.
+- `app/api/admin`, `app/api/media`: protected mutations, temporary session, uploads and local image serving.
+- `lib/database.ts`, `lib/menu-repository.ts`, `lib/menu-types.ts`, `lib/menu-validation.ts`, `lib/admin-access.ts`: data/access boundaries.
+- `db`, `scripts/database.mts`: schema, preserved snapshot, migration and seed commands.
+- `app/menu/page.tsx`, `app/page.tsx`, `components/menu-explorer.tsx`, `components/dish-showcase.tsx`: public data integration.
+- `components/site-chrome.tsx`, `components/analytics-*`, `lib/analytics.ts`: public/admin shell separation and existing analytics integration.
+
+Known deployment limitations: managed PostgreSQL and Vercel Blob need real credentials and live smoke tests; provider analytics delivery/import needs deployment verification; permanent authentication and upload garbage collection remain separate work. Category management is intentionally deferred.

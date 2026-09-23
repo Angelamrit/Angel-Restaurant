@@ -1,18 +1,17 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
-import { GoogleAnalytics } from "@next/third-parties/google";
-import { Analytics } from "@vercel/analytics/next";
+import { AnalyticsProviders } from "@/components/analytics-providers";
 import "./globals.css";
 import "./site.css";
-import { Header } from "@/components/header";
+import "./pages.css";
+import { SiteChrome } from "@/components/site-chrome";
 import { Footer } from "@/components/editorial";
-import { Motion } from "@/components/motion";
 import { restaurant } from "@/lib/restaurant";
 
 const editorial = Cormorant_Garamond({
   variable: "--font-cormorant",
   subsets: ["latin"],
-  weight: ["500", "600"],
+  weight: ["300", "400", "500", "600"],
   style: ["normal", "italic"],
   display: "swap",
 });
@@ -76,8 +75,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#E5C88F",
-  colorScheme: "light",
+  themeColor: "#1f130d",
+  colorScheme: "dark",
 };
 
 // Restaurant schema, sourced only from CONTENT_REFERENCE.md's verified facts.
@@ -122,17 +121,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       className={`${editorial.variable} ${functional.variable}`}
-      // The inline script below sets data-motion-ready on the live DOM before hydration,
-      // so it never matches the server-rendered markup by design — expected, not a bug.
-      suppressHydrationWarning
     >
       <head>
-        {/* Runs before first paint so reveal targets never render visible and then blink. */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: "if(!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.setAttribute('data-motion-ready','')",
-          }}
-        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\u003c") }}
@@ -142,12 +132,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <a className="skip-link button button-primary" href="#main-content">
           Skip to content
         </a>
-        <Header />
-        {children}
-        <Footer />
-        <Motion />
-        {isProduction && <Analytics />}
-        {isProduction && gaId && <GoogleAnalytics gaId={gaId} />}
+        <SiteChrome footer={<Footer />} analytics={isProduction && <AnalyticsProviders gaId={gaId} />}>
+          {children}
+        </SiteChrome>
       </body>
     </html>
   );

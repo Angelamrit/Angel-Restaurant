@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState, type CSSProperties } from "react";
-import { categories, menu } from "@/lib/restaurant";
+import type { PublicSection } from "@/lib/menu-types";
+import { trackEvent } from "@/lib/analytics";
 
 const order = (index: number) => ({ "--i": index } as CSSProperties);
 
@@ -13,7 +14,7 @@ const diets = [
 
 type Diet = (typeof diets)[number]["id"];
 
-export function MenuExplorer() {
+export function MenuExplorer({ menu, categories }: { menu: PublicSection[]; categories: string[] }) {
   const [category, setCategory] = useState("All dishes");
   const [diet, setDiet] = useState<Diet>("all");
   const [query, setQuery] = useState("");
@@ -34,16 +35,16 @@ export function MenuExplorer() {
         }),
       }))
       .filter((section) => section.items.length > 0);
-  }, [category, diet, query]);
+  }, [category, diet, query, menu]);
 
   const count = sections.reduce((total, section) => total + section.items.length, 0);
 
   return (
     <div className="menu-explorer">
-      <div className="menu-controls">
+      <div className="menu-controls frame frame-strong">
         <div className="menu-categories" aria-label="Filter dishes by course">
           {categories.map((name) => (
-            <button key={name} type="button" aria-pressed={category === name} onClick={() => setCategory(name)}>
+            <button key={name} type="button" aria-pressed={category === name} onClick={() => { setCategory(name); trackEvent("menu_filter", { category: name }); }}>
               {name}
             </button>
           ))}
@@ -51,7 +52,7 @@ export function MenuExplorer() {
         <div className="menu-filters">
           <div className="diet-filter" role="group" aria-label="Filter dishes by diet">
             {diets.map((option) => (
-              <button key={option.id} type="button" aria-pressed={diet === option.id} onClick={() => setDiet(option.id)}>
+              <button key={option.id} type="button" aria-pressed={diet === option.id} onClick={() => { setDiet(option.id); trackEvent("menu_filter", { diet: option.id }); }}>
                 {option.label}
               </button>
             ))}
@@ -71,15 +72,15 @@ export function MenuExplorer() {
       {/* Keyed on the filters so every change replays the arrival, the way .dish-card does. */}
       <div className="menu-list" key={`${category}-${diet}-${query}`}>
         {sections.map((section, index) => (
-          <section className="menu-list-section" key={section.id} aria-labelledby={`${section.id}-title`}>
-            <header className="menu-list-head">
+          <section className="menu-list-section frame frame-strong" key={section.id} aria-labelledby={`${section.id}-title`}>
+            <header className="menu-list-head" data-reveal>
               <span className="menu-list-num" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
               <h2 id={`${section.id}-title`}>{section.title}</h2>
               {section.kicker && <p className="type-eyebrow">{section.kicker}</p>}
             </header>
-            <ul className="menu-items">
+            <ul className="menu-items" data-reveal data-stagger-children>
               {section.items.map((item, position) => (
-                <li className="menu-item" style={order(position)} key={`${section.id}-${item.name}`}>
+                <li className="menu-item" style={order(position)} key={item.id}>
                   <div className="menu-item-head">
                     <h3>
                       {item.name}

@@ -1,0 +1,2 @@
+"use client";
+export default function MenuError({ reset }: { reset: () => void }) { return <main id="main-content" className="container-shell section-space" style={{ paddingTop: "12rem", minHeight: "70vh" }}><h1>The menu will be back shortly.</h1><p>We couldn’t load our dishes. Please try again, or call us for today’s menu.</p><button className="button button-primary" onClick={reset}>Try again</button></main>; }

@@ -20,7 +20,7 @@ export default function PrivacyPage() {
         italic="& terms."
         description="How this website handles the information you share with us, and the terms for using it. Last updated 18 September 2026."
       />
-      <section className="legal-content container-shell" aria-label="Privacy policy and terms of use">
+      <section className="surface-dark tone-dark section" aria-label="Privacy policy and terms of use"><div className="legal-content container-shell">
         <h2>What this website collects</h2>
         <p>
           The private dining enquiry form asks for your name, email, phone, party size, date, occasion, and message. When
@@ -61,7 +61,7 @@ export default function PrivacyPage() {
           This page describes how this website works. It is a plain-language starting point, not a substitute for legal
           advice tailored to Angel&rsquo;s business.
         </p>
-      </section>
+      </div></section>
     </main>
   );
 }

@@ -1,0 +1,17 @@
+import Link from "next/link";
+import type { CSSProperties } from "react";
+import { AnimatedNumber } from "@/components/admin/animated-number";
+import { getAdminMenu, getCategories } from "@/lib/menu-repository";
+export default async function Dashboard() {
+  const [items, categories] = await Promise.all([getAdminMenu(), getCategories()]);
+  const stats: [string, number][] = [["Total dishes", items.length], ["Available", items.filter(item => item.available).length], ["Chef Specials", items.filter(item => item.type === "chef-special").length], ["Hidden", items.filter(item => !item.visible).length], ["Categories", categories.length]];
+  const published = items.filter(item => item.visible && item.available).length;
+  const distribution = categories.map(category => ({ ...category, count: items.filter(item => item.categoryId === category.id).length }));
+  const largestCategory = Math.max(1, ...distribution.map(category => category.count));
+  return <><div className="admin-page-head"><div><p className="eyebrow">THE RESTAURANT AT A GLANCE</p><h1>Good food. Well managed.</h1><p>Your kitchen’s menu, all in one place.</p></div><Link className="admin-button primary" href="/admin/menu/new">+ Add dish</Link></div>
+    <div className="admin-stats">{stats.map(([label, value], index) => <article className="admin-panel" key={label} style={{ "--enter-order": index } as CSSProperties}><p>{label}</p><strong><AnimatedNumber value={value} /></strong></article>)}</div>
+    <div className="admin-two"><section className="admin-panel"><div className="admin-section-head"><h2>Menu by category</h2><Link href="/admin/menu">Manage menu ↗</Link></div>{distribution.map(category => <div className="admin-category" key={category.id}><div className="admin-summary-row"><span>{category.title}<small>{category.kicker}</small></span><strong>{category.count}</strong></div><div className="admin-meter" aria-hidden="true"><span style={{ "--meter-fill": category.count / largestCategory } as CSSProperties} /></div></div>)}</section>
+    <section className="admin-panel admin-published"><span className="admin-badge gold">Public menu</span><h2>Ready for your guests</h2><p className="admin-large-number"><AnimatedNumber value={published} /></p><p>Dishes currently published and available on the website.</p><div className="admin-meter" aria-hidden="true"><span style={{ "--meter-fill": published / Math.max(1, items.length) } as CSSProperties} /></div><div className="admin-summary-row"><span>Unavailable dishes</span><strong>{items.filter(item => !item.available).length}</strong></div><p className="admin-muted">Saved changes appear on the public menu on its next load. Hidden and unavailable dishes stay in your workspace.</p><Link href="/menu" target="_blank" className="admin-button">Preview the menu ↗</Link></section></div>
+    <section className="admin-panel"><div className="admin-section-head"><h2>Recently updated</h2><Link href="/admin/menu">All dishes ↗</Link></div>{[...items].sort((a,b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0,5).map(dish => <div className="admin-summary-row" key={dish.id}><Link href={`/admin/menu/${dish.id}/edit`}>{dish.name}</Link><small>{new Date(dish.updatedAt).toLocaleDateString("en-US", { timeZone: "America/New_York", month: "short", day: "numeric", year: "numeric" })}</small></div>)}{!items.length && <p>No dishes yet. Add your first dish to get started.</p>}</section>
+  </>;
+}

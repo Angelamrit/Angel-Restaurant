@@ -9,7 +9,7 @@ Speed is the highest design priority, with accessibility, security and correctne
 | Loading | LCP <= 2.5 s at the 75th percentile of real visits, separately for mobile and desktop |
 | Responsiveness | INP <= 200 ms at the 75th percentile |
 | Visual stability | CLS <= 0.1 at the 75th percentile |
-| Media | Zero homepage video requests before explicit playback; only the selected slideshow/dish image mounted |
+| Media | The requested hero video autoplays muted while visible and pauses when hidden or offscreen; only the selected slideshow/dish image is mounted |
 | Accessibility | WCAG 2.2 AA review, keyboard navigation, dialog focus containment/return, visible focus, reduced motion, contrast and readable zoom |
 | Responsive design | No horizontal overflow at 390 px and 1440 px; manual review at 320 px and 200% zoom before release |
 | Correctness | Lint, TypeScript, unit tests, browser workflow tests and production build pass |
@@ -22,11 +22,11 @@ Core Web Vitals thresholds: [Google PageSpeed Insights documentation](https://de
 - Keep the existing Next.js/React application for its server rendering, image optimization, admin routes and database integration. This is not a claim that it is the smallest framework; reconsider architecture only with equivalent-workflow measurements and a migration plan.
 - Prefer semantic HTML, native scrolling/dialogs, CSS and small browser observers. No new animation, scrolling, carousel or UI framework without demonstrating why native capabilities are insufficient and measuring the added transfer/runtime cost.
 - Keep content on the server and client components limited to interactions. Avoid polling and continuous animation loops. Reserve image space and provide responsive sizes.
-- Keep essential content visible before hydration and when JavaScript fails. Playback and slideshow progression start on user intent. Respect reduced motion and pause video when hidden/offscreen.
+- Keep essential content visible before hydration and when JavaScript fails. The hero video is the client's autoplay exception; start it muted when visible, respect reduced motion, and pause it when hidden/offscreen. Slideshow progression starts on user intent.
 
 ## Inspection findings — 23 September 2026
 
-Implemented: removed Lenis and its perpetual animation loop from the site, removed the mounted cursor overlay, replaced scroll/pointer-driven decoration with a brief offscreen entrance observer, removed pre-hydration hiding and delayed hero entrances, stopped ambient animation, replaced eager 4,535,389-byte video loading with an optimized image and explicit playback, mounted only selected slideshow/dish images, and used a native gallery dialog for keyboard focus containment.
+Implemented: removed Lenis and its perpetual animation loop from the site, removed the mounted cursor overlay, replaced scroll/pointer-driven decoration with a brief offscreen entrance observer, removed pre-hydration hiding and delayed hero entrances, stopped ambient animation, kept an optimized poster behind the client-requested muted autoplay video, mounted only selected slideshow/dish images, and used a native gallery dialog for keyboard focus containment.
 
 Existing strengths: optimized image component, self-hosted framework fonts, semantic page structure, skip link, reduced-motion styles, server validation, administrator authorization, origin checks, error routes and existing menu lifecycle tests.
 
@@ -43,12 +43,12 @@ Remaining review items:
 
 Motion refinement: finite CSS/Web Animations API effects use 260–480 ms durations, small translations and a maximum 120 ms stagger. No animation dependency was added. The focused `luxury-motion.spec.ts` browser check passed for immediate content, opt-in media, settled animations, menu navigation, mobile overflow and reduced motion. Lint, TypeScript and the production build also passed for this refinement. This focused result does not resolve the earlier full-suite findings below.
 
-Run `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:e2e`, and `npm run build`. Browser tests use an isolated seeded database. `tests/browser/sqa.spec.ts` covers public route overflow, content without JavaScript, opt-in video requests and gallery keyboard containment/return. Screenshots are saved under ignored `test-results/` for visual review.
+Run `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:e2e`, and `npm run build`. Browser tests use an isolated seeded database. `tests/browser/sqa.spec.ts` covers public route overflow, content without JavaScript, hero autoplay and gallery keyboard containment/return. Screenshots are saved under ignored `test-results/` for visual review.
 
 ### Verification status
 
 - Five unit tests passed. Final lint and TypeScript checks passed after the keyboard/CSS cleanup.
-- Nine public routes passed at both 390 px and 1440 px with no page errors or horizontal overflow. The header scroll regression passed. Video requested no MP4 before intent and did request it after Play.
+- In the earlier opt-in implementation, nine public routes passed at both 390 px and 1440 px with no page errors or horizontal overflow; the header scroll regression passed. Autoplay changes need a fresh browser run.
 - The first browser run caught gallery focus wrapping and outdated animation-class assertions, now corrected. Their final rerun could not complete: the test server and test runner exhausted host memory. The no-JavaScript menu limitation remains documented above.
 - The existing admin lifecycle test failed when restoring a dish's availability, leaving an extra test dish that caused a later count assertion to fail. Reproduce on a healthy host using the isolated test database; this is unresolved, not a passing workflow.
 - The final production build passed, including generation of all 19 static outputs. Earlier attempts ran out of disk space and encountered an incomplete generated test type file during concurrent regeneration. A production performance baseline has not been measured.

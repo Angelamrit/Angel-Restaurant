@@ -110,10 +110,9 @@ confirm which is current before launch:
 
 ### Structured-data facts to confirm
 
-- **Geo coordinates**: this build's Restaurant JSON-LD (`app/layout.tsx`) uses
-  `40.7498, -73.8846`; the old site's uses `40.7505, -73.8865`. These are close but not
-  identical — confirm which matches the actual Google Business Profile pin for
-  75-18 37th Avenue, and correct the other.
+- **Geo coordinates**: sources disagree (`40.7498, -73.8846` versus
+  `40.7505, -73.8865`). The site now links directions by verified street address and
+  omits coordinates from Restaurant JSON-LD until the Google Business Profile pin is confirmed.
 - **`priceRange`**: old site publishes `"$$"`. Not yet added to this build's JSON-LD.
 - **`paymentAccepted`**: old site publishes Cash, Credit Card, Debit Card. Not yet added.
 - **`alternateName`**: old site publishes `"Angel Indian"`. Not yet added.

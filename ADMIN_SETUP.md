@@ -35,7 +35,6 @@ Set these server environment variables before enabling the deployment:
 | `DATABASE_URL` | PostgreSQL connection string, including provider TLS requirements |
 | `ADMIN_ACCESS_KEY` | Temporary shared administrator key, minimum 32 random characters |
 | `BLOB_READ_WRITE_TOKEN` | Server-only token for the public Blob store |
-| `BLOB_PUBLIC_HOST` | Exact store hostname, e.g. `your-store.public.blob.vercel-storage.com`; required at build time for image optimization |
 | `ADMIN_ORIGIN` | Optional canonical admin origin for reverse proxies; otherwise the incoming request URL origin is checked |
 | `NEXT_PUBLIC_SITE_URL` | Existing public canonical domain |
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Optional existing GA4 property ID |
@@ -56,7 +55,7 @@ Flow: admin form → same-origin, server-authorized route → validation → par
 
 Uploads go through the protected `/api/admin/uploads` endpoint. JPEG, PNG and WebP are limited to 4 MiB and 40 megapixels, decoded, oriented, stripped of metadata, resized to at most 1600×1600 and re-encoded as WebP. SVG and other formats are rejected. This limit stays below Vercel's server-upload request limit ([Vercel server uploads](https://vercel.com/docs/vercel-blob/server-upload)).
 
-The immutable image URL is stored in `media`, and only registered URLs may be attached to dishes. Next Image continues to optimize presentation; remote access is restricted to the configured Blob host. Replacing an image creates a new URL, preventing stale image-cache reuse. A failed upload leaves the previous selection intact. Preview/remove changes are published only when the dish is saved. Chef Specials and explicitly featured regular dishes require an image.
+The immutable image URL is stored in `media`, and only registered URLs may be attached to dishes. Next Image continues to optimize presentation; remote access is restricted to public Vercel Blob URLs under `/menu/`. No separate Blob hostname setting is needed at build time. Replacing an image creates a new URL, preventing stale image-cache reuse. A failed upload leaves the previous selection intact. Preview/remove changes are published only when the dish is saved. Chef Specials and explicitly featured regular dishes require an image.
 
 Old/replaced and abandoned uploads are retained rather than deleting a file that another editor may still be using. Storage garbage collection is an operational follow-up; URLs are not secrets, and hiding a dish does not revoke its public image URL.
 

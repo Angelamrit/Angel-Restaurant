@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Manrope } from "next/font/google";
+import localFont from "next/font/local";
 import { AnalyticsProviders } from "@/components/analytics-providers";
 import "./globals.css";
 import "./site.css";
@@ -8,17 +8,19 @@ import { SiteChrome } from "@/components/site-chrome";
 import { Footer } from "@/components/editorial";
 import { restaurant } from "@/lib/restaurant";
 
-const editorial = Cormorant_Garamond({
+const editorial = localFont({
+  src: [
+    { path: "./fonts/cormorant-garamond-latin.woff2", weight: "300 600", style: "normal" },
+    { path: "./fonts/cormorant-garamond-italic-latin.woff2", weight: "300 600", style: "italic" },
+  ],
   variable: "--font-cormorant",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  style: ["normal", "italic"],
   display: "swap",
 });
 
-const functional = Manrope({
+const functional = localFont({
+  src: "./fonts/manrope-latin.woff2",
   variable: "--font-manrope",
-  subsets: ["latin"],
+  weight: "200 800",
   display: "swap",
 });
 
@@ -102,7 +104,6 @@ const structuredData = {
     postalCode: "11372",
     addressCountry: "US",
   },
-  geo: { "@type": "GeoCoordinates", latitude: 40.7498, longitude: -73.8846 },
   openingHoursSpecification: [
     {
       "@type": "OpeningHoursSpecification",

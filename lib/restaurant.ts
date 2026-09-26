@@ -1,7 +1,7 @@
 export const restaurant = {
   name: "Angel Indian Restaurant",
   resy: "https://resy.com/cities/new-york-ny/venues/angel-indian-restaurant-ny",
-  directions: "https://www.google.com/maps/dir/?api=1&destination=40.7498,-73.8846",
+  directions: "https://www.google.com/maps/dir/?api=1&destination=75-18%2037th%20Avenue%2C%20Jackson%20Heights%2C%20NY%2011372",
   phone: "347-848-0098",
   // Digits-only, for tel: hrefs. Derived rather than duplicated so the display
   // and link forms of the phone number can never drift apart (see plan finding S6).

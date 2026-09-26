@@ -16,14 +16,6 @@ export type PressItem = {
 // `award` field (app/layout.tsx) once the client confirms it, not as an article.
 export const press: PressItem[] = [
   {
-    outlet: "Angel Indian Restaurant",
-    title: "Full Bar Service Launches at Angel Indian Restaurant",
-    url: "/press",
-    date: "2026-01-02",
-    kind: "feature",
-    note: "“The addition of our full bar allows us to complete the dining experience.” — Chef Amrit Pal Singh",
-  },
-  {
     outlet: "Resy",
     title: "NYC Restaurants Where We Want to Be Regulars",
     url: "https://blog.resy.com/2025/12/nyc-restaurants-where-we-want-to-be-regulars/",

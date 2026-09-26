@@ -1,1 +1,0 @@
-export default function Loading() { return <main id="main-content" className="container-shell section-space" style={{ paddingTop: "12rem", minHeight: "70vh" }} aria-busy="true"><p role="status">Loading menu…</p></main>; }

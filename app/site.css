@@ -496,6 +496,7 @@
   .plating { position: relative; height: 340svh; view-timeline-name: --plating; view-timeline-axis: block; background: var(--brown-deep); }
   .plating-sticky { position: sticky; top: 0; height: 100svh; overflow: clip; display: flex; align-items: center; }
   .plating-media { position: absolute; inset: 0; }
+  .plating-media .editorial-photo { position: absolute; inset: 0; }
   .plating-media img { object-fit: cover; transform: scale(1); filter: blur(0) brightness(.85); }
   .plating-veil { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(21, 13, 8, 0.82), rgba(21, 13, 8, 0.35) 60%, rgba(21, 13, 8, 0.2)), linear-gradient(180deg, rgba(21, 13, 8, 0.6), transparent 30%, transparent 70%, rgba(21, 13, 8, 0.85)); }
   .plating-copy { position: relative; z-index: 2; width: 100%; }
@@ -800,7 +801,22 @@
 
 /* Speed takes precedence over ambient decoration, including on desktop. */
 @layer components {
+  .certificate-highlight { position: relative; padding: clamp(2rem, 5vw, 4.5rem) 0; background: #351a18; border-block: 1px solid rgba(226, 189, 108, .3); }
+  .certificate-highlight-inner { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: clamp(2rem, 6vw, 6rem); align-items: center; }
+  .certificate-highlight-copy h2 { max-width: 43rem; margin-top: 1rem; font-family: var(--font-editorial); font-size: clamp(2.5rem, 5vw, 5rem); font-weight: 300; line-height: 1.04; }
+  .certificate-highlight-copy h2 em { color: var(--gold-light); font-weight: 400; }
+  .certificate-highlight-copy > p:last-child { margin-top: 1.25rem; color: rgba(246, 239, 226, .72); }
+  .certificate-highlight-mark { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: .65rem; width: clamp(15rem, 25vw, 22rem); min-height: 12rem; padding: 2rem; border: 1px solid var(--gold); outline: 1px solid rgba(226, 189, 108, .38); outline-offset: -.65rem; text-align: center; }
+  .certificate-highlight-mark span { color: var(--gold-light); font-size: .58rem; font-weight: 700; letter-spacing: .3em; }
+  .certificate-highlight-mark strong { color: var(--ivory); font-family: var(--font-editorial); font-size: clamp(2rem, 3vw, 3rem); font-weight: 400; line-height: 1; }
+  @media (max-width: 48rem) {
+    .certificate-highlight-inner { grid-template-columns: 1fr; gap: 2rem; }
+    .certificate-highlight-mark { width: 100%; min-height: 10rem; }
+  }
+
   .hero-poster { object-fit: cover; }
+  .hero-video { opacity: 0; }
+  .hero-video.is-playing { opacity: 1; }
   .orb, .ember, .text-shimmer, .badge-ring, .badge-glow,
   .monogram::before, .editorial-star, .hero-spot,
   .hero:not([data-pointer]) .hero-spot, .scroll-cue-line i,

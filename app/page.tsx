@@ -74,6 +74,21 @@ export default async function Home() {
         </div>
       </section>
 
+      <section className="certificate-highlight tone-dark" aria-labelledby="certificate-title">
+        <div className="container-shell certificate-highlight-inner">
+          <div className="certificate-highlight-copy">
+            <p className="eyebrow eyebrow-rule">A place worth discovering</p>
+            <h2 id="certificate-title">Recognized by the <em>MICHELIN Guide.</em></h2>
+            <p>Angel Indian Restaurant · Jackson Heights, New York</p>
+          </div>
+          <div className="certificate-highlight-mark" aria-label="Michelin Bib Gourmand recognition">
+            <span>MICHELIN</span>
+            <strong>Bib Gourmand</strong>
+            <span>RECOGNITION</span>
+          </div>
+        </div>
+      </section>
+
       {/* Welcome: the heading lights up word by word as it scrolls through */}
       <section id="welcome" className="manifesto section surface-dark tone-dark" aria-label="Welcome">
         <div className="manifesto-bg" aria-hidden="true">

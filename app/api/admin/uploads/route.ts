@@ -25,7 +25,6 @@ export async function POST(request: Request) {
     let url: string;
     let cleanup: () => Promise<unknown>;
     if (process.env.BLOB_READ_WRITE_TOKEN) {
-      if (!process.env.BLOB_PUBLIC_HOST) throw new InputError("Image storage hostname is not configured. Please contact your site administrator.");
       const blob = await put(`menu/${id}.webp`, image, { access: "public", contentType: "image/webp", addRandomSuffix: false });
       url = blob.url;
       cleanup = () => del(url);

@@ -8,7 +8,7 @@ test("editorial motion preserves immediate content, navigation and reduced-motio
   await expect(page.locator("main")).toHaveAttribute("data-motion-hydrated", "");
   await expect(page.locator("h1")).toBeVisible();
   await expect(page.locator(".hero-poster")).toBeVisible();
-  await expect(page.locator("video")).toHaveCount(0);
+  await expect(page.locator(".hero-video")).toHaveCount(1);
   const card = page.locator(".signature-card").first();
   await card.scrollIntoViewIfNeeded();
   await card.hover();

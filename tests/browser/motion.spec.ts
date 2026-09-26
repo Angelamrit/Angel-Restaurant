@@ -10,7 +10,7 @@ test("admin motion preserves navigation, filtering and reduced-motion access", a
   await expect(total).toHaveAttribute("aria-label", "84");
   await expect(total).toHaveText("84");
   await expect(page.locator(".admin-page-head")).toHaveCSS("animation-name", "admin-enter");
-  await page.screenshot({ path: "test-results/admin-motion-desktop.png", fullPage: true });
+  await page.screenshot({ path: "test-results/admin-motion-desktop.png" });
 
   const navigation = page.getByRole("navigation", { name: "Administration" });
   await navigation.getByRole("link", { name: "Menu", exact: true }).click();
@@ -26,7 +26,7 @@ test("admin motion preserves navigation, filtering and reduced-motion access", a
   await expect(navigation.getByRole("link", { name: "Overview" })).toHaveAttribute("aria-current", "page");
   await expect(total).toHaveText("84");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.screenshot({ path: "test-results/admin-motion-mobile.png", fullPage: true });
+  await page.screenshot({ path: "test-results/admin-motion-mobile.png" });
 
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(page.locator(".admin-page-head")).toHaveCSS("animation-name", "none");

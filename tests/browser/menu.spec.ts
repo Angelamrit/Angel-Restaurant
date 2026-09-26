@@ -23,7 +23,7 @@ test("public routes, guarded mutations, dish lifecycle, uploads and tracking", a
   await expect(page.locator("#mobile-navigation")).toHaveAttribute("data-open", "true");
   await page.getByRole("button", { name: "Close −" }).click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.screenshot({ path: "test-results/public-menu-mobile.png", fullPage: true });
+  await page.screenshot({ path: "test-results/public-menu-mobile.png" });
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/admin/menu/new");
   await expect(page).toHaveURL(/\/admin$/);
@@ -31,7 +31,7 @@ test("public routes, guarded mutations, dish lifecycle, uploads and tracking", a
   await page.getByRole("button", { name: "Open workspace" }).click();
   await expect(page).toHaveURL(/\/admin\/dashboard$/);
   await expect(page.locator(".site-header")).toHaveCount(0);
-  await page.screenshot({ path: "test-results/admin-dashboard.png", fullPage: true });
+  await page.screenshot({ path: "test-results/admin-dashboard.png" });
   const originFailure = await page.request.post("/api/admin/menu", { headers: { origin: "https://untrusted.example" }, data: {} });
   expect(originFailure.status()).toBe(403);
   const fakeImage = await page.request.post("/api/admin/uploads", { headers: { origin: "http://127.0.0.1:3100", "Content-Type": "image/png" }, data: "not an image" });
@@ -117,7 +117,7 @@ test("public routes, guarded mutations, dish lifecycle, uploads and tracking", a
   await expect(page.getByText("No dishes found.")).toBeVisible();
   await page.getByLabel("Search dishes").fill("");
   await expect(page.locator("tbody tr")).toHaveCount(84);
-  await page.screenshot({ path: "test-results/admin-menu-tablet.png", fullPage: true, caret: "initial" });
+  await page.screenshot({ path: "test-results/admin-menu-tablet.png", caret: "initial" });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.goto("/admin/analytics");
   await expect(page.getByText("No imported reporting data")).toBeVisible();

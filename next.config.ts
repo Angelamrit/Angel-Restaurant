@@ -16,7 +16,7 @@ const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://www.googletagmanager.com${previewToolbar}`,
   "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' data: blob: https://www.google-analytics.com https://www.googletagmanager.com${previewToolbar}`,
+  `img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://www.google-analytics.com https://www.googletagmanager.com${previewToolbar}`,
   `font-src 'self'${previewToolbar}`,
   "media-src 'self'",
   `connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com${previewToolbar}`,
@@ -46,7 +46,9 @@ const nextConfig: NextConfig = {
   distDir: process.env.ANGEL_TEST_BUILD === "true" ? ".next-e2e" : ".next",
   serverExternalPackages: ["postgres", "sharp", "node:sqlite"],
   images: {
-    remotePatterns: process.env.BLOB_PUBLIC_HOST ? [{ protocol: "https", hostname: process.env.BLOB_PUBLIC_HOST, pathname: "/menu/**" }] : [],
+    // Vercel creates BLOB_READ_WRITE_TOKEN automatically, but does not provide a
+    // build-time hostname. Keep optimization limited to public menu uploads.
+    remotePatterns: [{ protocol: "https", hostname: "*.public.blob.vercel-storage.com", pathname: "/menu/**" }],
   },
   poweredByHeader: false,
   async headers() {

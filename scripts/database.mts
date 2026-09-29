@@ -8,6 +8,9 @@ const mode = process.argv[2];
 if (!['migrate', 'seed', 'verify'].includes(mode)) throw new Error("Use migrate, seed, or verify.");
 type Dish = { name: string; price: string; description?: string; vegetarian?: boolean; vegan?: boolean; tag?: string };
 type Snapshot = { menu: { id: string; filter: string; title: string; kicker?: string; items: Dish[] }[]; signatureDishes: { name: string; image: string; description: string }[] };
+// Applied in order; each file is idempotent (CREATE TABLE IF NOT EXISTS) and
+// recorded in the migrations table, so re-running migrate is always safe.
+const MIGRATIONS = ["001-menu", "002-events"];
 const snapshot = JSON.parse(readFileSync("db/original-menu.json", "utf8")) as Snapshot;
 const dishId = (name: string) => {
   const h = createHash("sha256").update(`angel-menu:${name}`).digest("hex");
@@ -16,10 +19,12 @@ const dishId = (name: string) => {
 try {
   if (mode === "migrate") {
     await query("BEGIN");
-    for (const sql of readFileSync("db/001-menu.sql", "utf8").split(";").filter(part => part.trim())) await query(sql);
-    await query("INSERT INTO migrations(id, applied_at) VALUES (?, ?) ON CONFLICT(id) DO NOTHING", ["001-menu", new Date().toISOString()]);
+    for (const id of MIGRATIONS) {
+      for (const sql of readFileSync(`db/${id}.sql`, "utf8").split(";").filter(part => part.trim())) await query(sql);
+      await query("INSERT INTO migrations(id, applied_at) VALUES (?, ?) ON CONFLICT(id) DO NOTHING", [id, new Date().toISOString()]);
+    }
     await query("COMMIT");
-    console.log("Schema 001-menu is ready.");
+    console.log(`Schema ${MIGRATIONS.join(", ")} is ready.`);
   }
   if (mode === "seed") {
     await query("BEGIN");

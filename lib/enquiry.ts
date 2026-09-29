@@ -16,7 +16,9 @@ export type EnquiryValues = Partial<Record<EnquiryField, string>>;
 
 export type EnquiryState = {
   status: "idle" | "success" | "error";
-  code?: "validation" | "rate_limit" | "delivery" | "config";
+  // "date_taken": an event is already held on the requested date. Decided by
+  // lib/events.ts, the same service the assistant reads, never here.
+  code?: "validation" | "rate_limit" | "delivery" | "config" | "date_taken";
   fieldErrors?: Partial<Record<EnquiryField, string>>;
   values?: EnquiryValues;
 };

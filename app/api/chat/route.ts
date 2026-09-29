@@ -2,7 +2,9 @@ import { getPublicMenu } from "@/lib/menu-repository";
 import { AccessError, sameOrigin } from "@/lib/admin-access";
 import { apiError, readJson } from "@/lib/api-response";
 import { InputError } from "@/lib/menu-validation";
-import { gateInput, resolveCta } from "@/lib/chat/gate";
+import { gateInput, resolveCta, resolveDateIntent } from "@/lib/chat/gate";
+import { resolveDate, formatDate } from "@/lib/chat/dates";
+import { getEventDateStatus } from "@/lib/events";
 import { buildSystemInstruction, toGeminiContents } from "@/lib/chat/prompt";
 import { geminiConfig } from "@/lib/chat/client";
 import { trimHistory, validateMessage } from "@/lib/chat/validation";
@@ -16,6 +18,19 @@ export const maxDuration = 30;
 
 const encoder = new TextEncoder();
 const UNAVAILABLE = "Please try again shortly.";
+// Event-date answers are composed here rather than by the model. The status is a
+// database fact, and a generated sentence could soften or overstate it; these
+// are fixed strings built from the looked-up status and nothing else.
+const EVENT_DATE_REPLY = {
+  reserved: (date: string) => `${date} is already reserved for an event. If you would like to look at another date, send an event enquiry and the team will follow up.`,
+  not_reserved: (date: string) => `I do not have a reserved event recorded for ${date}. That is not a confirmation — send an event enquiry and the team will confirm it with you.`,
+  unknown: () => "I cannot confirm that date right now. Send an event enquiry and the restaurant team will follow up with you.",
+} as const;
+const EVENT_DATE_CLARIFY = "Which month are you thinking of? Give me the full date and I can check whether an event is already held then.";
+// The wording fits an ordinary table or a private event equally well, so the
+// assistant asks rather than picking one. No database is read and no booking
+// route is offered until the visitor says which they mean.
+const BOOKING_KIND_CLARIFY = "Are you asking about a regular table or an event?";
 // Which onward route the answer offers: "resy" for an ordinary table, "event"
 // for a celebration or private-event enquiry the restaurant team handles
 // through the existing form. Carried on the failure paths too, so neither
@@ -102,11 +117,39 @@ export async function POST(request: Request) {
     if (!gate.allowed) return gateResponse(gate.message, gate.kind, 200, { "x-chat-gate": gate.kind });
 
     cta = resolveCta(message, history);
+
+    // Event date questions are answered from the event database, not by the
+    // model. resolveDateIntent keeps ordinary table talk out of this branch and
+    // on its existing Resy route.
+    const dateIntent = resolveDateIntent(message, history);
+    // "What about October 15?" inside a table thread is still a table request.
+    // It names no table of its own, so resolveCta finds no reservation wording
+    // and returns nothing — without this the visitor is told to use Resy and
+    // given no way to get there.
+    if (!cta && dateIntent === "table") cta = "resy";
+    // Ambiguous between a table and an event: ask, read nothing, offer nothing.
+    if (dateIntent === "clarify") return gateResponse(BOOKING_KIND_CLARIFY, "date_intent_clarify");
+    if (dateIntent === "event") {
+      const priorUserText = history.filter((turn) => turn.role === "user").map((turn) => turn.text);
+      const resolved = resolveDate(message, priorUserText);
+      if (resolved.kind === "ambiguous") {
+        return gateResponse(EVENT_DATE_CLARIFY, `event_date_${resolved.reason}`, 200, ctaHeader("event"));
+      }
+      if (resolved.kind === "date") {
+        // Only a status crosses this boundary — never a row, an id or a name.
+        const { status } = await getEventDateStatus(resolved.iso);
+        const reply = status === "unknown"
+          ? EVENT_DATE_REPLY.unknown()
+          : EVENT_DATE_REPLY[status](formatDate(resolved.iso));
+        return gateResponse(reply, `event_date_${status}`, 200, ctaHeader("event"));
+      }
+    }
+
     const config = geminiConfig();
     if (!config) return gateResponse(UNAVAILABLE, "unavailable", 200, ctaHeader(cta));
 
     const menu = await getPublicMenu();
-    const promptMenu = { sections: menu.sections.map((section) => ({ title: section.title, kicker: section.kicker, items: section.items.map((item) => ({ name: item.name, price: item.price, description: item.description, vegetarian: item.vegetarian, vegan: item.vegan, tag: item.tag })) })) };
+    const promptMenu = { sections: menu.sections.map((section) => ({ title: section.title, kicker: section.kicker, items: section.items.map((item) => ({ name: item.name, price: item.price, description: item.description, vegetarian: item.vegetarian, vegan: item.vegan, tag: item.tag, chefSpecial: item.type === "chef-special", featured: item.featured, featuredDescription: item.featuredDescription })) })) };
     const contents = toGeminiContents(history, message);
     // The key travels in a header rather than the query string, so it cannot be
     // captured by proxy logs or surface in an error carrying the request URL.

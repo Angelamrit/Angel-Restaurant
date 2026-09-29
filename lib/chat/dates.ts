@@ -67,6 +67,22 @@ const MONTH_FIRST = new RegExp(`\\b(${MONTH_NAMES})\\s+(\\d{1,2})${ORDINAL}(?:\\
 const DAY_FIRST = new RegExp(`\\b(\\d{1,2})${ORDINAL}\\s+(?:of\\s+)?(${MONTH_NAMES})(?:\\s*,?\\s*(\\d{4}))?\\b`, "i");
 // "2026-10-15"
 const ISO = /\b(\d{4})-(\d{2})-(\d{2})\b/;
+// "01/15/2027", "1/5", "01/15/27". Read month-first: the restaurant is in New
+// York and the whole site is en-US, so 01/15 is 15 January. A first number
+// above 12 cannot be a month, and rather than silently switching to day-first
+// that is reported as ambiguous.
+const NUMERIC = /\b(\d{1,2})\/(\d{1,2})(?:\/(\d{2}|\d{4}))?\b/;
+// "in two weeks", "three days from now", "a month later".
+const QUANTITIES = new Map([
+  ["a", 1], ["an", 1], ["one", 1], ["two", 2], ["three", 3], ["four", 4], ["five", 5],
+  ["six", 6], ["seven", 7], ["eight", 8], ["nine", 9], ["ten", 10], ["eleven", 11], ["twelve", 12],
+]);
+const QUANTITY = "\\d{1,3}|a|an|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve";
+const OFFSET_IN = new RegExp(`\\bin\\s+(${QUANTITY})\\s+(day|week|month)s?\\b`, "i");
+const OFFSET_FROM = new RegExp(`\\b(${QUANTITY})\\s+(day|week|month)s?\\s+(?:from\\s+(?:now|today)|later|ahead)\\b`, "i");
+// A month named on its own, used only to supply the month a bare day is missing
+// ("an event in December" ... "what about the 25th?").
+const MONTH_ONLY = new RegExp(`\\b(${MONTH_NAMES})\\b(?:\\s*,?\\s*(\\d{4}))?`, "i");
 // "the 20th", "on the 3rd" — a day with no month of its own.
 const BARE_DAY = /\b(?:the|on)\s+(\d{1,2})(?:st|nd|rd|th)\b|\b(\d{1,2})(?:st|nd|rd|th)\b/i;
 const WEEKDAY = new RegExp(`\\b(this|next|coming)?\\s*(${WEEKDAYS.join("|")})\\b`, "i");
@@ -102,6 +118,32 @@ export function resolveDate(text: string, context: string[] = [], now: Date = ne
     return build(year, month, day);
   }
 
+  const numeric = NUMERIC.exec(value);
+  if (numeric) {
+    const month = Number(numeric[1]);
+    const day = Number(numeric[2]);
+    // Day-first input ("15/01") cannot be read as month-first, and guessing
+    // which convention the visitor meant is exactly what must not happen.
+    if (month > 12) return { kind: "ambiguous", reason: "missing-month" };
+    const raw = numeric[3];
+    const year = raw ? (raw.length === 2 ? 2000 + Number(raw) : Number(raw)) : nextOccurrenceYear(month, day, today);
+    return build(year, month, day);
+  }
+
+  const offset = OFFSET_IN.exec(value) ?? OFFSET_FROM.exec(value);
+  if (offset) {
+    const amount = QUANTITIES.get(offset[1].toLowerCase()) ?? Number(offset[1]);
+    const unit = offset[2].toLowerCase();
+    if (Number.isFinite(amount)) {
+      if (unit === "month") {
+        // Month arithmetic through Date.UTC so month-end rolls correctly.
+        const shifted = new Date(Date.UTC(Number(today.slice(0, 4)), Number(today.slice(5, 7)) - 1 + amount, Number(today.slice(8, 10))));
+        return { kind: "date", iso: shifted.toISOString().slice(0, 10) };
+      }
+      return { kind: "date", iso: toIso(toUtc(today) + amount * (unit === "week" ? 7 : 1) * DAY_MS) };
+    }
+  }
+
   if (/\btoday\b/.test(value)) return { kind: "date", iso: today };
   if (/\btomorrow\b/.test(value)) return { kind: "date", iso: toIso(toUtc(today) + DAY_MS) };
 
@@ -123,12 +165,20 @@ export function resolveDate(text: string, context: string[] = [], now: Date = ne
   const bare = BARE_DAY.exec(value);
   if (bare) {
     const day = Number(bare[1] ?? bare[2]);
-    // Borrow the month from the most recent earlier message that carried one.
+    // Borrow the month from the most recent earlier message that carried one,
+    // either as a full date ("October 15") or as a bare month name on its own
+    // ("I want to host an event in December").
     for (let index = context.length - 1; index >= 0; index--) {
       const earlier = resolveDate(context[index], [], now);
-      if (earlier.kind !== "date") continue;
-      const year = Number(earlier.iso.slice(0, 4));
-      const month = Number(earlier.iso.slice(5, 7));
+      if (earlier.kind === "date") {
+        const resolved = build(Number(earlier.iso.slice(0, 4)), Number(earlier.iso.slice(5, 7)), day);
+        if (resolved.kind === "date") return resolved;
+        continue;
+      }
+      const named = MONTH_ONLY.exec(context[index]);
+      if (!named) continue;
+      const month = monthIndex(named[1]);
+      const year = named[2] ? Number(named[2]) : nextOccurrenceYear(month, day, today);
       const resolved = build(year, month, day);
       if (resolved.kind === "date") return resolved;
     }

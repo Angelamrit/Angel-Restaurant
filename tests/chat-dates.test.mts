@@ -90,3 +90,36 @@ test("the human-readable form matches the resolved date", () => {
   assert.equal(formatDate("2026-10-15"), "15 October 2026");
   assert.equal(formatDate("2027-03-05"), "5 March 2027");
 });
+
+// --- forms the event-date pass found unresolved ------------------------------
+
+// A visitor typing 01/15/2027 was getting "which month?" even though the month
+// was right there. Month-first, because the restaurant and the site are en-US.
+test("numeric dates resolve month-first", () => {
+  assert.equal(iso("01/15/2027"), "2027-01-15");
+  assert.equal(iso("Is 01/15/2027 available for an event?"), "2027-01-15");
+  assert.equal(iso("12/25/26"), "2026-12-25", "two-digit year");
+  assert.equal(iso("1/5"), "2027-01-05", "no year -> next occurrence");
+});
+
+test("a day-first numeric date is reported ambiguous, never re-read as month-first", () => {
+  assert.equal(iso("15/01/2027"), "ambiguous");
+  assert.equal(iso("31/12/2026"), "ambiguous");
+});
+
+test("relative offsets resolve against the restaurant's today", () => {
+  // NOW is 28 September 2026.
+  assert.equal(iso("two weeks from now"), "2026-10-12");
+  assert.equal(iso("in two weeks"), "2026-10-12");
+  assert.equal(iso("in 10 days"), "2026-10-08");
+  assert.equal(iso("three days from now"), "2026-10-01");
+  assert.equal(iso("a month later"), "2026-10-28");
+  assert.equal(iso("in 2 months"), "2026-11-28");
+});
+
+test("a bare day borrows a month named on its own earlier in the thread", () => {
+  assert.equal(iso("What about the 25th?", ["I want to host an event in December."]), "2026-12-25");
+  assert.equal(iso("the 5th?", ["something in March 2027"]), "2027-03-05");
+  // Still ambiguous when no month is anywhere in view.
+  assert.equal(iso("What about the 20th?", ["I want to host a birthday event."]), "ambiguous");
+});

@@ -18,6 +18,10 @@ export const maxDuration = 30;
 
 const encoder = new TextEncoder();
 const UNAVAILABLE = "Please try again shortly.";
+// Headroom over the longest legitimate answer (the whole menu, ~2060 tokens).
+const MAX_OUTPUT_TOKENS = 3000;
+// If the model still runs out of room, say so instead of stopping mid-word.
+const TRUNCATED_NOTE = "\n\nThat is as much as I can list in one reply — ask me about a particular part of the menu and I will go through it.";
 // Event-date answers are composed here rather than by the model. The status is a
 // database fact, and a generated sentence could soften or overstate it; these
 // are fixed strings built from the looked-up status and nothing else.
@@ -55,12 +59,17 @@ function streamText(response: Response, cta: Cta) {
     async start(controller) {
       const decoder = new TextDecoder();
       let buffer = "";
+      let truncated = false;
       const emit = (line: string) => {
         if (!line.startsWith("data:")) return;
         const payload = line.slice(5).trim();
         if (!payload || payload === "[DONE]") return;
-        const json = JSON.parse(payload) as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
-        const text = json.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("") || "";
+        const json = JSON.parse(payload) as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> }; finishReason?: string }> };
+        const candidate = json.candidates?.[0];
+        // Gemini reports the stop reason on the final chunk. Without reading it
+        // a capped answer simply ends mid-word and looks broken.
+        if (candidate?.finishReason === "MAX_TOKENS") truncated = true;
+        const text = candidate?.content?.parts?.map((part) => part.text || "").join("") || "";
         if (text) controller.enqueue(encoder.encode(text));
       };
       try {
@@ -73,6 +82,7 @@ function streamText(response: Response, cta: Cta) {
           if (done) break;
         }
         if (buffer.trim()) emit(buffer);
+        if (truncated) controller.enqueue(encoder.encode(TRUNCATED_NOTE));
         controller.close();
       } catch (error) {
         controller.error(error);
@@ -160,7 +170,11 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: buildSystemInstruction(promptMenu) }] },
         contents,
-        generationConfig: { temperature: 0.2, maxOutputTokens: 700, thinkingConfig: { thinkingLevel: "MINIMAL" } },
+        // The full menu is 84 dishes and needs ~2060 output tokens to list in
+        // full; at 700 the answer stopped mid-price after 28 of them. This is a
+        // ceiling, not a reservation — ordinary answers stay short, so raising
+        // it costs nothing for them.
+        generationConfig: { temperature: 0.2, maxOutputTokens: MAX_OUTPUT_TOKENS, thinkingConfig: { thinkingLevel: "MINIMAL" } },
       }),
     });
 

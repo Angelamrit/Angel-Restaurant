@@ -303,3 +303,57 @@ test("the celebration workflow and the Resy route are both unchanged", () => {
   assert.equal(hasCelebrationIntent("I want to celebrate my birthday."), true);
   assert.equal(hasReservationIntent("I want to book a table tonight"), true);
 });
+
+// --- regressions found by the QA pass ---------------------------------------
+
+// "Are you open Sunday?" names a day and uses "open", so it was landing in the
+// table-or-event clarification and never getting an answer about the hours.
+test("an opening-hours question is never mistaken for a booking question", () => {
+  for (const phrase of [
+    "Are you open Sunday?",
+    "Is the restaurant open Monday?",
+    "are u open tomorrow",
+    "what time do you close",
+    "How late are you open?",
+    "wht time u close",
+    "When do you open on Saturday?",
+    "What are your opening hours?",
+  ]) {
+    assert.equal(resolveDateIntent(phrase, []), "none", `wrongly routed as a booking: ${phrase}`);
+  }
+});
+
+test("genuine booking ambiguity still asks which kind", () => {
+  for (const phrase of [
+    "Is October 15 available?",
+    "Is December 24 free?",
+    "Can I book the 15th?",
+    "Do you have availability Saturday?",
+  ]) {
+    assert.equal(resolveDateIntent(phrase, []), "clarify", phrase);
+  }
+});
+
+// The call to action disappeared mid-conversation: an intervening bare date
+// carries no intent of its own, and the scan used to stop at the first user
+// turn, so "How do I do that?" ended the thread with no way to act on it.
+test("a continuation finds the thread's intent past an intervening date", () => {
+  const event: ChatTurn[] = [
+    { role: "user", text: "I want to celebrate my birthday." },
+    { role: "model", text: "Angel welcomes birthdays; the team follows up on an event enquiry." },
+    { role: "user", text: "What about October 15?" },
+    { role: "model", text: "15 October 2026 is already reserved for an event." },
+  ];
+  const table: ChatTurn[] = [
+    { role: "user", text: "I want to book a table." },
+    { role: "model", text: "Reservations are handled through Resy." },
+    { role: "user", text: "What about Saturday?" },
+    { role: "model", text: "Reservations are handled through Resy." },
+  ];
+  assert.equal(resolveCta("How do I do that?", event), "event");
+  assert.equal(resolveCta("How do I do that?", table), "resy");
+  // Still nothing to inherit when there is no conversation, and still no
+  // lingering button over an unrelated later question.
+  assert.equal(resolveCta("How do I do that?", []), undefined);
+  assert.equal(resolveCta("What are your hours?", event), undefined);
+});

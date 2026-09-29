@@ -88,6 +88,15 @@ const SUBJECT = /\b(chef|chefs|amrit|singh|angel|angel's|restaurant)\b/i;
 const TABLE_WORD = /\btables?\b/i;
 // An ordinary meal with no occasion named.
 const MEAL = /\b(dinner|lunch|brunch|supper)\b/i;
+// Opening hours. "Are you open Sunday?" names a day and uses "open", which
+// otherwise reads as booking availability and sent it to the table-or-event
+// clarification instead of answering the hours.
+//
+// The subject of "open" is the discriminator: when it is the restaurant
+// ("are YOU open Sunday?") it is an hours question, and when it is the date
+// ("is next Saturday open?") it is still a booking question and must ask
+// which kind of booking is meant.
+const HOURS_QUESTION = /\b(?:what|which)\s+time\b|\bhow\s+late\b|\bopening\s+hours?\b|\bwhen\s+(?:do|does|are|r)\b[^.?]{0,20}\b(?:open|close)\b|\b(?:are|is|r)\s+(?:you|u|the\s+restaurant|angel|the\s+place|it)\b[^.?]{0,15}\b(?:open|closed)\b/i;
 // Asking after a date's standing, without saying which kind of booking.
 const AVAILABILITY = /\b(available|availability|free|open|booked|reserved|taken|unavailable)\b/i;
 // Ordinary table-booking vocabulary. Used both to admit the question into scope
@@ -168,12 +177,17 @@ export function resolveCta(text: string, history: ChatTurn[]): "resy" | "event" 
   if (hasReservationIntent(text)) return "resy";
   if (hasCelebrationIntent(text)) return "event";
   if (!CONTINUATION.test(text.trim())) return undefined;
+  // Scan back until a turn actually carries an intent. Stopping at the first
+  // user turn lost the button whenever a bare date sat in between:
+  // "I want to celebrate my birthday" / "What about October 15?" / "How do I
+  // do that?" left the last answer with no way to send the enquiry.
+  // Only an explicit continuation reaches this loop, so looking further back
+  // cannot attach a button to an unrelated question.
   for (let index = history.length - 1; index >= 0; index--) {
     const turn = history[index];
     if (turn.role !== "user") continue;
     if (hasReservationIntent(turn.text)) return "resy";
     if (hasCelebrationIntent(turn.text)) return "event";
-    return undefined;
   }
   return undefined;
 }
@@ -203,11 +217,14 @@ export function resolveDateIntent(text: string, history: ChatTurn[]): DateIntent
   // 3. An ordinary meal with no occasion behind it: "can I book dinner on the 15th?".
   if (MEAL.test(normalized)) return "table";
 
-  // 4. Nothing names either side. Only a message that actually carries a date
+  // 4. An hours question is not a booking question, however it names the day.
+  if (HOURS_QUESTION.test(normalized)) return "none";
+
+  // 5. Nothing names either side. Only a message that actually carries a date
   //    can be a date question at all.
   if (resolveDate(normalized).kind === "none") return "none";
 
-  // 5. Inherit whichever side the conversation already established, so a bare
+  // 6. Inherit whichever side the conversation already established, so a bare
   //    "October 15" or "what about the 20th?" continues the same thread.
   for (let index = history.length - 1; index >= 0; index--) {
     const turn = history[index];
@@ -216,7 +233,7 @@ export function resolveDateIntent(text: string, history: ChatTurn[]): DateIntent
     if (earlier === "event" || earlier === "table") return earlier;
   }
 
-  // 6. A date question with no side named and no context behind it. Ask.
+  // 7. A date question with no side named and no context behind it. Ask.
   if (AVAILABILITY.test(normalized) || RESERVATION.test(normalized)) return "clarify";
   return "none";
 }

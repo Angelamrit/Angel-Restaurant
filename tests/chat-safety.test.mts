@@ -109,3 +109,24 @@ test("an over-long single turn is dropped, not truncated into the window", () =>
   const trimmed = trimHistory([{ role: "user", text: "y".repeat(5000) }]);
   assert.deepEqual(trimmed, []);
 });
+
+// A visitor asking about private dining was told capacity is "not published in
+// the source material" — internal provenance wording lifted straight out of a
+// knowledge-base fact body. Directives are now split out of the facts before
+// the system instruction is built, leaving the knowledge base itself untouched.
+test("handling directives are kept out of the visitor-facing facts", async () => {
+  const { splitFacts, isDirectiveSentence } = await import("../lib/chat/facts.ts");
+  const { facts, rules } = splitFacts();
+
+  for (const phrase of ["source material", "must not be invented", "Do not describe it as a Michelin star", "Do not provide allergy"]) {
+    assert.ok(!facts.includes(phrase), `internal phrasing left among the facts: ${phrase}`);
+    assert.ok(rules.includes(phrase), `directive lost instead of moved: ${phrase}`);
+  }
+  // The visitor-facing half of every split fact must survive.
+  assert.ok(facts.includes("Private dining enquiries are handled through the restaurant team."));
+  assert.ok(facts.includes("Michelin Bib Gourmand recognition"));
+  assert.ok(facts.includes("Pathankot"), "ordinary facts must be untouched");
+
+  assert.equal(isDirectiveSentence("Do not describe it as a Michelin star."), true);
+  assert.equal(isDirectiveSentence("Angel serves 100% halal food."), false);
+});

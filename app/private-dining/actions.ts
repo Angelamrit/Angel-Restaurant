@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { checkRateLimit, deliverEnquiry, validateEnquiry, type EnquiryState } from "@/lib/enquiry";
+import { getEventDateStatus, recordEventReservation } from "@/lib/events";
 
 // Every export from a "use server" file becomes a public POST endpoint
 // (node_modules/next/dist/docs/01-app/02-guides/server-actions.md, "Security"),
@@ -33,6 +34,20 @@ export async function sendEnquiry(_prev: EnquiryState, formData: FormData): Prom
   if (!result.ok) {
     return { status: "error", code: "validation", fieldErrors: result.fieldErrors, values: result.values };
   }
+
+  // The same lookup the assistant uses, so the form and the chat can never
+  // disagree about whether a date is free. Date is already ISO yyyy-mm-dd here:
+  // validateEnquiry rejects anything else.
+  const { status } = await getEventDateStatus(result.data.Date);
+  if (status === "reserved") {
+    return { status: "error", code: "date_taken", values: result.data };
+  }
+
+  // Recorded as "pending" deliberately: an enquiry is not a booking, so it must
+  // not block the date for the next visitor. The team promotes it to confirmed
+  // or reserved in their own workflow. Best-effort — a storage failure must
+  // never lose the enquiry itself, which the email below carries.
+  await recordEventReservation({ date: result.data.Date, type: result.data.Occasion, status: "pending" });
 
   const delivered = await deliverEnquiry(result.data);
   if (!delivered) {

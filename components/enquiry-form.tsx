@@ -268,6 +268,12 @@ export function EnquiryForm() {
         </div>
       )}
 
+      {state.status === "error" && state.code === "date_taken" && (
+        <div className="form-status" role="status">
+          <p><strong>That date is already reserved for an event.</strong> Please choose another date, or call us on <a href={`tel:${restaurant.phoneHref}`}>{restaurant.phone}</a> and we will find one that works.</p>
+        </div>
+      )}
+
       {state.status === "error" && state.code === "rate_limit" && (
         <div className="form-status" role="status">
           <p><strong>Too many enquiries at once.</strong> Please try again in a few minutes, or call us at <a href={`tel:${restaurant.phoneHref}`}>{restaurant.phone}</a>.</p>

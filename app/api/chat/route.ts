@@ -5,8 +5,9 @@ import { InputError } from "@/lib/menu-validation";
 import { gateInput, resolveCta, resolveDateIntent } from "@/lib/chat/gate";
 import { resolveDate, formatDate } from "@/lib/chat/dates";
 import { getEventDateStatus } from "@/lib/events";
-import { buildSystemInstruction, toGeminiContents } from "@/lib/chat/prompt";
-import { geminiConfig } from "@/lib/chat/client";
+import { buildSystemInstruction, toResponsesInput } from "@/lib/chat/prompt";
+import { CHAT_MODEL, MAX_OUTPUT_TOKENS, REASONING_EFFORT, getOpenAIClient } from "@/lib/chat/client";
+import type { ResponseStreamEvent } from "openai/resources/responses/responses";
 import { trimHistory, validateMessage } from "@/lib/chat/validation";
 import { rateLimit, rateLimitKey } from "@/lib/chat/rate-limit";
 
@@ -18,8 +19,6 @@ export const maxDuration = 30;
 
 const encoder = new TextEncoder();
 const UNAVAILABLE = "Please try again shortly.";
-// Headroom over the longest legitimate answer (the whole menu, ~2060 tokens).
-const MAX_OUTPUT_TOKENS = 3000;
 // If the model still runs out of room, say so instead of stopping mid-word.
 const TRUNCATED_NOTE = "\n\nThat is as much as I can list in one reply — ask me about a particular part of the menu and I will go through it.";
 // Event-date answers are composed here rather than by the model. The status is a
@@ -52,50 +51,36 @@ function gateResponse(message: string, gate: string, status = 200, extra: Record
   });
 }
 
-function streamText(response: Response, cta: Cta) {
-  const reader = response.body?.getReader();
-  if (!reader) throw new Error("Gemini returned no stream.");
-  const stream = new ReadableStream({
+function streamText(stream: AsyncIterable<ResponseStreamEvent>, cta: Cta) {
+  const body = new ReadableStream<Uint8Array>({
     async start(controller) {
-      const decoder = new TextDecoder();
-      let buffer = "";
+      // Set from the terminal event rather than inferred: the API says so
+      // explicitly when the answer was cut at the token ceiling. Without reading
+      // it a capped answer simply ends mid-word and looks broken.
       let truncated = false;
-      const emit = (line: string) => {
-        if (!line.startsWith("data:")) return;
-        const payload = line.slice(5).trim();
-        if (!payload || payload === "[DONE]") return;
-        const json = JSON.parse(payload) as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> }; finishReason?: string }> };
-        const candidate = json.candidates?.[0];
-        // Gemini reports the stop reason on the final chunk. Without reading it
-        // a capped answer simply ends mid-word and looks broken.
-        if (candidate?.finishReason === "MAX_TOKENS") truncated = true;
-        const text = candidate?.content?.parts?.map((part) => part.text || "").join("") || "";
-        if (text) controller.enqueue(encoder.encode(text));
-      };
       try {
-        while (true) {
-          const { value, done } = await reader.read();
-          buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
-          const lines = buffer.split("\n");
-          buffer = lines.pop() || "";
-          for (const line of lines) emit(line);
-          if (done) break;
+        for await (const event of stream) {
+          // Each text delta is forwarded the moment it arrives. Collecting them
+          // first would add the whole generation to the visible wait.
+          if (event.type === "response.output_text.delta") {
+            controller.enqueue(encoder.encode(event.delta));
+          } else if (event.type === "response.incomplete") {
+            truncated = event.response.incomplete_details?.reason === "max_output_tokens";
+          }
         }
-        if (buffer.trim()) emit(buffer);
         if (truncated) controller.enqueue(encoder.encode(TRUNCATED_NOTE));
         controller.close();
       } catch (error) {
+        // A mid-stream failure must not leave the client hanging.
+        console.error("Chat stream error", error);
         controller.error(error);
-      } finally {
-        reader.releaseLock();
       }
     },
-    cancel() { reader.cancel().catch(() => {}); },
   });
   // The reservation verdict is computed server-side alongside the gate, so the
   // browser never needs the KB-backed intent matcher. A header carries it
   // because the body itself is the streamed answer.
-  return new Response(stream, {
+  return new Response(body, {
     status: 200,
     headers: {
       "Content-Type": "text/plain; charset=utf-8",
@@ -155,36 +140,42 @@ export async function POST(request: Request) {
       }
     }
 
-    const config = geminiConfig();
-    if (!config) return gateResponse(UNAVAILABLE, "unavailable", 200, ctaHeader(cta));
+    const client = getOpenAIClient();
+    if (!client) return gateResponse(UNAVAILABLE, "unavailable", 200, ctaHeader(cta));
 
     const menu = await getPublicMenu();
     const promptMenu = { sections: menu.sections.map((section) => ({ title: section.title, kicker: section.kicker, items: section.items.map((item) => ({ name: item.name, price: item.price, description: item.description, vegetarian: item.vegetarian, vegan: item.vegan, tag: item.tag, chefSpecial: item.type === "chef-special", featured: item.featured, featuredDescription: item.featuredDescription })) })) };
-    const contents = toGeminiContents(history, message);
-    // The key travels in a header rather than the query string, so it cannot be
-    // captured by proxy logs or surface in an error carrying the request URL.
-    const upstream = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(config.model)}:streamGenerateContent?alt=sse`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": config.apiKey },
-      signal: AbortSignal.any([request.signal, AbortSignal.timeout(30_000)]),
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: buildSystemInstruction(promptMenu) }] },
-        contents,
+    // Either the visitor leaving or the timeout elapsing ends the generation.
+    const abortSignal = AbortSignal.any([request.signal, AbortSignal.timeout(30_000)]);
+    // The key travels in the SDK's Authorization header, never a query string,
+    // so it cannot be captured by proxy logs or surface in an error URL.
+    const stream = await client.responses.create(
+      {
+        model: CHAT_MODEL,
+        // The system instruction travels as `instructions`, which the Responses
+        // API keeps separate from the conversation. Visitor text can therefore
+        // never occupy the same channel as the rules, which is the structural
+        // half of the injection defence — the deterministic gate is the other.
+        instructions: buildSystemInstruction(promptMenu),
+        input: toResponsesInput(history, message),
         // The full menu is 84 dishes and needs ~2060 output tokens to list in
         // full; at 700 the answer stopped mid-price after 28 of them. This is a
         // ceiling, not a reservation — ordinary answers stay short, so raising
         // it costs nothing for them.
-        generationConfig: { temperature: 0.2, maxOutputTokens: MAX_OUTPUT_TOKENS, thinkingConfig: { thinkingLevel: "MINIMAL" } },
-      }),
-    });
+        max_output_tokens: MAX_OUTPUT_TOKENS,
+        // `temperature` is not an option here — reasoning models reject it with
+        // a 400 — so determinism is governed by the reasoning budget instead.
+        reasoning: { effort: REASONING_EFFORT },
+        // Nothing is retained on OpenAI's side. Visitors are anonymous and the
+        // transcript belongs to their browser, so there is no reason to leave a
+        // copy of it with a third party.
+        store: false,
+        stream: true,
+      },
+      { signal: abortSignal },
+    );
 
-    if (!upstream.ok) {
-      const detail = await upstream.text().catch(() => "");
-      console.error("Gemini chat error", upstream.status, detail.slice(0, 500));
-      return gateResponse(UNAVAILABLE, "unavailable", 200, ctaHeader(cta));
-    }
-
-    return streamText(upstream, cta);
+    return streamText(stream, cta);
   } catch (error) {
     // Rejected origin, oversized body and malformed JSON are request faults and
     // answer in the repository's standard `{ error }` shape; anything else stays

@@ -58,6 +58,13 @@
   .dish-feature-tile:hover .dish-feature-copy > p { opacity: 1; }
   .dish-feature-section { display: block; margin-top: .6rem; color: var(--gold-deep); font-size: .55rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; }
   .dish-feature-close { display: flex; flex-direction: column; gap: .35rem; }
+  /* These tiles sit on the mid-gold section. The muted brown description (about 3:1 at 85% opacity) and the gold-deep
+     "Chef's special" label (about 1.2:1, nearly invisible) were too faint to read, especially on phones in daylight. */
+  .surface-gold .dish-feature-copy > p { color: var(--brown-deep); opacity: 1; }
+  .surface-gold .dish-feature-section { color: var(--brown-deep); font-size: .62rem; }
+  .surface-gold .dish-feature-price { color: var(--brown-deep); }
+  .surface-gold .menu-note { color: var(--brown-deep); border-top-color: rgba(31, 19, 13, 0.3); }
+  .surface-gold .section-head-main .eyebrow { color: var(--brown-deep); }
   .menu-note { margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--fg-muted); }
   .empty-menu { padding-block: 5rem; color: var(--fg-muted); text-align: center; }
 

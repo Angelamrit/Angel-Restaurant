@@ -132,3 +132,13 @@ test("a bare day borrows a month named on its own earlier in the thread", () => 
   // Still ambiguous when no month is anywhere in view.
   assert.equal(iso("What about the 20th?", ["I want to host a birthday event."]), "ambiguous");
 });
+
+test("an age or anniversary is not a day of the month", () => {
+  assert.equal(iso("I want to host my 40th birthday dinner for 30 guests"), "none");
+  assert.equal(iso("her 21st birthday party"), "none");
+  assert.equal(iso("my 30th birthday"), "none");
+  // A real day with a month still resolves, even beside an age.
+  assert.equal(iso("the 21st birthday on the 15th of December"), "2026-12-15");
+  // And a genuine bare day still asks for its month.
+  assert.equal(iso("is the 20th free"), "ambiguous");
+});

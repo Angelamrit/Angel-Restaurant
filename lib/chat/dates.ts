@@ -84,7 +84,9 @@ const OFFSET_FROM = new RegExp(`\\b(${QUANTITY})\\s+(day|week|month)s?\\s+(?:fro
 // ("an event in December" ... "what about the 25th?").
 const MONTH_ONLY = new RegExp(`\\b(${MONTH_NAMES})\\b(?:\\s*,?\\s*(\\d{4}))?`, "i");
 // "the 20th", "on the 3rd" — a day with no month of its own.
-const BARE_DAY = /\b(?:the|on)\s+(\d{1,2})(?:st|nd|rd|th)\b|\b(\d{1,2})(?:st|nd|rd|th)\b/i;
+// An ordinal followed by one of these words is an age or a count ("her 21st birthday"), not a day of the month.
+const NOT_A_DAY = "(?!\\s+(?:birthday|bday|b-day|anniversary|wedding|reunion|time|visit|year|floor))";
+const BARE_DAY = new RegExp(`\\b(?:the|on)\\s+(\\d{1,2})(?:st|nd|rd|th)\\b${NOT_A_DAY}|\\b(\\d{1,2})(?:st|nd|rd|th)\\b${NOT_A_DAY}`, "i");
 const WEEKDAY = new RegExp(`\\b(this|next|coming)?\\s*(${WEEKDAYS.join("|")})\\b`, "i");
 const RANGE = /\b(next|this|following)\s+(week|month|weekend)\b|\bsometime\b|\bsoon\b/i;
 
@@ -167,7 +169,8 @@ export function resolveDate(text: string, context: string[] = [], now: Date = ne
   if (RANGE.test(value)) return { kind: "ambiguous", reason: "range" };
 
   const bare = BARE_DAY.exec(value);
-  if (bare) {
+  // 1-31 only: "the 40th" cannot be a day, so it must not trigger a "which month?" question.
+  if (bare && Number(bare[1] ?? bare[2]) >= 1 && Number(bare[1] ?? bare[2]) <= 31) {
     const day = Number(bare[1] ?? bare[2]);
     // Borrow the month from the most recent earlier message that carried one,
     // either as a full date ("October 15") or as a bare month name on its own

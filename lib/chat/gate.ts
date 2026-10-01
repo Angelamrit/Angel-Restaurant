@@ -24,7 +24,7 @@ import { resolveDate } from "./dates.ts";
 
 export type GateResult =
   | { allowed: true }
-  | { allowed: false; kind: "redirect" | "profanity" | "gibberish" | "injection"; message: string };
+  | { allowed: false; kind: "redirect" | "profanity" | "gibberish" | "injection" | "greeting"; message: string };
 
 const REDIRECT = "Ask me about Chef Amrit or Angel Indian Restaurant.";
 // Prompt injection. Until now these were refused only because they happen to
@@ -68,7 +68,29 @@ export function hasInjection(text: string): boolean {
   return INJECTION.some((pattern) => pattern.test(text));
 }
 const PROFANITY = /(^|[^a-z])(fuck|fucking|shit|bullshit|bitch|asshole|motherfucker|cunt|pussy|whore|slut|dickhead|bastard)(?=$|[^a-z])/i;
-const GREETINGS = /^(hi|hello|hey|good morning|good afternoon|good evening)\b/i;
+const GREETINGS = /^(hi|hello|hey|hiya|howdy|greetings|good morning|good afternoon|good evening|namaste|namaskar|sat sri akal|salam|salaam|assalam\S*|as-salam\S*|thanks|thank you|thankyou|thx|shukriya|bye|goodbye|see you|cheers)\b/i;
+
+// A greeting on its own has no question in it, so it gets a short, warm, fixed welcome instead of the cold
+// redirect (and costs no model call). The visitor's name is used only if it is plainly one word of letters.
+const GREETING_TAIL = "I can tell you about our menu, opening hours, reservations or private dining. What would you like to know?";
+export function greetingReply(text: string): string {
+  const value = text.trim().toLowerCase();
+  // "my name is Sara" is unambiguous; "I'm Sara" counts only when the name is capitalised and not an ordinary word,
+  // so "I'm hungry" can never become "Hello Hungry".
+  const stated = /\bmy name is\s+([a-z][a-z'-]{1,19})\b/i.exec(text);
+  const casual = /\b[Ii](?:'m| am)\s+([A-Z][a-z'-]{1,19})\b/.exec(text);
+  const ordinary = /^(here|looking|hungry|thirsty|new|just|so|not|good|fine|great|well|okay|back|visiting|coming|planning|wondering|interested|vegetarian|vegan|late|early|sorry|curious|ready|starving)$/i;
+  const raw = stated?.[1] ?? (casual && !ordinary.test(casual[1]) ? casual[1] : "");
+  const name = raw ? raw[0].toUpperCase() + raw.slice(1).toLowerCase() : "";
+  const to = name ? ` ${name}` : "";
+  if (/^(thanks|thank you|thankyou|thx|shukriya|cheers)\b/.test(value)) return `You're very welcome${to}! If there's anything else you'd like to know about Angel, just ask.`;
+  if (/^(bye|goodbye|see you)\b/.test(value)) return `Thank you for stopping by${to}. We'd love to welcome you at Angel soon!`;
+  if (/^(assalam|as-salam|salam|salaam)/.test(value)) return `Wa alaikum assalam${to}, and welcome to Angel! ${GREETING_TAIL}`;
+  if (/^(namaste|namaskar|sat sri akal)/.test(value)) return `Namaste${to}, and welcome to Angel! ${GREETING_TAIL}`;
+  const partOfDay = /^good (morning|afternoon|evening)/.exec(value);
+  const hello = partOfDay ? `Good ${partOfDay[1]}${to}` : `Hello${to}`;
+  return `${hello}, and welcome to Angel! ${GREETING_TAIL}`;
+}
 // Private-service enquiries are handled by the restaurant team, never by Resy,
 // so this is tested first everywhere below and always wins over booking wording.
 const PRIVATE_SERVICE = /(private\s+(?:dining|event|party|room|hire)|wedding|corporate\s+(?:event|dinner)|birthday\s+party|company\s+dinner|\bevents?\b|\bcater(?:ing|er|ers|ed)?\b|\bhire\b|\bbuy\s?out\b)/i;
@@ -81,7 +103,7 @@ const CELEBRATION = /\b(birthdays?|anniversar(?:y|ies)|engagements?|weddings?|ce
 const CONTINUATION = /^(?:and\s+)?(?:how|what|where|when|who)\b[^?]*\b(?:that|this|it|them|those)\b\??$|^(?:how|what)\s+(?:do|should|can|would)\s+i\b/i;
 // Who designed/built the website itself, distinct from "who made this dish" —
 // the site/website noun is required so ordinary food questions never match.
-const SITE_CREDIT = /\bwho\s+(?:built|made|designed|developed|created|coded)\s+(?:this|the)\s+(?:site|website)\b|\b(?:this|the)\s+(?:site|website)\b(?:\s+\w+){0,4}\s+(?:built|made|designed|developed|created|coded)\s+by\b|\bweb\s*(?:design(?:er)?|develop(?:er|ment)?)\b|\bsite\s+credit(?:s)?\b/i;
+const SITE_CREDIT = /\bwho\s+(?:built|made|designed|developed|created|coded)\s+(?:this|the)\s+(?:site|website)\b|\b(?:this|the)\s+(?:site|website)\b(?:\s+\w+){0,4}\s+(?:built|made|designed|developed|created|coded)\s+by\b|\bweb\s*(?:design(?:er)?|develop(?:er|ment)?)\b|\bsite\s+credit(?:s)?\b|\baceva\b|\b(?:developers?|designers?)\s+(?:of|behind)\s+(?:this|the)\s+(?:site|website)\b|\bcontact\s+(?:the\s+)?(?:developers?|designers?)\b/i;
 // The subjects this assistant exists to talk about. strongTopics below only holds
 // the full phrases ("chef amrit", "angel restaurant"), so without this a visitor
 // asking "tell me about chef" or "who is amrit?" was refused as out of scope.
@@ -260,7 +282,8 @@ export function gateInput(text: string, history: ChatTurn[]): GateResult {
   if (hasInjection(value)) return { allowed: false, kind: "injection", message: REDIRECT };
 
   // A bare greeting with nothing else in it has no question to answer.
-  if (GREETINGS.test(value) && value.split(/\s+/).length <= 3) return { allowed: false, kind: "redirect", message: REDIRECT };
+  // Short enough to be only a greeting, thanks or goodbye (not "hello, what are your hours?", which carries a real question).
+  if (GREETINGS.test(value) && value.split(/\s+/).length <= 6 && !isClearlyInScope(value)) return { allowed: false, kind: "greeting", message: greetingReply(value) };
 
   // Knowledge-base or booking vocabulary is unambiguously usable; skip the
   // noise check so a real term is never mistaken for a keyboard roll.

@@ -799,7 +799,8 @@
   .manifesto-text.display-lg { line-height: 1.02; }
   .welcome-bottom { display: grid; grid-template-columns: 4rem minmax(0, 1fr) auto; gap: clamp(1.5rem, 4vw, 3rem); align-items: center; max-width: 60rem; margin: 3rem auto 0; padding-top: 2.5rem; border-top: 1px solid var(--line); text-align: left; }
   .welcome-bottom p { color: color-mix(in srgb, var(--fg) 78%, transparent); font-size: var(--type-body-lg); line-height: 1.65; }
-  .editorial-star { display: inline-block; color: var(--gold); font-size: 3rem; line-height: 1; animation: spin 36s linear infinite; }
+  /* An SVG, not the "✳" character: iOS and Android draw that character as a green emoji square. */
+  .editorial-star { display: block; width: 3rem; height: 3rem; color: var(--gold); animation: spin 36s linear infinite; }
   .signature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; align-items: start; }
   .signature-grid > :nth-child(2) { margin-top: clamp(1.5rem, 5vw, 4rem); }
   .signature-card { display: flex; flex-direction: column; padding: .9rem; color: var(--fg); text-decoration: none; }

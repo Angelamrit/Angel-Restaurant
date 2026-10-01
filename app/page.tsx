@@ -110,7 +110,7 @@ export default async function Home() {
             <ScrollWords segments={[{ text: "From a family kitchen in India to a table in" }, { text: "Jackson Heights.", em: true }]} />
           </h2>
           <div className="welcome-bottom" data-reveal data-stagger-children>
-            <span className="editorial-star" aria-hidden="true">✳</span>
+            <svg className="editorial-star" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>
             <p>At Angel, it begins with the food. Honest ingredients, the warmth of the tandoor, and the kind of cooking that brings people together. Chef Amrit Pal Singh’s story is ours to share.</p>
             <Link href="/story" className="button button-glass"><span>Meet Angel</span>{arrow}</Link>
           </div>

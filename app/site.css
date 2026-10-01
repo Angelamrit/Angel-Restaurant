@@ -741,6 +741,9 @@
   .mobile-reserve-bar { display: flex; align-items: center; justify-content: center; gap: .6rem; position: fixed; inset-inline: 0; bottom: 0; z-index: var(--z-raised); min-height: 3.75rem; padding: .9rem var(--gutter) calc(.9rem + env(safe-area-inset-bottom, 0px)); background-image: var(--btn-fill); color: var(--brown-deep); box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.45); font-size: .66rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; text-decoration: none; }
   .chef-grid, .restaurant-grid, .dish-showcase, .visit-grid { grid-template-columns: 1fr; }
   .dish-preview { position: relative; top: auto; }
+  /* On phones the preview opens inside the list, right under the dish that was tapped. */
+  .dish-item { scroll-margin-top: calc(var(--nav-height, 4.5rem) + 1rem); }
+  .dish-preview--inline { aspect-ratio: 4 / 3; margin: .25rem 0 1.5rem; transform: none; }
   .menu-cards, .recognition-cards { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
   .footer-map { grid-column: 1 / -1; }

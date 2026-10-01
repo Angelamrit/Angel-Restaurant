@@ -541,34 +541,34 @@
       "section": "Chef’s special",
       "price": "$22.99",
       "description": "Chicken, fragrant basmati rice and saffron. Served with raita.",
-      "image": "chicken-biryani-stock",
+      "image": "chicken-dum-biryani",
       "vegetarian": false,
-      "stock": true
+      "stock": false
     },
     {
       "name": "Goat Dum Biryani",
       "section": "Chef’s special",
       "price": "$25.99",
       "description": "Goat, basmati rice and saffron. Served with raita.",
-      "image": "goat-biryani-stock",
+      "image": "goat-dum-biryani",
       "vegetarian": false,
-      "stock": true
+      "stock": false
     },
     {
       "name": "Chole Bhatura",
       "section": "Chef’s special",
       "price": "$17.99",
       "description": "Chickpeas, fried flat bread and spices.",
-      "image": "chole-bhature-stock",
+      "image": "chole-bhatura",
       "vegetarian": true,
-      "stock": true
+      "stock": false
     },
     {
       "name": "Tandoori Chicken",
       "section": "Appetizers",
       "price": "$20.99",
       "description": "Chicken with bone, marinated in yogurt and chili. Straight from the clay oven.",
-      "image": "tandoori-aceva",
+      "image": "tandoori-chicken",
       "vegetarian": false,
       "stock": false
     },
@@ -577,9 +577,9 @@
       "section": "Chef’s special",
       "price": "$20.99",
       "description": "Fresh vegetables, paneer, basmati rice and saffron. Served with raita.",
-      "image": "vegetable-biryani-stock",
+      "image": "vegetable-dum-biryani",
       "vegetarian": true,
-      "stock": true
+      "stock": false
     },
     {
       "name": "Amritsari Paneer Kulcha",
@@ -595,7 +595,7 @@
       "section": "Main course",
       "price": "$21.99",
       "description": "Cubes of lamb cooked in a rich tomato and onion sauce.",
-      "image": "lamb-curry-aceva",
+      "image": "lamb-rogan-josh",
       "vegetarian": false,
       "stock": false
     },
@@ -604,7 +604,7 @@
       "section": "Main course",
       "price": "$18.99",
       "description": "Black lentil cooked over a low flame with herbs and chilli. Order it with garlic naan.",
-      "image": "dal-naan-aceva",
+      "image": "dal-makhni",
       "vegetarian": true,
       "stock": false
     }

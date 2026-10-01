@@ -12,12 +12,12 @@ export default function PrivateDiningPage() {
   return (
     <main id="main-content" tabIndex={-1}>
       <JsonLd data={breadcrumbs} />
-      <PageIntro eyebrow="Private dining & gatherings" title="Your people." italic="Our table." description="Birthdays, family gatherings, and company dinners. Bring your occasion to Angel." image={{ name: "feast-aceva", alt: "A generous table of Indian dishes ready to share" }} mark="Celebrate" />
+      <PageIntro eyebrow="Private dining & gatherings" title="Your people." italic="Our table." description="Birthdays, family gatherings, and company dinners. Bring your occasion to Angel." image={{ name: "table-spread", alt: "A generous table of Indian dishes ready to share" }} mark="Celebrate" />
       <section className="surface-dark tone-dark section">
         <div className="container-shell private-dining">
           <div>
             <div className="photo-frame private-media" data-reveal="photo">
-              <CinematicSlideshow className="private-cinema" priority label="Private dining atmosphere at Angel" slides={[{ name: "room-guests", alt: "Guests dining together in Angel’s dining room" }, { name: "room-long-table", alt: "A long table set for a group along the banquette at Angel" },{ name: "feast-aceva", alt: "A table of Indian dishes ready to share" }, { name: "thali-aceva", alt: "A generous Indian meal for a gathering" }]} />
+              <CinematicSlideshow className="private-cinema" priority label="Private dining atmosphere at Angel" slides={[{ name: "room-guests-v2", alt: "Guests dining together in Angel’s dining room" }, { name: "room-long-table-v2", alt: "A long table set for a group along the banquette at Angel" },{ name: "table-spread", alt: "A table of Indian dishes ready to share" }, { name: "thali-plate", alt: "A generous Indian meal for a gathering" }]} />
             </div>
             <div className="private-copy" data-reveal="words">
               <p className="eyebrow eyebrow-rule rise">Good company deserves good food</p>

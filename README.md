@@ -41,7 +41,14 @@ The form on `/private-dining` posts to a Server Action (`app/private-dining/acti
 
 ## Ask Angel chatbot
 
-A server-side Gemini assistant at `/api/chat`. Set `GEMINI_API_KEY` in the deployment environment; it is read only on the server and must never be given a `NEXT_PUBLIC_` prefix. Answers are closed-world: the route composes them from the knowledge base in `lib/chat/kb.ts` plus the current public menu, blocks out-of-scope, profane and unintelligible input before the model is called, and routes ordinary table reservations to the Resy listing in `lib/restaurant.ts`. Requests are limited per visitor per minute and per day, with a site-wide daily cap (`CHAT_DAILY_LIMIT`).
+A server-side OpenAI assistant at `/api/chat` (Responses API, model fixed in
+`lib/chat/client.ts`). Set `OPENAI_API_KEY` in the deployment environment; it is read
+only on the server and must never be given a `NEXT_PUBLIC_` prefix. Requests are sent
+with `store: false`, so nothing is retained on OpenAI's side. Answers are closed-world: the route composes them from the authoritative
+knowledge base in `lib/chat/kb.ts` plus the current public menu, blocks out-of-scope,
+profane and unintelligible input before the model is called, and routes ordinary table
+reservations to the canonical Resy listing in `lib/restaurant.ts`. Requests are limited per
+visitor per minute and per day, with a site-wide daily cap (`CHAT_DAILY_LIMIT`).
 
 The gate and knowledge base run on the server only and are not meant to reach the browser bundle.
 

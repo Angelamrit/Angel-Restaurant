@@ -95,9 +95,11 @@ OUT-OF-SCOPE RESPONSE
 Ask me about Chef Amrit or Angel Indian Restaurant.`;
 }
 
-export function toGeminiContents(history: ChatTurn[], current: string) {
-  return [...history, { role: "user", text: current }].map((turn) => ({
-    role: turn.role,
-    parts: [{ text: turn.text }],
+// Our transcript calls the assistant's turns "model"; the Responses API calls
+// them "assistant". The wire format the browser sends and receives is unchanged.
+export function toResponsesInput(history: ChatTurn[], current: string) {
+  return [...history, { role: "user" as const, text: current }].map((turn) => ({
+    role: turn.role === "model" ? ("assistant" as const) : ("user" as const),
+    content: turn.text,
   }));
 }

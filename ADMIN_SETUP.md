@@ -44,7 +44,7 @@ Set these server environment variables before enabling the deployment:
 | `NEXT_PUBLIC_SITE_URL` | Existing public canonical domain |
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Optional existing GA4 property ID |
 | `RESEND_API_KEY`, `CONTACT_FROM_EMAIL`, `CONTACT_TO_EMAIL` | Private dining notification email. Enquiries are always saved to the `enquiries` collection (see `/admin/enquiries`) even when these are unset; the email is best-effort |
-| `GEMINI_API_KEY`, `GEMINI_MODEL` | Ask Angel chat assistant (server-only). `CHAT_DAILY_LIMIT` optionally changes the site-wide daily message cap (default 2000) |
+| `OPENAI_API_KEY` | Ask Angel chat assistant (server-only). `CHAT_DAILY_LIMIT` optionally changes the site-wide daily message cap (default 2000) |
 | `DB_POOL_MAX` | Optional MongoDB connection pool size per instance; defaults to 3 |
 
 Run `npm run db:migrate`, `npm run db:seed`, and `npm run db:verify` against the production database **before** switching traffic. The migration creates collection indexes, including the TTL index used for temporary login rate limits. No schema writes or seeding occur during visitor requests or builds.

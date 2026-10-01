@@ -57,7 +57,7 @@ export function GalleryLightbox({ photos, children }: { photos: GalleryPhoto[]; 
             >
               <Photo name={photo.name} alt={`${photo.label} — Angel editorial collection, view larger`} />
             </button>
-            <figcaption><span>0{index + 1}</span><span>{photo.label}</span><span className="gallery-grid-cue" aria-hidden="true">View ↗</span></figcaption>
+            <figcaption><span>{String(index + 1).padStart(2, "0")}</span><span>{photo.label}</span><span className="gallery-grid-cue" aria-hidden="true">View ↗</span></figcaption>
           </figure>
         ))}
         {children}
@@ -75,7 +75,7 @@ export function GalleryLightbox({ photos, children }: { photos: GalleryPhoto[]; 
               loading="eager"
             />
             <figcaption>
-              <span className="type-caption">0{active + 1} / 0{photos.length}</span>
+              <span className="type-caption">{String(active + 1).padStart(2, "0")} / {String(photos.length).padStart(2, "0")}</span>
               {photos[active].label}
             </figcaption>
           </figure>

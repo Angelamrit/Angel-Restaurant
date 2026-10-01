@@ -6,13 +6,27 @@ import { pageMetadata, breadcrumbList } from "@/lib/seo";
 
 export const metadata = pageMetadata({ title: "Gallery: The Dining Room & Dishes", description: "A glimpse of the dining room, the tandoor, and the table at Angel Indian Restaurant in Jackson Heights, Queens.", path: "/gallery" });
 const breadcrumbs = breadcrumbList([{ name: "The experience", path: "/gallery" }]);
-const photos = [{ name: "room-long-table", label: "A room to settle into" }, { name: "tandoori-aceva", label: "Straight from the tandoor" }, { name: "dal-naan-aceva", label: "The comfort of familiar flavors" }, { name: "lamb-curry-aceva", label: "A little spice, a little soul" }, { name: "feast-aceva", label: "Better when shared" }, { name: "thali-aceva", label: "An invitation to linger" }];
+// The first six keep their approved captions; the rest are captioned with the dish's own menu name.
+const photos = [
+  { name: "dining-room-portrait-v2", label: "A room to settle into" },
+  { name: "tandoori-chicken", label: "Straight from the tandoor" },
+  { name: "dinner-spread", label: "The comfort of familiar flavors" },
+  { name: "lamb-karahi", label: "A little spice, a little soul" },
+  { name: "table-spread", label: "Better when shared" },
+  { name: "thali-plate", label: "An invitation to linger" },
+  { name: "chole-bhatura", label: "Chole Bhatura" },
+  { name: "butter-chicken", label: "Butter Chicken" },
+  { name: "chicken-dum-biryani", label: "Chicken Dum Biryani" },
+  { name: "dal-makhni", label: "Dal Makhni" },
+  { name: "garlic-naan", label: "Garlic Naan" },
+  { name: "gulab-jamun", label: "Gulab Jamun" },
+];
 
 export default function GalleryPage() {
   return (
     <main id="main-content" tabIndex={-1}>
       <JsonLd data={breadcrumbs} />
-      <PageIntro eyebrow="The Angel experience" title="Come for the food." italic="Stay for the feeling." description="A glimpse of the room, the table, and the flavors that bring us together." image={{ name: "room-long-table", alt: "Angel’s dining room on 37th Avenue" }} mark="Angel" />
+      <PageIntro eyebrow="The Angel experience" title="Come for the food." italic="Stay for the feeling." description="A glimpse of the room, the table, and the flavors that bring us together." image={{ name: "room-long-table-v2", mobileName: "dining-room-portrait-v2", alt: "Angel’s dining room on 37th Avenue" }} mark="Angel" />
       <section className="surface-gold tone-gold section" aria-label="A glimpse of Angel"><GalleryRail /></section>
       <section className="surface-dark tone-dark section" aria-label="Angel photo collection">
         <GalleryLightbox photos={photos}>

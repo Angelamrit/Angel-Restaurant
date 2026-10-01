@@ -6,7 +6,7 @@ import { closeDatabase, collections, getDatabase, type CategoryDocument, type Me
 
 nextEnv.loadEnvConfig(process.cwd());
 const mode = process.argv[2];
-if (!['migrate', 'seed', 'verify'].includes(mode)) throw new Error("Use migrate, seed, or verify.");
+if (!['migrate', 'seed', 'verify', 'photos'].includes(mode)) throw new Error("Use migrate, seed, verify, or photos.");
 
 type Dish = { name: string; price: string; description?: string; vegetarian?: boolean; vegan?: boolean; tag?: string };
 type Snapshot = { menu: { id: string; filter: string; title: string; kicker?: string; items: Dish[] }[]; signatureDishes: { name: string; image: string; description: string }[] };
@@ -88,10 +88,37 @@ async function verify() {
   console.log(`Verified ${rows.length} dishes against the original snapshot.`);
 }
 
+// Moves the signature dishes from the original placeholder/stock images to the restaurant's own
+// photographs. A dish is only touched while it still shows its original seed image, so any image an
+// administrator has uploaded since is left alone. Safe to run more than once.
+const photoUpdates = [
+  { name: "Tandoori Chicken", from: "tandoori-aceva", to: "tandoori-chicken" },
+  { name: "Lamb Rogan Josh", from: "lamb-curry-aceva", to: "lamb-rogan-josh" },
+  { name: "Dal Makhni", from: "dal-naan-aceva", to: "dal-makhni" },
+  { name: "Chole Bhatura", from: "chole-bhature-stock", to: "chole-bhatura" },
+  { name: "Chicken Dum Biryani", from: "chicken-biryani-stock", to: "chicken-dum-biryani" },
+  { name: "Goat Dum Biryani", from: "goat-biryani-stock", to: "goat-dum-biryani" },
+  { name: "Vegetable Dum Biryani", from: "vegetable-biryani-stock", to: "vegetable-dum-biryani" },
+];
+
+async function photos() {
+  const { menuItems, media } = collections();
+  const now = new Date().toISOString();
+  for (const { name, from, to } of photoUpdates) {
+    const url = `/angel/${to}.webp`;
+    // The admin editor only accepts images registered in the media library.
+    await media.updateOne({ url }, { $setOnInsert: { id: dishId(url), url, createdAt: now } }, { upsert: true });
+    const { modifiedCount } = await menuItems.updateOne({ id: dishId(name), image: `/angel/${from}.webp` }, { $set: { image: url, updatedAt: now } });
+    console.log(`${name}: ${modifiedCount ? `now ${url}` : "unchanged (already updated or replaced by an administrator)"}`);
+  }
+  console.log("The public menu cache refreshes within 10 minutes, or immediately on the next admin save.");
+}
+
 try {
   if (mode === "migrate") await migrate();
   if (mode === "seed") await seed();
   if (mode === "verify") await verify();
+  if (mode === "photos") await photos();
 } finally {
   await closeDatabase();
 }

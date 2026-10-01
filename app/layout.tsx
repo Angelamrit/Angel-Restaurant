@@ -93,7 +93,7 @@ const structuredData = {
   url: restaurant.siteUrl,
   telephone: `+1${restaurant.phoneHref}`,
   email: restaurant.email,
-  image: new URL("/angel/room-long-table.webp", restaurant.siteUrl).toString(),
+  image: new URL("/angel/room-long-table-v2.webp", restaurant.siteUrl).toString(),
   hasMenu: new URL("/menu", restaurant.siteUrl).toString(),
   servesCuisine: ["Indian"],
   address: {

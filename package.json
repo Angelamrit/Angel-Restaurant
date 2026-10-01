@@ -11,6 +11,7 @@
     "db:migrate": "node scripts/database.mts migrate",
     "db:seed": "node scripts/database.mts seed",
     "db:verify": "node scripts/database.mts verify",
+    "db:photos": "node scripts/database.mts photos",
     "test": "node --test tests/*.test.mts",
     "test:e2e": "playwright test"
   },

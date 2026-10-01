@@ -11,11 +11,11 @@ export default function StoryPage() {
   return (
     <main id="main-content" tabIndex={-1}>
       <JsonLd data={breadcrumbs} />
-      <PageIntro eyebrow="Our story" title="India in our roots." italic="Queens in our heart." image={{ name: "thali-aceva", alt: "A generous Indian meal served in traditional dishes" }} mark="Story" />
+      <PageIntro eyebrow="Our story" title="India in our roots." italic="Queens in our heart." image={{ name: "thali-spread", alt: "A generous Indian meal served in traditional dishes" }} mark="Story" />
       <section className="surface-gold tone-gold section" aria-labelledby="chef-title">
         <div className="container-shell story-feature">
           <div className="story-media" data-reveal="photo">
-            <DishIndex layout="stacked" priority label="Hover or tap a dish from Chef Amrit Pal Singh’s kitchen to preview it" slides={[{ name: "thali-aceva", alt: "A generous Indian meal from Angel’s editorial collection", title: "The Angel Thali" }, { name: "tandoori-aceva", alt: "Food cooking in the tandoor at Angel", title: "From the Tandoor" }, { name: "feast-aceva", alt: "A table filled with Indian dishes at Angel", title: "A Generous Feast" }]} />
+            <DishIndex layout="stacked" priority label="Hover or tap a dish from Chef Amrit Pal Singh’s kitchen to preview it" slides={[{ name: "thali-plate", alt: "A generous Indian meal from Angel’s editorial collection", title: "The Angel Thali" }, { name: "tandoori-chicken", alt: "Food cooking in the tandoor at Angel", title: "From the Tandoor" }, { name: "table-spread", alt: "A table filled with Indian dishes at Angel", title: "A Generous Feast" }]} />
           </div>
           <div data-reveal="words">
             <p className="eyebrow eyebrow-rule rise">Chef Amrit Pal Singh</p>
@@ -42,7 +42,7 @@ export default function StoryPage() {
             <p className="rise rise-late">Come for lunch. Settle in for dinner. Share a few favorites and make yourself at home.</p>
           </div>
           <div className="story-media" data-reveal="photo">
-            <DishIndex layout="stacked" label="Hover or tap to preview Angel at home in Jackson Heights" slides={[{ name: "room-long-table", alt: "Angel’s dining room on 37th Avenue", title: "The Dining Room" }, { name: "feast-aceva", alt: "A generous table at Angel in Jackson Heights", title: "A Table to Share" }, { name: "dal-naan-aceva", alt: "Dal makhni, naan and rice made for sharing", title: "Dal Makhni & Naan" }]} />
+            <DishIndex layout="stacked" label="Hover or tap to preview Angel at home in Jackson Heights" slides={[{ name: "room-long-table-v2", alt: "Angel’s dining room on 37th Avenue", title: "The Dining Room" }, { name: "table-spread", alt: "A generous table at Angel in Jackson Heights", title: "A Table to Share" }, { name: "dal-makhni-naan", alt: "Dal makhni and garlic naan made for sharing", title: "Dal Makhni & Naan" }]} />
           </div>
         </div>
       </section>

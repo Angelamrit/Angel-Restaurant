@@ -54,7 +54,7 @@ export default async function MenuPage() {
         title="A little spice."
         italic="A lot of soul."
         description="From the clay oven to the comfort of a slow-cooked curry. Find your favorite, or discover something new."
-        image={{ name: "tandoori-aceva", alt: "Tandoori chicken and kebabs coming out of the clay oven" }}
+        image={{ name: "tandoori-chicken", alt: "Tandoori chicken coming out of the clay oven" }}
         mark="Menu"
       />
       <SignaturePlates specials={specials} categories={categories} dishCount={dishCount} />

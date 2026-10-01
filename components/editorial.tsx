@@ -1,12 +1,17 @@
-import Image from "next/image";
+import Image, { getImageProps } from "next/image";
 import Link from "next/link";
 import { restaurant } from "@/lib/restaurant";
 import { Words } from "@/components/split-text";
 import { Badge, Embers } from "@/components/badge";
 
-export function Photo({ name, alt, className = "", priority = false, sizes = "(max-width: 767px) 100vw, 60vw" }: { name: string; alt: string; className?: string; priority?: boolean; sizes?: string }) {
+export function Photo({ name, mobileName, alt, className = "", priority = false, sizes = "(max-width: 767px) 100vw, 60vw" }: { name: string; mobileName?: string; alt: string; className?: string; priority?: boolean; sizes?: string }) {
   // Next 16: `loading="eager"` (not `preload`) is what the LCP heuristic checks on the rendered <img>.
-  return <div className={`editorial-photo ${className}`}><Image src={`/angel/${name}.webp`} alt={alt} fill sizes={sizes} loading={priority ? "eager" : undefined} /></div>;
+  const loading = priority ? "eager" : undefined;
+  if (!mobileName) return <div className={`editorial-photo ${className}`}><Image src={`/angel/${name}.webp`} alt={alt} fill sizes={sizes} loading={loading} /></div>;
+  // Art direction: phones get a portrait frame of the same room, so a full-bleed backdrop is not a blurry sliver of a landscape photo.
+  const { props } = getImageProps({ src: `/angel/${name}.webp`, alt, fill: true, sizes, loading });
+  const { props: mobile } = getImageProps({ src: `/angel/${mobileName}.webp`, alt, fill: true, sizes, loading });
+  return <div className={`editorial-photo editorial-photo--art ${className}`}><picture><source media="(max-width: 767px)" srcSet={mobile.srcSet} sizes={sizes} /><img {...props} alt={alt} /></picture></div>;
 }
 
 // Secondary-page opener. With `image` it is a full-bleed photographic hero in the
@@ -25,14 +30,14 @@ export function PageIntro({
   title: string;
   italic: string;
   description?: string;
-  image?: { name: string; alt: string };
+  image?: { name: string; mobileName?: string; alt: string };
   mark?: string;
 }) {
   return (
     <section className={`page-intro${image ? " page-intro--photo tone-dark" : " surface-gold tone-gold"}`}>
       {image && (
         <>
-          <div className="page-intro-media" aria-hidden="true"><Photo name={image.name} alt={image.alt} priority sizes="100vw" /></div>
+          <div className="page-intro-media" aria-hidden="true"><Photo name={image.name} mobileName={image.mobileName} alt={image.alt} priority sizes="100vw" /></div>
           <div className="page-intro-scrim" aria-hidden="true" />
           <Embers count={12} />
         </>
@@ -53,7 +58,7 @@ export function PageIntro({
 export function Reservation() {
   return (
     <section id="reserve" className="section surface-dark tone-dark section-space book" aria-labelledby="book-title">
-      <div className="book-bg" aria-hidden="true"><Photo name="thali-aceva" alt="" sizes="100vw" /></div>
+      <div className="book-bg" aria-hidden="true"><Photo name="thali-spread" alt="" sizes="100vw" /></div>
       <div className="book-scrim" aria-hidden="true" />
       <div className="container-shell">
         <div className="frame frame-strong spotlight book-card" data-spotlight data-reveal="words">
@@ -73,7 +78,7 @@ export function Footer() {
   return (
     <footer className="site-footer tone-dark">
       <span className="hairline footer-hairline" aria-hidden="true" />
-      <div className="footer-photo" aria-hidden="true"><Photo name="room-long-table" alt="" sizes="100vw" /></div>
+      <div className="footer-photo" aria-hidden="true"><Photo name="room-long-table-v2" mobileName="dining-room-portrait-v2" alt="" sizes="100vw" /></div>
       <div className="footer-bg" aria-hidden="true">
         <span className="orb orb-gold" style={{ left: "-10%", top: "-10%", width: "46vw", maxWidth: "720px", aspectRatio: "1", opacity: .5 }} />
         <span className="orb orb-ember orb-slow" style={{ right: "-12%", top: "30%", width: "40vw", maxWidth: "640px", aspectRatio: "1", opacity: .5 }} />

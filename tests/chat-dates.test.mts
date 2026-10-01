@@ -38,6 +38,15 @@ test("a month/day already past rolls to next year, by rule and not by month", ()
   assert.equal(iso("September 27"), "2027-09-27", "yesterday rolls forward");
 });
 
+test("'the day after tomorrow' is two days out, and past references never resolve to a future date", () => {
+  assert.equal(iso("the day after tomorrow"), "2026-09-30");
+  assert.equal(iso("day after tomorrow"), "2026-09-30");
+  assert.equal(iso("tomorrow"), "2026-09-29");
+  assert.equal(iso("yesterday"), "none");
+  assert.equal(iso("last Friday"), "none");
+  assert.equal(iso("last night"), "none");
+});
+
 test("relative expressions resolve against the restaurant's today", () => {
   assert.equal(iso("today"), "2026-09-28");
   assert.equal(iso("tomorrow"), "2026-09-29");
@@ -122,4 +131,14 @@ test("a bare day borrows a month named on its own earlier in the thread", () => 
   assert.equal(iso("the 5th?", ["something in March 2027"]), "2027-03-05");
   // Still ambiguous when no month is anywhere in view.
   assert.equal(iso("What about the 20th?", ["I want to host a birthday event."]), "ambiguous");
+});
+
+test("an age or anniversary is not a day of the month", () => {
+  assert.equal(iso("I want to host my 40th birthday dinner for 30 guests"), "none");
+  assert.equal(iso("her 21st birthday party"), "none");
+  assert.equal(iso("my 30th birthday"), "none");
+  // A real day with a month still resolves, even beside an age.
+  assert.equal(iso("the 21st birthday on the 15th of December"), "2026-12-15");
+  // And a genuine bare day still asks for its month.
+  assert.equal(iso("is the 20th free"), "ambiguous");
 });

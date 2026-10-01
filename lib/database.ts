@@ -9,6 +9,8 @@ export type MenuItemDocument = {
   sortOrder: number; vegetarian: boolean; vegan: boolean; tag: string; featured: boolean;
   featuredDescription: string; createdAt: string; updatedAt: string;
 };
+// Holds NO customer information: a document is only a date, the kind of occasion and its place in the workflow, so the assistant cannot leak personal data it never reads.
+export type EventReservationDocument = { id: string; eventDate: string; eventType: string; status: "pending" | "confirmed" | "reserved" | "cancelled"; createdAt: string };
 export type MediaDocument = { id: string; url: string; createdAt: string };
 export type RateLimitDocument = { key: string; hits: number; expiresAt: Date };
 export type EnquiryStatus = "new" | "contacted" | "closed";
@@ -67,6 +69,7 @@ export function collections() {
     adminSessions: database.collection<AdminSessionDocument>("admin_sessions"),
     audit: database.collection<AuditDocument>("audit_log"),
     enquiries: database.collection<EnquiryDocument>("enquiries"),
+    eventReservations: database.collection<EventReservationDocument>("event_reservations"),
     rateLimits: database.collection<RateLimitDocument>("rate_limits"),
     migrations: database.collection<MigrationDocument>("migrations"),
   };

@@ -18,13 +18,15 @@ const dishId = (name: string) => {
 
 async function migrate() {
   const database = getDatabase();
-  const { categories, menuItems, media, rateLimits, migrations, enquiries, adminSessions, audit } = collections();
+  const { categories, menuItems, media, rateLimits, migrations, enquiries, adminSessions, audit, eventReservations } = collections();
   await Promise.all([
     adminSessions.createIndex({ tokenHash: 1 }, { unique: true, name: "admin_session_token" }),
     adminSessions.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0, name: "admin_session_expiry" }),
     audit.createIndex({ at: -1 }, { name: "audit_recent" }),
     enquiries.createIndex({ id: 1 }, { unique: true, name: "enquiry_id" }),
     enquiries.createIndex({ createdAt: -1 }, { name: "enquiry_recent" }),
+    // The only read this collection serves: "is any blocking event on this date?".
+    eventReservations.createIndex({ eventDate: 1, status: 1 }, { name: "event_date_status" }),
     categories.createIndex({ id: 1 }, { unique: true, name: "category_id" }),
     menuItems.createIndex({ id: 1 }, { unique: true, name: "menu_item_id" }),
     menuItems.createIndex({ visible: 1, available: 1, categoryId: 1, sortOrder: 1 }, { name: "public_menu_order" }),
@@ -34,7 +36,7 @@ async function migrate() {
     rateLimits.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0, name: "rate_limit_expiry" }),
     migrations.createIndex({ id: 1 }, { unique: true, name: "migration_id" }),
   ]);
-  await migrations.updateOne({ id: "001-menu" }, { $setOnInsert: { id: "001-menu", appliedAt: new Date().toISOString() } }, { upsert: true });
+  for (const id of ["001-menu", "002-events"]) await migrations.updateOne({ id }, { $setOnInsert: { id, appliedAt: new Date().toISOString() } }, { upsert: true });
   // Keep the database name visible in the command output without logging its URI.
   console.log(`MongoDB schema is ready in ${database.databaseName}.`);
 }

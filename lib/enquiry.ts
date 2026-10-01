@@ -136,8 +136,15 @@ export async function deliverEnquiry(data: ValidatedEnquiry): Promise<boolean> {
       }),
       signal: AbortSignal.timeout(10_000),
     });
+    if (!response.ok) {
+      // Previously silent, which made a bad key, an unverified sender domain or a rejected recipient impossible to
+      // tell apart. Only Resend's own error name and message are logged, never the visitor's details.
+      const detail = await response.json().catch(() => ({})) as { name?: string; message?: string };
+      console.error("Enquiry email rejected by Resend", response.status, detail.name ?? "", detail.message ?? "");
+    }
     return response.ok;
-  } catch {
+  } catch (error) {
+    console.error("Enquiry email could not be sent", error instanceof Error ? error.name : "unknown error");
     return false;
   }
 }

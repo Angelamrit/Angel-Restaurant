@@ -40,10 +40,16 @@ export async function requireAdmin() {
 export async function requireAdminPage() {
   if (!(await isAdmin())) redirect("/admin");
 }
+// ADMIN_ORIGIN pins the public origin behind a proxy. Anything that is not a valid URL (an empty value, or the
+// "[SENSITIVE]" placeholder that `vercel env pull` writes for protected variables) is ignored in favour of the
+// request's own origin, instead of rejecting every form post, chat message and login with a 403.
+function expectedOrigin(request: Request) {
+  try { if (process.env.ADMIN_ORIGIN) return new URL(process.env.ADMIN_ORIGIN).origin; } catch { /* fall through */ }
+  return new URL(request.url).origin;
+}
 export function sameOrigin(request: Request) {
   const origin = request.headers.get("origin");
-  const expected = process.env.ADMIN_ORIGIN || new URL(request.url).origin;
-  if (origin !== expected) throw new AccessError("This request could not be verified. Reload and try again.");
+  if (origin !== expectedOrigin(request)) throw new AccessError("This request could not be verified. Reload and try again.");
 }
 export async function limitAttempts(request: Request) {
   // Shared across instances. Use only Vercel's trusted proxy header; otherwise one global bucket.

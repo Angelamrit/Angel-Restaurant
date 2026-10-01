@@ -6,7 +6,8 @@ import { pageMetadata, breadcrumbList } from "@/lib/seo";
 
 export const metadata = pageMetadata({ title: "Gallery: The Dining Room & Dishes", description: "A glimpse of the dining room, the tandoor, and the table at Angel Indian Restaurant in Jackson Heights, Queens.", path: "/gallery" });
 const breadcrumbs = breadcrumbList([{ name: "The experience", path: "/gallery" }]);
-// The first six keep their approved captions; the rest are captioned with the dish's own menu name.
+// The first six keep their approved captions; the bar and storefront reuse wording already on the site,
+// and the dishes are captioned with their own menu names.
 const photos = [
   { name: "dining-room-portrait-v2", label: "A room to settle into" },
   { name: "tandoori-chicken", label: "Straight from the tandoor" },
@@ -14,6 +15,8 @@ const photos = [
   { name: "lamb-karahi", label: "A little spice, a little soul" },
   { name: "table-spread", label: "Better when shared" },
   { name: "thali-plate", label: "An invitation to linger" },
+  { name: "bar-counter", label: "Full bar" },
+  { name: "storefront-street", label: "Make your way to Angel" },
   { name: "chole-bhatura", label: "Chole Bhatura" },
   { name: "butter-chicken", label: "Butter Chicken" },
   { name: "chicken-dum-biryani", label: "Chicken Dum Biryani" },

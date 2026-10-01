@@ -95,7 +95,10 @@
   .menu-search span { color: var(--fg-muted); font-size: 1rem; }
   .menu-search input { width: 10rem; min-height: 2.5rem; padding: 0; border: 0; background: transparent; color: var(--fg); font-size: .8rem; }
   .menu-search input::placeholder { color: var(--fg-muted); }
-  .menu-search:focus-within { border-color: var(--gold); }
+  /* The focus ring belongs on the rounded pill, not on the square input inside it (the global :focus-visible outline
+     drew a rectangle that cut across the pill's curved ends). Focus stays clearly visible for keyboard users. */
+  .menu-search input:focus, .menu-search input:focus-visible { outline: none; box-shadow: none; }
+  .menu-search:focus-within { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(226, 189, 108, 0.35); }
   /* Tablet widths: the course tabs, diet pills and search cannot share one row without the tabs clipping mid-word, so the tabs take their own row. */
   @media (min-width: 48.01rem) and (max-width: 75rem) {
     .menu-controls { flex-wrap: wrap; row-gap: .25rem; }

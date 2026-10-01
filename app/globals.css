@@ -353,6 +353,21 @@
     color: transparent;
     padding-right: .06em;
   }
+  /* Phones (iOS Safari, Android Chrome) paint a gradient-clipped parent as invisible text when the words inside it are
+     animated inline-blocks (the word-by-word reveal): the clip does not reach their compositing layers. So each word
+     carries the gold gradient itself and the parent stops clipping. Where :has() is missing the parent keeps its own
+     clip as well, which is harmless. */
+  :where(h1, h2, h3) em .w,
+  .sw-em .sw {
+    background: var(--accent-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    padding-right: .06em;
+  }
+  :where(h1, h2, h3) em:has(.w),
+  .sw-em:has(.sw) { background: none; }
   p { text-wrap: pretty; }
   a {
     color: var(--link);

@@ -415,10 +415,11 @@
   }
   .hero-media { position: absolute; inset: 0; z-index: 0; background: var(--brown-deep); animation: hero-image-in 1800ms var(--ease-luxe) 200ms backwards; }
   .hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  /* Framing for the hero clip (a server leaning in with a plate toward a guest). The file is cropped to its
-     16:9 picture, so a centered crop keeps the server, plate and guest on wide screens; on narrow portrait
-     screens only about a quarter of the frame width shows, so the window sits right of center to keep the
-     plate and the guest's face in view. */
+  /* Framing for the hero sequence: the dining-room clip (cropped out of its white border to a full 16:9
+     picture; a server walks in from the right and serves the front table), then a 0.6s crossfade into the
+     server leaning in with a plate toward a guest. A centered crop keeps both scenes on wide screens; on
+     narrow portrait screens only about a quarter of the frame width shows, so the window sits right of
+     center to keep the servers, plates and the guest's face in view. */
   .hero-video, .hero-poster { object-position: 50% 50%; }
   @media (max-width: 48rem) { .hero-video, .hero-poster { object-position: 58% 50%; } }
   /* On tablet and desktop the hero section is taller than a 16:9 screen, and filling it would crop the picture

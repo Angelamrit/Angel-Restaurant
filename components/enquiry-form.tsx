@@ -26,7 +26,7 @@ function mailtoFallback(values: Partial<Record<EnquiryField, string>> | undefine
       (key) => `${key}: ${values?.[key] || "Not specified"}`
     ),
   ].join("\n\n");
-  return `mailto:${restaurant.email}?subject=${encodeURIComponent("Private dining enquiry — Angel")}&body=${encodeURIComponent(body)}`;
+  return `mailto:${restaurant.inbox}?subject=${encodeURIComponent("Private dining enquiry — Angel")}&body=${encodeURIComponent(body)}`;
 }
 
 function formatGuests(value?: string) {
@@ -273,7 +273,7 @@ export function EnquiryForm() {
       {state.status === "success" && (
         <div className="form-status" role="status">
           <p><strong>Your enquiry is on its way.</strong> Our team will be in touch shortly.</p>
-          <p>Or contact us directly: <a href={`mailto:${restaurant.email}`}>{restaurant.email}</a> · <a href={`tel:${restaurant.phoneHref}`}>{restaurant.phone}</a></p>
+          <p>Or contact us directly: <a href={`mailto:${restaurant.inbox}`}>{restaurant.email}</a> · <a href={`tel:${restaurant.phoneHref}`}>{restaurant.phone}</a></p>
         </div>
       )}
 

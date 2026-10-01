@@ -8,7 +8,10 @@ export const restaurant = {
   get phoneHref() {
     return this.phone.replace(/[^0-9]/g, "");
   },
-  email: "info@angelindianrestaurant.com",
+  // The address shown to visitors, and published in search data.
+  email: "contact@angelindianrestaurantnyc.com",
+  // Where mail actually arrives: mailto links and enquiry notifications go here, whatever address is displayed above.
+  inbox: "angelrestaurant278@gmail.com",
   address: "75-18 37th Avenue, Jackson Heights, NY 11372",
   instagram: "https://www.instagram.com/angel_indian_restaurant/",
   // TODO — Client Information Required: no production domain has been assigned yet.

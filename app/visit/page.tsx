@@ -21,7 +21,7 @@ export default function VisitPage() {
             <div><p className="eyebrow eyebrow-rule rise">A question before your visit?</p><h2 className="display-lg" id="contact-title"><Words text="Let’s" /> <em><Words text="talk." from={1} /></em></h2></div>
             <div>
               <a className="rise rise-late" href={`tel:${restaurant.phoneHref}`}>{restaurant.phone}</a>
-              <a className="rise rise-late" href={`mailto:${restaurant.email}`}>{restaurant.email}</a>
+              <a className="rise rise-late" href={`mailto:${restaurant.inbox}`}>{restaurant.email}</a>
               <p className="rise rise-late">For parking, access, or dietary questions, please contact our team before your visit.</p>
               <p className="rise rise-late">Planning an event? <Link className="text-link" href="/private-dining#enquiry">Send an enquiry ↗</Link></p>
               <Link className="text-link rise rise-late" href="/faq">Frequently asked questions ↗</Link>

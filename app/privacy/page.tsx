@@ -44,7 +44,7 @@ export default function PrivacyPage() {
         </p>
         <h2>Questions about your information</h2>
         <p>
-          Contact us directly at <a href={`mailto:${restaurant.email}`}>{restaurant.email}</a> or{" "}
+          Contact us directly at <a href={`mailto:${restaurant.inbox}`}>{restaurant.email}</a> or{" "}
           <a href={`tel:${restaurant.phoneHref}`}>{restaurant.phone}</a>.
         </p>
         <h2>Website terms of use</h2>

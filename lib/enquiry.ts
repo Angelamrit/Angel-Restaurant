@@ -115,8 +115,15 @@ export function validateEnquiry(formData: FormData): ValidationResult {
 export async function deliverEnquiry(data: ValidatedEnquiry): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.CONTACT_FROM_EMAIL;
-  const to = process.env.CONTACT_TO_EMAIL || restaurant.email;
-  if (!apiKey || !from) return false;
+  const configuredTo = process.env.CONTACT_TO_EMAIL;
+  const to = configuredTo && !/^\[.*\]$/.test(configuredTo.trim()) ? configuredTo : restaurant.inbox;
+  // `vercel env pull` writes the literal text "[SENSITIVE]" for protected variables; treat that like an empty value and say so.
+  const unusable = (value?: string) => !value || /^\[.*\]$/.test(value.trim());
+  if (unusable(apiKey) || unusable(from)) {
+    console.error("Enquiry email not sent: RESEND_API_KEY or CONTACT_FROM_EMAIL is missing or still a placeholder such as [SENSITIVE]. The enquiry itself was saved.");
+    return false;
+  }
+  if (unusable(process.env.CONTACT_TO_EMAIL) && process.env.CONTACT_TO_EMAIL) console.error("CONTACT_TO_EMAIL is a placeholder; using the default inbox instead.");
 
   const text = [
     "Private dining enquiry",
@@ -136,8 +143,15 @@ export async function deliverEnquiry(data: ValidatedEnquiry): Promise<boolean> {
       }),
       signal: AbortSignal.timeout(10_000),
     });
+    if (!response.ok) {
+      // Previously silent, which made a bad key, an unverified sender domain or a rejected recipient impossible to
+      // tell apart. Only Resend's own error name and message are logged, never the visitor's details.
+      const detail = await response.json().catch(() => ({})) as { name?: string; message?: string };
+      console.error("Enquiry email rejected by Resend", response.status, detail.name ?? "", detail.message ?? "");
+    }
     return response.ok;
-  } catch {
+  } catch (error) {
+    console.error("Enquiry email could not be sent", error instanceof Error ? error.name : "unknown error");
     return false;
   }
 }

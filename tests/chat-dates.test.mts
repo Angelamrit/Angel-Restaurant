@@ -38,6 +38,15 @@ test("a month/day already past rolls to next year, by rule and not by month", ()
   assert.equal(iso("September 27"), "2027-09-27", "yesterday rolls forward");
 });
 
+test("'the day after tomorrow' is two days out, and past references never resolve to a future date", () => {
+  assert.equal(iso("the day after tomorrow"), "2026-09-30");
+  assert.equal(iso("day after tomorrow"), "2026-09-30");
+  assert.equal(iso("tomorrow"), "2026-09-29");
+  assert.equal(iso("yesterday"), "none");
+  assert.equal(iso("last Friday"), "none");
+  assert.equal(iso("last night"), "none");
+});
+
 test("relative expressions resolve against the restaurant's today", () => {
   assert.equal(iso("today"), "2026-09-28");
   assert.equal(iso("tomorrow"), "2026-09-29");

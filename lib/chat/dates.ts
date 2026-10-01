@@ -144,7 +144,11 @@ export function resolveDate(text: string, context: string[] = [], now: Date = ne
     }
   }
 
+  // Past references must never fall through to a future date ("last Friday" is not the coming Friday).
+  if (new RegExp(`\\b(yesterday|(?:last|previous|past)\\s+(?:night|${WEEKDAYS.join("|")}))\\b`).test(value)) return { kind: "none" };
   if (/\btoday\b/.test(value)) return { kind: "date", iso: today };
+  // Checked before "tomorrow", which is a substring of it.
+  if (/\bday\s+after\s+(?:tomorrow|tmrw)\b|\bovermorrow\b/.test(value)) return { kind: "date", iso: toIso(toUtc(today) + 2 * DAY_MS) };
   if (/\btomorrow\b/.test(value)) return { kind: "date", iso: toIso(toUtc(today) + DAY_MS) };
 
   const weekday = WEEKDAY.exec(value);

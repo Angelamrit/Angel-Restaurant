@@ -112,7 +112,7 @@ export const kb = {
     {
       "topic": "email",
       "status": "confirmed",
-      "body": "info@angelindianrestaurant.com."
+      "body": "contact@angelindianrestaurantnyc.com."
     },
     {
       "topic": "transit",

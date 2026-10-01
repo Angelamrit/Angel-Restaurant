@@ -105,7 +105,7 @@ export function Footer() {
           <div className="footer-card-head"><span className="eyebrow">Say hello</span><span className="circle-btn" aria-hidden="true">✦</span></div>
           <div className="footer-contact">
             <a href={`tel:${restaurant.phoneHref}`}>{restaurant.phone}</a>
-            <a href={`mailto:${restaurant.email}`}>{restaurant.email}</a>
+            <a href={`mailto:${restaurant.inbox}`}>{restaurant.email}</a>
             <a href={restaurant.instagram}>Instagram ↗</a>
           </div>
         </div>

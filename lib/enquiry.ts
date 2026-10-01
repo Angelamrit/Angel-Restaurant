@@ -115,7 +115,7 @@ export function validateEnquiry(formData: FormData): ValidationResult {
 export async function deliverEnquiry(data: ValidatedEnquiry): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.CONTACT_FROM_EMAIL;
-  const to = process.env.CONTACT_TO_EMAIL || restaurant.email;
+  const to = process.env.CONTACT_TO_EMAIL || restaurant.inbox;
   if (!apiKey || !from) return false;
 
   const text = [

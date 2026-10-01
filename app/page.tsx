@@ -220,7 +220,7 @@ export default async function Home() {
           </div>
           <div className="container-shell bar-grid" style={{ position: "relative" }}>
             <div className="bar-media" data-reveal="photo" data-tilt>
-              <Photo name="bar-wine-service-v2" alt="A bartender serving two glasses of red wine across the bar at Angel" className="photo-frame bar-photo" sizes="(max-width: 767px) 100vw, 45vw" />
+              <Photo name="bar-counter" alt="Angel’s bar, with bottles on lit shelves under hanging Edison bulbs" className="photo-frame bar-photo" sizes="(max-width: 767px) 100vw, 45vw" />
               <div className="chip-float chip-float-bl frame frame-strong"><p className="eyebrow">100% halal food</p><strong>Full bar</strong></div>
             </div>
             <div className="bar-copy">

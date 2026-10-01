@@ -340,7 +340,8 @@
   img[src*="room-long-table-v2"] { object-position: 62% 72%; }
   img[src*="dining-room-portrait-v2"] { object-position: 50% 58%; }
   img[src*="room-guests-v2"] { object-position: 50% 66%; }
-  img[src*="bar-wine-service-v2"] { object-position: 52% 50%; }
+  img[src*="bar-counter"] { object-position: 50% 40%; }
+  img[src*="storefront-street"] { object-position: 57% 50%; }
   img[src*="storefront-v2"] { object-position: 50% 24%; }
   img[src*="dal-makhni-naan"] { object-position: 74% 45%; }
   img[src*="lamb-karahi"] { object-position: 36% 50%; }

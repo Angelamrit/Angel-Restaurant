@@ -1,8 +1,8 @@
 import "server-only";
-import { createHash, createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { query } from "./database";
+import { collections } from "./database";
 
 export const ADMIN_COOKIE = "angel_admin";
 export class AccessError extends Error {}
@@ -10,16 +10,28 @@ export function accessConfigured() { return (process.env.ADMIN_ACCESS_KEY?.lengt
 export function equalSecret(left: string, right: string) {
   return timingSafeEqual(createHash("sha256").update(left).digest(), createHash("sha256").update(right).digest());
 }
-const sign = (value: string) => createHmac("sha256", process.env.ADMIN_ACCESS_KEY!).update(value).digest("hex");
-export function createSession() {
-  const expiry = String(Date.now() + 8 * 60 * 60 * 1000);
-  return `${expiry}.${sign(expiry)}`;
+export class RateLimitError extends AccessError {}
+export const SESSION_SECONDS = 8 * 60 * 60;
+const hashToken = (token: string) => createHash("sha256").update(token).digest("hex");
+// Sessions are random tokens recorded (hashed) in the database, so each one can be revoked
+// individually on sign-out and no longer depends on the login key being used as a signing secret.
+export async function createSession() {
+  const token = randomBytes(32).toString("hex");
+  const now = Date.now();
+  await collections().adminSessions.insertOne({ tokenHash: hashToken(token), createdAt: new Date(now).toISOString(), expiresAt: new Date(now + SESSION_SECONDS * 1000) });
+  return token;
+}
+export async function destroySession() {
+  const store = await cookies();
+  const token = store.get(ADMIN_COOKIE)?.value;
+  if (token) await collections().adminSessions.deleteOne({ tokenHash: hashToken(token) });
+  store.delete(ADMIN_COOKIE);
 }
 export async function isAdmin() {
   if (!accessConfigured()) return false;
-  const token = (await cookies()).get(ADMIN_COOKIE)?.value || "";
-  const [expiry, signature] = token.split(".");
-  return !!signature && Number(expiry) > Date.now() && equalSecret(signature, sign(expiry));
+  const token = (await cookies()).get(ADMIN_COOKIE)?.value;
+  if (!token || !/^[a-f0-9]{64}$/.test(token)) return false;
+  return !!(await collections().adminSessions.findOne({ tokenHash: hashToken(token), expiresAt: { $gt: new Date() } }, { projection: { _id: 1 } }));
 }
 // Replace this seam with the selected provider's session + restaurant-role check.
 export async function requireAdmin() {
@@ -38,8 +50,11 @@ export async function limitAttempts(request: Request) {
   const source = process.env.VERCEL ? request.headers.get("x-vercel-forwarded-for") || "unknown" : "local";
   const bucket = Math.floor(Date.now() / 600000);
   const key = createHash("sha256").update(`${source}:${bucket}`).digest("hex");
-  const now = new Date().toISOString();
-  await query("DELETE FROM rate_limits WHERE expires_at < ?", [now]);
-  const rows = await query("INSERT INTO rate_limits(key,hits,expires_at) VALUES (?,1,?) ON CONFLICT(key) DO UPDATE SET hits=rate_limits.hits+1 RETURNING hits", [key, new Date(Date.now()+600000).toISOString()]);
-  if (Number(rows[0].hits) > 10) throw new AccessError("Too many attempts. Try again in ten minutes.");
+  const expiresAt = new Date(Date.now() + 600000);
+  const row = await collections().rateLimits.findOneAndUpdate(
+    { key },
+    { $inc: { hits: 1 }, $set: { expiresAt }, $setOnInsert: { key } },
+    { upsert: true, returnDocument: "after" },
+  );
+  if ((row?.hits || 1) > 10) throw new RateLimitError("Too many attempts. Try again in ten minutes.");
 }

@@ -10,7 +10,9 @@ The immutable migration snapshot is `db/original-menu.json`: **84 dishes, eight 
 
 Use Node 24 LTS (minimum 22.18, for [native TypeScript script execution](https://nodejs.org/download/release/v22.18.0/docs/api/typescript.html)). Copy `.env.example` to `.env.local` and set `ADMIN_ACCESS_KEY` to at least 32 unpredictable characters. Generate a value with a password manager, or `node -p "require('node:crypto').randomBytes(32).toString('hex')"`. Never commit that value.
 
-Leave `DATABASE_URL` and Blob variables empty locally. Then run:
+Set `MONGODB_URI` to an Atlas development connection string locally (or pull it
+from Vercel), and leave Blob variables empty if you do not need upload testing.
+Then run:
 
 ```sh
 npm install
@@ -20,36 +22,42 @@ npm run db:verify
 npm run dev
 ```
 
-Visit `/admin` and enter the configured key. Missing/short keys disable access; there is no default password or public development bypass. Local data persists in ignored `.data/angel.sqlite`; local uploads persist in `.data/uploads` and are served through a filename-validated route. The local database has already been migrated and seeded in this workspace.
+Visit `/admin` and enter the configured key. Missing/short keys disable access; there is no default password or public development bypass. Menu data persists in MongoDB Atlas; local uploads persist in `.data/uploads` and are served through a filename-validated route when Blob is not configured.
 
-Seed runs are transactional and recorded in `migrations`. Re-running seed does not overwrite edits or resurrect deleted dishes. `db:verify` compares original content, so run it immediately after initial migration, before restaurant edits. Do not edit the archived snapshot to manage the menu.
+Seed records its completion in the `migrations` collection. Re-running it does not overwrite edits or resurrect deleted dishes. `db:verify` compares original content, so run it immediately after initial migration, before restaurant edits. Do not edit the archived snapshot to manage the menu.
 
 ## Production setup
 
-Provision a managed PostgreSQL database with a pooled, TLS-enabled connection URL, and a public Vercel Blob store. No cloud resources, accounts or deployments were created by this implementation.
+Provision MongoDB Atlas through the Vercel Marketplace and a public Vercel Blob
+store. Atlas injects `MONGODB_URI` into the selected Vercel environments. No
+cloud resources, accounts or deployments were created by this implementation.
 
 Set these server environment variables before enabling the deployment:
 
 | Variable | Purpose |
 | --- | --- |
-| `DATABASE_URL` | PostgreSQL connection string, including provider TLS requirements |
+| `MONGODB_URI` | Atlas connection string, injected by the Vercel MongoDB Atlas integration |
+| `MONGODB_DB` | Optional database name; defaults to `angel-restaurant` |
 | `ADMIN_ACCESS_KEY` | Temporary shared administrator key, minimum 32 random characters |
 | `BLOB_READ_WRITE_TOKEN` | Server-only token for the public Blob store |
 | `ADMIN_ORIGIN` | Optional canonical admin origin for reverse proxies; otherwise the incoming request URL origin is checked |
 | `NEXT_PUBLIC_SITE_URL` | Existing public canonical domain |
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Optional existing GA4 property ID |
+| `RESEND_API_KEY`, `CONTACT_FROM_EMAIL`, `CONTACT_TO_EMAIL` | Private dining notification email. Enquiries are always saved to the `enquiries` collection (see `/admin/enquiries`) even when these are unset; the email is best-effort |
+| `OPENAI_API_KEY` | Ask Angel chat assistant (server-only). `CHAT_DAILY_LIMIT` optionally changes the site-wide daily message cap (default 2000) |
+| `DB_POOL_MAX` | Optional MongoDB connection pool size per instance; defaults to 3 |
 
-Run `npm run db:migrate`, `npm run db:seed`, and `npm run db:verify` against the production database **before** switching traffic. Migration credentials may be separate from the runtime database user. Give the runtime user only the required table permissions. No schema writes or seeding occur during visitor requests or builds.
+Run `npm run db:migrate`, `npm run db:seed`, and `npm run db:verify` against the production database **before** switching traffic. The migration creates collection indexes, including the TTL index used for temporary login rate limits. No schema writes or seeding occur during visitor requests or builds.
 
-Production refuses to fall back to SQLite or local uploads. `ALLOW_LOCAL_DATABASE=true` exists solely for an explicit local production-build smoke test; Vercel always requires cloud storage. SQLite is not a serverless deployment option.
+MongoDB is required in every environment; there is no SQLite fallback. Vercel always requires MongoDB Atlas for menu and administrator data.
 
-The three runtime dependencies added are `postgres` (parameterized SQL), `@vercel/blob` (durable image storage) and explicit `sharp` (image validation/re-encoding). There is no ORM or authentication provider.
+The database uses the official `mongodb` driver with `@vercel/functions` pool lifecycle support. `@vercel/blob` provides durable image storage and `sharp` performs image validation/re-encoding. There is no ORM or authentication provider.
 
 ## Data and publishing
 
-`db/001-menu.sql` defines categories, menu items, media references, temporary login rate-limit buckets and migration markers. Prices are integer cents; boolean flags are checked 0/1 values. Categories are foreign keys and retain the original vegetarian/non-vegetarian section distinctions. Menu records include timestamps, sort order, regular/Chef Special type, publishing flags, image reference and dietary labels. `updated_at` is used for optimistic concurrency checks.
+MongoDB collections (types in `lib/database.ts`, indexes created by `npm run db:migrate` in `scripts/database.mts`): `categories`, `menu_items`, `media`, `enquiries` (private dining requests), `rate_limits` (TTL counters shared by admin login, chat and the enquiry form) and `migrations`. Prices are integer cents. Each menu item references its category by `categoryId`; the original vegetarian/non-vegetarian section distinctions are kept. Menu records include timestamps, sort order, regular/Chef Special type, publishing flags, image reference and dietary labels. `updatedAt` is used for optimistic concurrency checks. Rules such as "vegan implies vegetarian" and "Chef Specials need an image" are enforced in `lib/menu-validation.ts`, not by the database.
 
-Flow: admin form → same-origin, server-authorized route → validation → parameterized database mutation → route revalidation → refreshed admin list/public server render. Create IDs prevent accidental duplicate submissions. Conflicting updates/deletes ask the editor to reload. Public records always require both `visible` and `available`; this applies to featured cards, homepage and structured data. Public menu reads are request-time, with React memoization only within a render, so there is no persistent stale menu cache. Previously open menu/homepage tabs refresh when they become visible; no constant polling is used.
+Flow: admin form → same-origin, server-authorized route → validation → database mutation → route revalidation → refreshed admin list/public server render. Create IDs prevent accidental duplicate submissions. Conflicting updates/deletes ask the editor to reload. Public records always require both `visible` and `available`; this applies to featured cards, homepage and structured data. Public menu reads are request-time, with React memoization only within a render, so there is no persistent stale menu cache. Previously open menu/homepage tabs refresh when they become visible; no constant polling is used.
 
 ## Images
 
@@ -69,7 +77,7 @@ The existing Vercel Analytics and optional GA4 are retained. `lib/analytics.ts` 
 
 Replace the temporary session implementation in `lib/admin-access.ts` and `/api/admin/session` with the chosen provider's session/role checks. All private reads and mutations use the shared authorization seam; replacing it does not require rewriting the menu system. Add administrator identities, restaurant roles, recovery, MFA and per-user auditing. Public visitors continue to need no account.
 
-Temporary protection uses an eight-hour signed, HTTP-only, same-site session cookie; secure cookies in production; constant-time key comparison; database-backed login throttling; same-origin checks on mutations; and no secret in client code. Rotating the key invalidates all existing sessions. This is a temporary gate, not a finalized account system. Without Vercel's trusted client-IP header the login throttle deliberately uses a shared bucket.
+Temporary protection uses an eight-hour session: a random token in an HTTP-only, same-site cookie whose hash is stored in the `admin_sessions` collection (so signing out revokes it, and the login key is not used as a signing secret); secure cookies in production; constant-time key comparison; database-backed login throttling (HTTP 429); same-origin checks on mutations; and no secret in client code. Rotating the key blocks new logins, but existing sessions live until they expire or are signed out; to revoke all of them at once, empty the `admin_sessions` collection. Administrator actions (sign-ins, failed sign-ins, dish create/update/delete, uploads, enquiry status changes) are written to the `audit_log` collection and shown under Settings → Recent activity. A deleted dish's full record is kept in its audit entry so it can be re-created by hand. Image uploads are limited to 30 per hour. This is a temporary gate, not a finalized account system. Without Vercel's trusted client-IP header the login throttle deliberately uses a shared bucket.
 
 ## Verification and files
 
@@ -81,15 +89,16 @@ npm run test:e2e
 npm run build
 ```
 
-Unit/integration tests cover validation, SQL constraints, migration fidelity and seed idempotence. Playwright uses an isolated database and `.next-e2e` build directory on port 3100; it never changes the development menu database. Tests use installed Microsoft Edge (`msedge`); change the channel or install that browser on CI. Browser tests cover public routes, responsive navigation, admin access, origin rejection, regular/Chef Special lifecycles, uploads/replacement and event dispatch. Screenshots/traces go to ignored `test-results`.
+Unit/integration tests cover validation, MongoDB migration fidelity and seed idempotence. MongoDB integration and Playwright tests require `TEST_MONGODB_URI` for a dedicated non-production Atlas cluster; each run uses a randomly named database. Playwright uses `.next-e2e` on port 3100. Tests use installed Microsoft Edge (`msedge`); change the channel or install that browser on CI. Browser tests cover public routes, responsive navigation, admin access, origin rejection, regular/Chef Special lifecycles, uploads/replacement and event dispatch. Screenshots/traces go to ignored `test-results`.
 
 Main implementation groups:
 
 - `app/admin`, `components/admin`: workspace routes, navigation, forms, list, dialog, states and styles.
 - `app/api/admin`, `app/api/media`: protected mutations, temporary session, uploads and local image serving.
 - `lib/database.ts`, `lib/menu-repository.ts`, `lib/menu-types.ts`, `lib/menu-validation.ts`, `lib/admin-access.ts`: data/access boundaries.
-- `db`, `scripts/database.mts`: schema, preserved snapshot, migration and seed commands.
+- `db/original-menu.json`, `scripts/database.mts`: preserved snapshot, index migration and seed commands.
+- `lib/enquiry.ts`, `lib/enquiry-store.ts`, `lib/rate-limit.ts`, `app/admin/(workspace)/enquiries`: private dining enquiries, storage, inbox and shared rate limiting.
 - `app/menu/page.tsx`, `app/page.tsx`, `components/menu-explorer.tsx`, `components/dish-showcase.tsx`: public data integration.
 - `components/site-chrome.tsx`, `components/analytics-*`, `lib/analytics.ts`: public/admin shell separation and existing analytics integration.
 
-Known deployment limitations: managed PostgreSQL and Vercel Blob need real credentials and live smoke tests; provider analytics delivery/import needs deployment verification; permanent authentication and upload garbage collection remain separate work. Category management is intentionally deferred.
+Known deployment limitations: MongoDB Atlas and Vercel Blob need real credentials and live smoke tests; provider analytics delivery/import needs deployment verification; permanent authentication and upload garbage collection remain separate work. Category management is intentionally deferred.

@@ -36,9 +36,10 @@ const EVENT_DATE_CLARIFY = "Which month are you thinking of? Give me the full da
 const BOOKING_KIND_CLARIFY = "Are you asking about a regular table or an event?";
 // Which onward route the answer offers: "resy" for an ordinary table, "event"
 // for a celebration or private-event enquiry the restaurant team handles
-// through the existing form. Carried on the failure paths too, so neither
-// route disappears when the model is unavailable.
-type Cta = "resy" | "event" | undefined;
+// through the existing form, "credit" for a website-credit question. Carried
+// on the failure paths too, so neither route disappears when the model is
+// unavailable.
+type Cta = "resy" | "event" | "credit" | undefined;
 const ctaHeader = (cta: Cta): Record<string, string> => (cta ? { "x-chat-cta": cta } : {});
 
 // User-facing envelope. Distinct from apiError()'s `{ error }` shape because the
@@ -100,12 +101,13 @@ export async function POST(request: Request) {
     // API key from being driven cross-site.
     sameOrigin(request);
 
-    if (!rateLimit(rateLimitKey(request))) return gateResponse(UNAVAILABLE, "rate_limit", 429, { "Retry-After": "60" });
+    if (!(await rateLimit(rateLimitKey(request)))) return gateResponse(UNAVAILABLE, "rate_limit", 429, { "Retry-After": "60" });
 
     // readJson() enforces the same 20 KB bounded body as every other route here,
     // rejecting an oversized payload before it is buffered or parsed.
     const body = await readJson(request) as { message?: unknown; history?: unknown };
-    const message = validateMessage(body.message);
+    let message: string;
+    try { message = validateMessage(body.message); } catch { throw new InputError("Please send a message."); }
     const history = trimHistory(body.history);
 
     const gate = gateInput(message, history);

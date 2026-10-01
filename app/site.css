@@ -14,7 +14,7 @@
   /* Word-by-word headline reveal: each word focuses in from a blur as it rises. */
   .w { display: inline-block; transform-origin: 0 100%; }
   [data-reveal="words"].is-revealed .w {
-    animation: word-in 850ms var(--ease-luxe) backwards;
+    animation: word-in var(--duration-reveal) var(--ease-luxe) backwards;
     animation-delay: calc(var(--word-delay, 120ms) + var(--i, 0) * var(--word-step, 60ms));
   }
   @keyframes word-in {
@@ -28,16 +28,16 @@
   .rise-late ~ .rise-late { --rise-delay: 850ms; }
   .rise-late ~ .rise-late ~ .rise-late { --rise-delay: 1000ms; }
   .rise-late ~ .rise-late ~ .rise-late ~ .rise-late { --rise-delay: 1150ms; }
-  @keyframes rise-in { from { opacity: 0; transform: translateY(1.75rem); filter: blur(4px); } }
+  @keyframes rise-in { from { opacity: 0; transform: translateY(1.75rem); } }
 
   /* Photograph reveal: the frame wipes open from its lower edge while the image settles. */
   [data-reveal="photo"].is-revealed:is(.editorial-photo, .frame),
   [data-reveal="photo"].is-revealed :is(.editorial-photo, .dish-image, .photo-frame) {
-    animation: photo-wipe 1400ms var(--ease-luxe) backwards;
+    animation: photo-wipe var(--duration-cinematic) var(--ease-luxe) backwards;
     animation-delay: calc(var(--i, 0) * 140ms);
   }
   [data-reveal="photo"].is-revealed :is(.editorial-photo:not(.cinematic-slideshow), .dish-image, .photo-frame) img {
-    animation: photo-settle 1900ms var(--ease-luxe) backwards;
+    animation: photo-settle 1500ms var(--ease-luxe) backwards;
     animation-delay: calc(var(--i, 0) * 140ms);
   }
   [data-reveal="photo"].is-revealed .chip-float,
@@ -63,6 +63,32 @@
   .sw { display: inline-block; opacity: 1; }
   .sw.is-lit { opacity: 1; filter: blur(0); }
   .sw-em { font-style: italic; font-weight: 400; background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; padding-right: .04em; }
+  .sw-block { display: block; }
+  /* Chef-site manifesto: each word lights in turn across 12–50% of the block's pass through the viewport. */
+  @supports (animation-timeline: view()) {
+    .sw-block { view-timeline-name: --manifesto; view-timeline-axis: block; }
+    .sw { animation: sw-lit linear both; animation-timeline: --manifesto; animation-range: cover calc(12% + 38% * var(--i, 0) / var(--n, 1)) cover calc(12% + 38% * (var(--i, 0) + 1) / var(--n, 1)); }
+    @keyframes sw-lit { from { opacity: .16; transform: translateY(6px); } }
+  }
+
+  /* Gold hairline along the top edge of a chapter. */
+  .section-hairline { position: absolute; inset: 0 0 auto; z-index: 2; }
+
+  /* Recognition: the press line, set like the chef site's peer quote. */
+  .press-quote { position: relative; max-width: 58rem; margin: clamp(2.5rem, 5vw, 4rem) auto 0; text-align: center; }
+  .press-quote-mark { position: absolute; top: -.45em; left: -.15em; z-index: 0; font-family: var(--font-editorial); font-size: clamp(7rem, 12vw, 12rem); line-height: 1; background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; opacity: .4; pointer-events: none; user-select: none; }
+  .press-quote blockquote { position: relative; z-index: 1; margin: 0; font-family: var(--font-editorial); font-style: italic; font-weight: 300; line-height: 1.12; text-wrap: balance; background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .press-quote figcaption { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: .4rem; margin-top: 2rem; }
+  .press-quote figcaption span:last-child { color: rgba(246, 239, 226, 0.6); font-size: .85rem; }
+
+  /* Book: a dimmed photograph under the card, veiled from the left like the chef site's reserve chapter. */
+  .book-bg { position: absolute; inset: 0; z-index: 0; opacity: .35; }
+  .book-bg .editorial-photo { position: absolute; inset: 0; }
+  .book-scrim { position: absolute; inset: 0; z-index: 1; background: linear-gradient(90deg, var(--brown-deep), color-mix(in srgb, var(--brown-deep) 70%, transparent) 55%, color-mix(in srgb, var(--brown-deep) 30%, transparent)); }
+  .book > .container-shell { position: relative; z-index: 2; }
+
+  /* Gallery filmstrip under the showcase, as on the chef site. */
+  .dish-showcase + .gallery-motion { margin-top: clamp(2.5rem, 5vw, 4rem); padding-bottom: 0; }
 
   /* Scroll-scrubbed motion (compositor-driven). Browsers without scroll timelines
      see the sections at rest. Sections hosting these use overflow: clip, never
@@ -296,17 +322,6 @@
   .chapter-rail:hover li span { opacity: 1; transform: translate(0, -50%); }
   @media (min-width: 80rem) { .chapter-rail { display: block; } }
 
-  /* Trailing cursor ring: fine-pointer devices only (components/cursor.tsx). */
-  .cursor { display: none; position: fixed; top: 0; left: 0; z-index: calc(var(--z-skip-link) + 1); width: 2.6rem; height: 2.6rem; margin: -1.3rem 0 0 -1.3rem; opacity: 0; mix-blend-mode: difference; pointer-events: none; transition: opacity 400ms var(--ease-standard); }
-  .cursor::before, .cursor::after { content: ""; position: absolute; border-radius: 50%; transition: transform 600ms var(--ease-luxe), background-color 400ms var(--ease-standard); }
-  .cursor::before { inset: 0; border: 1px solid var(--ivory); }
-  .cursor::after { inset: 50%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; background: var(--ivory); }
-  .cursor[data-visible="true"] { opacity: 1; }
-  .cursor[data-hover="true"]::before { transform: scale(1.7); background: rgba(246, 239, 226, 0.14); }
-  .cursor[data-hover="true"]::after { transform: scale(0); }
-  .cursor[data-pressed="true"]::before { transform: scale(.8); }
-  @media (hover: hover) and (pointer: fine) { .cursor { display: block; } }
-
   /* Text link with a redrawing underline. */
   .text-link { position: relative; display: inline-flex; align-items: center; gap: 1rem; width: max-content; padding-block: .5rem; color: currentColor; font-size: .66rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; text-decoration: none; transition: transform var(--duration-ui) var(--ease-luxe), color var(--duration-ui) var(--ease-luxe); }
   .text-link::after { content: ""; position: absolute; inset: auto 0 0; height: 1px; background: currentColor; transform-origin: left; }
@@ -343,7 +358,7 @@
 
   /* Rotating text-ring monogram badge. */
   .badge { position: relative; display: grid; place-items: center; width: var(--badge-size, 11rem); aspect-ratio: 1; color: var(--gold-light); }
-  .badge-glow { position: absolute; inset: 0; border-radius: 50%; background: rgba(226, 189, 108, 0.15); filter: blur(24px); animation: pulse-glow 3s ease-in-out infinite; }
+  .badge-glow { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(closest-side, rgba(226, 189, 108, 0.2), transparent); animation: pulse-glow 3s ease-in-out infinite; }
   @keyframes pulse-glow { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
   .badge-ring { position: absolute; inset: 0; width: 100%; height: 100%; animation: spin 40s linear infinite; }
   .badge-ring text { fill: currentColor; font-family: var(--font-functional); font-size: 7px; font-weight: 700; letter-spacing: .32em; }
@@ -386,14 +401,27 @@
     color: var(--ivory);
     background: var(--brown-deep);
   }
-  .hero-media { position: absolute; inset: 0; z-index: 0; background: var(--sand); animation: hero-image-in 1800ms var(--ease-luxe) 200ms backwards; }
+  .hero-media { position: absolute; inset: 0; z-index: 0; background: var(--brown-deep); animation: hero-image-in 1800ms var(--ease-luxe) 200ms backwards; }
   .hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  /* Framing for the hero clip (a server leaning in with a plate toward a guest). The file is cropped to its
+     16:9 picture, so a centered crop keeps the server, plate and guest on wide screens; on narrow portrait
+     screens only about a quarter of the frame width shows, so the window sits right of center to keep the
+     plate and the guest's face in view. */
+  .hero-video, .hero-poster { object-position: 50% 50%; }
+  @media (max-width: 48rem) { .hero-video, .hero-poster { object-position: 58% 50%; } }
+  /* On tablet and desktop the hero section is taller than a 16:9 screen, and filling it would crop the picture
+     to a zoomed-in slice. Instead the media box keeps the clip's own 16:9 shape along the top, so the whole scene
+     shows, and its lower edge dissolves into the page's dark brown. */
+  @media (min-width: 48.01rem) {
+    /* Sits a little below the top so the header strip does not cover the server's head; both edges feather into the brown. */
+    .hero-media { inset: clamp(3rem, 7vw, 6.5rem) 0 auto 0; aspect-ratio: 16 / 9; -webkit-mask-image: linear-gradient(transparent, #000 9%, #000 82%, transparent); mask-image: linear-gradient(transparent, #000 9%, #000 82%, transparent); }
+  }
   .hero-video-pause { position: absolute; z-index: 3; inset: auto clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) auto; }
   @keyframes hero-image-in { from { opacity: 0; transform: scale(1.08); filter: blur(6px); } }
   .hero-scrim { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(90deg, rgba(21, 13, 8, 0.78), rgba(21, 13, 8, 0.28) 55%, transparent); }
   .hero-scrim::after { content: ""; position: absolute; inset: 40% 0 0; background: linear-gradient(180deg, transparent, rgba(31, 19, 13, 0.92)); }
   .hero-scrim::before { content: ""; position: absolute; inset: 0 0 auto; height: 30%; background: linear-gradient(180deg, rgba(21, 13, 8, 0.55), transparent); }
-  .hero-spot { position: absolute; top: 0; left: 0; z-index: 1; width: clamp(24rem, 55vw, 50rem); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(closest-side, rgba(226, 189, 108, 0.22), transparent 70%); mix-blend-mode: screen; pointer-events: none; transform: translate(calc(var(--px, 55vw) - 50%), calc(var(--py, 45vh) - 50%)); transition: transform 1100ms var(--ease-luxe); }
+  .hero-spot { position: absolute; top: 0; left: 0; z-index: 1; width: clamp(24rem, 55vw, 50rem); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(closest-side, rgba(226, 189, 108, 0.22), transparent 70%); pointer-events: none; will-change: transform; transform: translate(calc(var(--px, 55vw) - 50%), calc(var(--py, 45vh) - 50%)); transition: transform 1100ms var(--ease-luxe); }
   .hero:not([data-pointer]) .hero-spot { animation: spot-drift 18s ease-in-out infinite alternate; }
   @keyframes spot-drift { from { transform: translate(calc(35vw - 50%), calc(30vh - 50%)); } to { transform: translate(calc(70vw - 50%), calc(65vh - 50%)); } }
   .hero-content { position: relative; z-index: 2; width: 100%; padding-top: calc(var(--header-height) + clamp(3rem, 8vh, 6rem)); padding-bottom: clamp(2rem, 4vw, 3.5rem); }
@@ -477,13 +505,14 @@
   .dish-num { font-family: var(--font-editorial); font-size: 1.1rem; color: var(--fg-muted); }
   .dish-name { display: block; font-family: var(--font-editorial); font-weight: 300; font-size: clamp(1.6rem, 2.4vw, 2.3rem); line-height: 1.05; }
   .dish-note { display: block; margin-top: .3rem; font-size: .58rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--fg-muted); }
-  .dish-preview { position: relative; aspect-ratio: 5 / 4; overflow: hidden; color: var(--ivory); }
+  .dish-preview { position: sticky; top: calc(var(--nav-height) + 2rem); align-self: start; aspect-ratio: 5 / 4; overflow: hidden; color: var(--ivory); transform: perspective(1100px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform 700ms var(--ease-luxe); }
   .dish-preview-frame { position: absolute; inset: 0; opacity: 0; transition: opacity var(--duration-reveal) var(--ease-standard); }
   .dish-preview-frame.is-active { opacity: 1; }
   .dish-preview-frame img { object-fit: cover; transform: scale(1.08); transition: transform var(--duration-cinematic) var(--ease-luxe); }
   .dish-preview-frame.is-active img { transform: scale(1); }
   .dish-preview-frame::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(31, 19, 13, 0.15), rgba(31, 19, 13, 0.55) 45%, rgba(31, 19, 13, 0.92)); }
   .dish-preview-num { position: absolute; top: 1.5rem; right: 2rem; z-index: 2; font-family: var(--font-editorial); font-size: clamp(4rem, 8vw, 7rem); font-weight: 300; line-height: 1; color: transparent; -webkit-text-stroke: 1px rgba(226, 189, 108, 0.7); }
+  .dish-preview-pause { position: absolute; top: 1.5rem; left: 2rem; z-index: 3; }
   .dish-preview-copy { position: absolute; inset: auto 0 0; z-index: 2; padding: clamp(1.5rem, 3vw, 2.5rem); display: grid; gap: .6rem; transform: translateY(12px); transition: transform var(--duration-reveal) var(--ease-luxe); }
   .dish-preview-frame.is-active .dish-preview-copy { transform: none; }
   .dish-preview-copy .eyebrow { color: var(--gold-light); font-size: .58rem; }
@@ -491,13 +520,21 @@
   .dish-preview-copy p { max-width: 34rem; color: rgba(246, 239, 226, 0.75); font-size: .9rem; line-height: 1.6; }
   .dish-badges { display: flex; gap: .4rem; margin-top: .4rem; }
   .dish-badges span { display: grid; place-items: center; width: 1.9rem; height: 1.9rem; border: 1px solid rgba(246, 239, 226, 0.3); border-radius: 50%; font-size: .55rem; font-weight: 700; letter-spacing: .05em; }
+  /* Chef-site showcase: the copy stack rises in sequence, and a hairline fills over the auto-advance interval. */
+  .dish-preview-frame.is-active .dish-preview-copy > * { animation: rise-in var(--duration-reveal) var(--ease-luxe) backwards; }
+  .dish-preview-frame.is-active .dish-preview-copy > :nth-child(2) { animation-delay: 80ms; }
+  .dish-preview-frame.is-active .dish-preview-copy > :nth-child(3) { animation-delay: 160ms; }
+  .dish-preview-frame.is-active .dish-preview-copy > :nth-child(4) { animation-delay: 240ms; }
+  .dish-preview-progress { position: absolute; inset: auto 0 0; z-index: 3; height: 2px; background: var(--gold-light); transform: scaleX(0); transform-origin: left; }
+  .dish-preview:not([data-paused="true"]) .dish-preview-progress { animation: progress-scale 5200ms linear both; }
+  @keyframes progress-scale { to { transform: scaleX(1); } }
 
   /* Plating interlude: a pinned scene, scrubbed by scroll. */
-  .plating { position: relative; height: 340svh; view-timeline-name: --plating; view-timeline-axis: block; background: var(--brown-deep); }
+  .plating { position: relative; height: 220svh; view-timeline-name: --plating; view-timeline-axis: block; background: var(--brown-deep); }
   .plating-sticky { position: sticky; top: 0; height: 100svh; overflow: clip; display: flex; align-items: center; }
   .plating-media { position: absolute; inset: 0; }
   .plating-media .editorial-photo { position: absolute; inset: 0; }
-  .plating-media img { object-fit: cover; transform: scale(1); filter: blur(0) brightness(.85); }
+  .plating-media img { object-fit: cover; transform: scale(1); }
   .plating-veil { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(21, 13, 8, 0.82), rgba(21, 13, 8, 0.35) 60%, rgba(21, 13, 8, 0.2)), linear-gradient(180deg, rgba(21, 13, 8, 0.6), transparent 30%, transparent 70%, rgba(21, 13, 8, 0.85)); }
   .plating-copy { position: relative; z-index: 2; width: 100%; }
   .plating-steps { position: relative; min-height: 22rem; margin-top: 1.5rem; }
@@ -515,7 +552,7 @@
   .plating-label { font-size: .52rem; color: rgba(246, 239, 226, 0.5); }
   @supports (animation-timeline: view()) {
     .plating-media img { animation: plating-focus linear both; animation-timeline: --plating; animation-range: contain 0% contain 90%; }
-    @keyframes plating-focus { from { transform: scale(1.18); filter: blur(28px) brightness(.45); } 55% { filter: blur(6px) brightness(.7); } to { transform: scale(1); filter: blur(0) brightness(.85); } }
+    @keyframes plating-focus { from { transform: scale(1.18); } to { transform: scale(1); } }
     .plating-step { animation: plating-step linear both; animation-timeline: --plating; }
     .plating-step:nth-child(1) { animation-range: contain 0% contain 26%; }
     .plating-step:nth-child(2) { animation-range: contain 25% contain 51%; }
@@ -597,6 +634,13 @@
   .recognition-card strong { display: block; margin-top: 1.25rem; font-family: var(--font-editorial); font-weight: 300; font-size: clamp(2.25rem, 3.6vw, 3.5rem); line-height: 1; background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .recognition-card p { margin-top: 1rem; color: rgba(246, 239, 226, 0.6); font-size: .85rem; }
   .recognition-cta { display: flex; justify-content: center; margin-top: 3rem; }
+  .recognition-certificates { display: grid; grid-template-columns: repeat(2, minmax(0, 18rem)); justify-content: center; gap: clamp(1rem, 3vw, 2rem); margin-top: clamp(2rem, 5vw, 3.5rem); }
+  .recognition-certificate { display: block; padding: .65rem; color: var(--ivory); text-decoration: none; }
+  .recognition-certificate img { display: block; width: 100%; height: auto; border: 1px solid rgba(226, 189, 108, .24); }
+  .recognition-certificate > span { display: flex; align-items: baseline; justify-content: space-between; gap: .75rem; padding: .85rem .2rem .1rem; }
+  .recognition-certificate strong { color: var(--gold-light); font-family: var(--font-editorial); font-size: 1.35rem; font-weight: 300; }
+  .recognition-certificate small { color: var(--ivory-muted); font-family: var(--font-functional); font-size: .52rem; font-weight: 700; letter-spacing: .12em; text-align: right; text-transform: uppercase; }
+  @media (hover: hover) { .recognition-certificate:hover { border-color: var(--gold); } }
 
   /* 08 · Visit */
   .visit-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(20rem, .65fr); gap: 1.25rem; align-items: stretch; }
@@ -696,6 +740,7 @@
   body { padding-bottom: 3.75rem; }
   .mobile-reserve-bar { display: flex; align-items: center; justify-content: center; gap: .6rem; position: fixed; inset-inline: 0; bottom: 0; z-index: var(--z-raised); min-height: 3.75rem; padding: .9rem var(--gutter) calc(.9rem + env(safe-area-inset-bottom, 0px)); background-image: var(--btn-fill); color: var(--brown-deep); box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.45); font-size: .66rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; text-decoration: none; }
   .chef-grid, .restaurant-grid, .dish-showcase, .visit-grid { grid-template-columns: 1fr; }
+  .dish-preview { position: relative; top: auto; }
   .menu-cards, .recognition-cards { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
   .footer-map { grid-column: 1 / -1; }
@@ -721,7 +766,7 @@
   .journey-track.is-revealed::before { animation-name: line-draw-y; }
   .journey-track li::before { top: .35rem; left: -1.8rem; }
   .bento-card, .bento-card:nth-child(n) { grid-column: 1 / -1; min-height: 16rem; }
-  .plating { height: 300svh; }
+  .plating { height: 200svh; }
   .plating-steps { min-height: 24rem; }
   .recognition-quote .quote-mark { display: none; }
   .footer-top { grid-template-columns: 1fr; }
@@ -738,12 +783,12 @@
   .map-halo, .badge-ring, .badge-glow, .monogram::before, .scroll-cue-line i, .local-time::before, .hero-media, .hero-spot, .hero-video, .hero-content, .page-enter, .site-header, .w, .rise, .apricot-rule::after, .drift-y, .drift-text, .page-intro-media, .page-intro-mark, .journey-track::before, .plating-media img, .plating-step, .plating-bar i, .plating-dots i, .scroll-progress { animation: none; }
   .hero:not([data-pointer]) .hero-spot { animation: none; }
   .apricot-rule::after, .journey-track::before { transform: scaleX(1); }
-  .scroll-progress, .cursor { display: none; }
+  .scroll-progress { display: none; }
   .plating { height: auto; }
   .plating-sticky { position: relative; height: auto; min-height: 80svh; padding-block: var(--section-space); }
   .plating-step { position: static; opacity: 1; transform: none; }
   .plating-step:not(:last-child) { display: none; }
-  .sw { opacity: 1; filter: none; transition: none; }
+  .sw { opacity: 1; filter: none; transition: none; animation: none; transform: none; }
   .mobile-navigation, .mobile-navigation > * { transition: none; }
 }
 
@@ -779,24 +824,63 @@
   .footer-lead h2 { margin-top: 2rem; }
   .footer-grid { grid-template-columns: repeat(4, 1fr); }
   .footer-contact p { margin: 0; color: rgba(246, 239, 226, 0.85); }
+
+  /* 05 · Full bar: the chef-site "restaurant" chapter register — slow-drifting room
+     photograph, chips of facts, and the Drinks course as a numbered glass card. */
+  .bar-section { position: relative; overflow: clip; }
+  .bar-bg { position: absolute; inset: 0; overflow: clip; pointer-events: none; }
+  .bar-grid { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: clamp(2.5rem, 6vw, 6rem); align-items: center; }
+  .bar-media { position: relative; padding: 0 0 3rem 1.5rem; }
+  .bar-photo { aspect-ratio: 4 / 5; transform: perspective(1100px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform 700ms var(--ease-luxe); }
+  .bar-photo img { animation: kenburns 26s ease-in-out infinite alternate; }
+  @keyframes kenburns { to { transform: scale(1.09) translate(-1.5%, -1%); } }
+  .bar-chips { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.5rem 0 0; padding: 0; list-style: none; }
+  .bar-card { margin-top: clamp(1.5rem, 3vw, 2.25rem); padding: clamp(1.5rem, 3vw, 2.25rem); }
+  .bar-card-head { display: flex; flex-direction: column; gap: .9rem; }
+  .bar-card-head .eyebrow { color: var(--gold); }
+  .bar-list { margin: 1.25rem 0 0; padding: 0; list-style: none; }
+  .bar-row { display: flex; align-items: baseline; gap: .75rem; padding: .7rem .25rem; border-top: 1px solid var(--line); transition: padding-left var(--duration-ui) var(--ease-luxe), color var(--duration-ui) var(--ease-luxe); }
+  .bar-row-num { flex: none; width: 1.6rem; color: var(--gold); font-family: var(--font-editorial); font-size: .95rem; }
+  .bar-row-name { color: var(--fg); font-size: .86rem; font-weight: 600; letter-spacing: .01em; }
+  .bar-row-tag { color: var(--fg-muted); font-weight: 400; }
+  @media (hover: hover) { .bar-row:hover { padding-left: .75rem; } .bar-row:hover .menu-item-leader { border-bottom-color: var(--gold); } }
+  .bar-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--line); }
+  .bar-card-foot .eyebrow { color: var(--fg-muted); }
+  .bar-card-foot .circle-btn { text-decoration: none; }
+
+  /* Chef-site slide progress: the active mark fills over the auto-advance interval. */
+  .cinematic-progress button span { position: relative; overflow: hidden; }
+  .cinematic-progress button span::after { content: ""; position: absolute; inset: 0; width: 0; background: var(--gold-light); }
+  .cinematic-slideshow:not([data-paused="true"]) .cinematic-progress button[aria-pressed="true"] span::after { animation: progress-run 5200ms linear both; }
+  @keyframes progress-run { to { width: 100%; } }
   @supports (animation-timeline: view()) {
     .plating-steps.is-single .plating-step { animation: plating-single linear both; animation-timeline: --plating; animation-range: contain 0% contain 45%; }
     @keyframes plating-single { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }
   }
 }
 @media (max-width: 64rem) {
-  .signature-grid, .recognition-cards { grid-template-columns: 1fr; }
+  .signature-grid, .recognition-cards, .bar-grid { grid-template-columns: 1fr; }
+  .bar-media { padding: 0 0 2.5rem; }
   .signature-grid > :nth-child(2) { margin-top: 0; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
 }
+/* Tablet: the dishes stack one per row, and a 3:4 portrait photo at full row width is over 800px tall, so they use a landscape frame instead. */
+@media (min-width: 40rem) and (max-width: 64rem) {
+  .signature-photo { aspect-ratio: 16 / 10; }
+}
 @media (max-width: 48rem) {
+  .recognition-certificates { grid-template-columns: 1fr 1fr; gap: .75rem; }
+  .recognition-certificate { padding: .45rem; }
+  .recognition-certificate > span { display: grid; gap: .2rem; padding: .65rem .1rem .05rem; }
+  .recognition-certificate small { text-align: left; }
   .welcome-bottom { grid-template-columns: 1fr; text-align: center; justify-items: center; }
   .story-image-accent { left: .5rem; bottom: .5rem; width: 7rem; }
   .footer-grid { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
   .editorial-star, .plating-steps.is-single .plating-step { animation: none; }
-  .signature-photo { transform: none; }
+  .signature-photo, .dish-preview, .bar-photo { transform: none; }
+  .bar-photo img, .cinematic-progress button span::after, .dish-preview-progress, .dish-preview-copy > * { animation: none; }
 }
 
 /* Speed takes precedence over ambient decoration, including on desktop. */
@@ -806,9 +890,12 @@
   .certificate-highlight-copy h2 { max-width: 43rem; margin-top: 1rem; font-family: var(--font-editorial); font-size: clamp(2.5rem, 5vw, 5rem); font-weight: 300; line-height: 1.04; }
   .certificate-highlight-copy h2 em { color: var(--gold-light); font-weight: 400; }
   .certificate-highlight-copy > p:last-child { margin-top: 1.25rem; color: rgba(246, 239, 226, .72); }
-  .certificate-highlight-mark { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: .65rem; width: clamp(15rem, 25vw, 22rem); min-height: 12rem; padding: 2rem; border: 1px solid var(--gold); outline: 1px solid rgba(226, 189, 108, .38); outline-offset: -.65rem; text-align: center; }
+  .certificate-highlight-link { display: inline-flex; gap: .55rem; margin-top: 1.5rem; color: var(--gold-light); font-family: var(--font-functional); font-size: .62rem; font-weight: 700; letter-spacing: .18em; text-decoration: none; text-transform: uppercase; }
+  .certificate-highlight-link span { transition: transform var(--duration-ui) var(--ease-luxe); }
+  .certificate-highlight-mark { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: .65rem; width: clamp(15rem, 25vw, 22rem); min-height: 12rem; padding: 2rem; border: 1px solid var(--gold); outline: 1px solid rgba(226, 189, 108, .38); outline-offset: -.65rem; color: inherit; text-align: center; text-decoration: none; transition: border-color var(--duration-ui) var(--ease-luxe), background-color var(--duration-ui) var(--ease-luxe); }
   .certificate-highlight-mark span { color: var(--gold-light); font-size: .58rem; font-weight: 700; letter-spacing: .3em; }
   .certificate-highlight-mark strong { color: var(--ivory); font-family: var(--font-editorial); font-size: clamp(2rem, 3vw, 3rem); font-weight: 400; line-height: 1; }
+  @media (hover: hover) { .certificate-highlight-link:hover span { transform: translate(3px, -3px); } .certificate-highlight-mark:hover { border-color: var(--gold-light); background: rgba(226, 189, 108, .06); } }
   @media (max-width: 48rem) {
     .certificate-highlight-inner { grid-template-columns: 1fr; gap: 2rem; }
     .certificate-highlight-mark { width: 100%; min-height: 10rem; }
@@ -817,6 +904,7 @@
   .hero-poster { object-fit: cover; }
   .hero-video { opacity: 0; }
   .hero-video.is-playing { opacity: 1; }
+  .hero-video { transition: opacity 1.6s var(--ease-luxe); }
   .orb, .ember, .text-shimmer, .badge-ring, .badge-glow,
   .monogram::before, .editorial-star, .hero-spot,
   .hero:not([data-pointer]) .hero-spot, .scroll-cue-line i,

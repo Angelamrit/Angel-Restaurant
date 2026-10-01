@@ -1,7 +1,9 @@
 "use server";
 
 import { headers } from "next/headers";
-import { checkRateLimit, deliverEnquiry, validateEnquiry, type EnquiryState } from "@/lib/enquiry";
+import { markEnquiryEmailed, saveEnquiry } from "@/lib/enquiry-store";
+import { clientSource, withinLimit } from "@/lib/rate-limit";
+import { deliverEnquiry, validateEnquiry, type EnquiryState } from "@/lib/enquiry";
 import { getEventDateStatus, recordEventReservation } from "@/lib/events";
 
 // Every export from a "use server" file becomes a public POST endpoint
@@ -22,11 +24,8 @@ export async function sendEnquiry(_prev: EnquiryState, formData: FormData): Prom
   if (startedAt > 0 && Date.now() - startedAt < 3000) return { status: "success" };
 
   const requestHeaders = await headers();
-  const ip =
-    requestHeaders.get("x-real-ip") ??
-    requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    "unknown";
-  if (!checkRateLimit(ip)) {
+  // Fails open: if the counter store is down the enquiry is still worth taking.
+  if (!(await withinLimit("enquiry", clientSource(requestHeaders), 10 * 60_000, 3, true))) {
     return { status: "error", code: "rate_limit" };
   }
 
@@ -43,14 +42,17 @@ export async function sendEnquiry(_prev: EnquiryState, formData: FormData): Prom
     return { status: "error", code: "date_taken", values: result.data };
   }
 
+  // Store first so the lead survives an email failure; email is then best-effort.
+  const stored = await saveEnquiry(result.data);
+
   // Recorded as "pending" deliberately: an enquiry is not a booking, so it must
   // not block the date for the next visitor. The team promotes it to confirmed
-  // or reserved in their own workflow. Best-effort — a storage failure must
-  // never lose the enquiry itself, which the email below carries.
+  // or reserved in their own workflow. Best-effort, a storage failure must never lose the enquiry.
   await recordEventReservation({ date: result.data.Date, type: result.data.Occasion, status: "pending" });
 
   const delivered = await deliverEnquiry(result.data);
-  if (!delivered) {
+  if (stored && delivered) await markEnquiryEmailed(stored.id);
+  if (!stored && !delivered) {
     return { status: "error", code: "delivery", values: result.data };
   }
 

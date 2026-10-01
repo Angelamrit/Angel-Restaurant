@@ -10,7 +10,7 @@
 // loads it under plain `node --test`, where that package does not resolve — the
 // same reasoning as lib/chat/kb.ts.
 // Explicit extension for that same loader.
-import { query } from "./database.ts";
+import { collections } from "./database.ts";
 
 export type EventStatus = "pending" | "confirmed" | "reserved" | "cancelled";
 export type EventDateStatus = "reserved" | "not_reserved" | "unknown";
@@ -32,20 +32,17 @@ export function isCalendarDate(date: string): boolean {
 
 /**
  * Is this date already held by an event? Works for any valid date — the date is
- * a bound parameter, never part of the SQL text, and no date is special-cased.
+ * a validated ISO string used as a plain equality value, never built into a query
+ * expression, and no date is special-cased.
  *
  * Returns a status and nothing else. No rows, no ids, no customer data ever
  * leaves this function, so a caller cannot forward what it never received.
  */
 export async function getEventDateStatus(date: string): Promise<{ status: EventDateStatus }> {
   if (!isCalendarDate(date)) return { status: "unknown" };
-  const placeholders = BLOCKING_STATUSES.map(() => "?").join(", ");
   try {
-    const rows = await query<{ hits: number | string }>(
-      `SELECT count(*) AS hits FROM event_reservations WHERE event_date = ? AND status IN (${placeholders})`,
-      [date, ...BLOCKING_STATUSES],
-    );
-    return { status: Number(rows[0]?.hits ?? 0) > 0 ? "reserved" : "not_reserved" };
+    const hit = await collections().eventReservations.findOne({ eventDate: date, status: { $in: [...BLOCKING_STATUSES] } }, { projection: { _id: 1 } });
+    return { status: hit ? "reserved" : "not_reserved" };
   } catch (error) {
     // A database that cannot be reached must never read as "free". "unknown"
     // sends the visitor to the enquiry rather than implying availability.
@@ -62,10 +59,7 @@ export async function getEventDateStatus(date: string): Promise<{ status: EventD
 export async function recordEventReservation(input: { date: string; type?: string; status?: EventStatus }): Promise<boolean> {
   if (!isCalendarDate(input.date)) return false;
   try {
-    await query(
-      "INSERT INTO event_reservations(id, event_date, event_type, status, created_at) VALUES (?, ?, ?, ?, ?)",
-      [crypto.randomUUID(), input.date, input.type ?? "", input.status ?? "pending", new Date().toISOString()],
-    );
+    await collections().eventReservations.insertOne({ id: crypto.randomUUID(), eventDate: input.date, eventType: input.type ?? "", status: input.status ?? "pending", createdAt: new Date().toISOString() });
     return true;
   } catch (error) {
     console.error("Event reservation insert failed", error);

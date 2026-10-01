@@ -12,11 +12,11 @@
 // The guard is the production bundle check documented in SQA.md.
 export const kb = {
   "metadata": {
-    "version": "1.8",
+    "version": "1.9",
     "name": "Angel Restaurant Chatbot Knowledge Base",
     "authoritative": true,
     "source": "Angel restaurant repository content reference and published menu data",
-    "last_reviewed": "2026-09-24"
+    "last_reviewed": "2026-09-29"
   },
   "answer_policy": {
     "source_precedence": [
@@ -42,7 +42,7 @@ export const kb = {
     {
       "topic": "identity",
       "status": "confirmed",
-      "body": "Angel Indian Restaurant is in Jackson Heights, Queens, New York, and serves Indian cooking rooted in Punjab."
+      "body": "Angel Indian Restaurant is in Jackson Heights, Queens, New York, and serves Indian cooking."
     },
     {
       "topic": "chef",
@@ -52,7 +52,7 @@ export const kb = {
     {
       "topic": "origin",
       "status": "confirmed",
-      "body": "Chef Amrit Pal Singh is from Pathankot, Punjab, India."
+      "body": "Chef Amrit Pal Singh is from Pathankot, India."
     },
     {
       "topic": "training",
@@ -77,7 +77,7 @@ export const kb = {
     {
       "topic": "philosophy",
       "status": "confirmed",
-      "body": "The cooking is rooted in Punjabi traditions, with an ingredient-led approach and a focus on bold flavors without using excess cream or spice to conceal the food's flavor."
+      "body": "The cooking is rooted in Indian traditions, with an ingredient-led approach and a focus on bold flavors without using excess cream or spice to conceal the food's flavor."
     },
     {
       "topic": "halal",
@@ -133,6 +133,11 @@ export const kb = {
       "topic": "dietary",
       "status": "confirmed",
       "body": "The printed menu marks specific dishes as vegan. The menu also asks guests to tell the restaurant about a food allergy or special dietary requirement before ordering. Do not provide allergy or cross-contamination guarantees."
+    },
+    {
+      "topic": "website-credit",
+      "status": "confirmed",
+      "body": "This website was designed and built by Aceva Tech. The interface provides a link to Aceva Tech separately; do not paste a URL or mention a button yourself."
     }
   ],
   "menu_snapshot": {

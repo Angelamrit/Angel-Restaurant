@@ -13,7 +13,7 @@ export default function VisitPage() {
   return (
     <main id="main-content" tabIndex={-1}>
       <JsonLd data={breadcrumbs} />
-      <PageIntro eyebrow="Make your way to Angel" title="A table worth" italic="coming together for." image={{ name: "storefront-v2", alt: "Angel Indian Restaurant’s storefront at 75-18 37th Avenue, Jackson Heights" }} mark="Queens" />
+      <PageIntro eyebrow="Make your way to Angel" title="A table worth" italic="coming together for." image={{ name: "storefront-street", alt: "Angel Indian Restaurant’s storefront at 75-18 37th Avenue, Jackson Heights" }} mark="Queens" />
       <VisitSection />
       <section className="surface-dark tone-dark section section-space" aria-labelledby="contact-title">
         <div className="container-shell">

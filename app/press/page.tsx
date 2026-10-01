@@ -26,7 +26,7 @@ export default function PressPage() {
   return (
     <main id="main-content" tabIndex={-1}>
       <JsonLd data={breadcrumbs} />
-      <PageIntro eyebrow="In the press" title="A citywide" italic="conversation." description="Michelin recognition, and coverage from The New Yorker, Eater NY, The Infatuation, Condé Nast Traveller and more." mark="Press" />
+      <PageIntro eyebrow="In the press" title="A citywide" italic="conversation." description="Michelin recognition, and coverage from The New Yorker, Eater NY, The Infatuation, Condé Nast Traveller and more." image={{ name: "press-interview", alt: "An interview in progress at a studio microphone" }} mark="Press" />
       <section className="surface-dark tone-dark section" aria-label="Press coverage">
         <div className="container-shell press-recognition" data-reveal>
           <div className="press-recognition-heading">

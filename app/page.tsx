@@ -50,7 +50,7 @@ export default async function Home() {
       <MenuRefresh />
       {/* Hero */}
       <section className="hero tone-dark" id="top" aria-label="Introduction">
-        <HeroVideo src="/videos/hero-loop-v4.mp4" poster="/angel/hero-poster.webp" posterAlt="A server bringing a plate to two guests at a table in Angel’s dining room" />
+        <HeroVideo src="/videos/hero-sequence-v5.mp4" poster="/angel/hero-poster-v5.webp" posterAlt="Guests dining together in Angel’s dining room" />
         <div className="hero-scrim" aria-hidden="true" />
         <div className="hero-spot" aria-hidden="true" />
         <Embers count={18} />

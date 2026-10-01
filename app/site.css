@@ -336,19 +336,23 @@
   /* Photographs */
   .editorial-photo { position: relative; overflow: clip; background: var(--sand); }
   .editorial-photo img { object-fit: cover; transform: scale(1); transition: transform var(--duration-cinematic) var(--ease-luxe), filter var(--duration-cinematic) var(--ease-luxe); }
-  /* Focal points for the photographer's shots, so object-fit: cover keeps the subject in frame in every crop (phones included). */
+  /* Per-photo focal points for object-fit: cover. */
   img[src*="room-long-table-v2"] { object-position: 62% 72%; }
   img[src*="dining-room-portrait-v2"] { object-position: 50% 58%; }
   img[src*="room-guests-v2"] { object-position: 50% 66%; }
   img[src*="bar-counter"] { object-position: 50% 40%; }
-  img[src*="storefront-street"] { object-position: 57% 50%; }
-  img[src*="storefront-v2"] { object-position: 50% 24%; }
+  img[src*="storefront-street"] { object-position: 50% 0%; }
+  .page-intro-media:has(img[src*="storefront-street"]) { top: 0; }
+  img[src*="press-interview"] { object-position: 66% 32%; }
+  img[src*="experience-dining-room"] { object-position: 56% 50%; }
   img[src*="dal-makhni-naan"] { object-position: 74% 45%; }
   img[src*="lamb-karahi"] { object-position: 36% 50%; }
   img[src*="chole-bhatura"] { object-position: 45% 55%; }
   img[src*="goat-dum-biryani"] { object-position: 55% 50%; }
   img[src*="dinner-spread"] { object-position: 50% 40%; }
-  @media (max-width: 767px) { .editorial-photo--art img { object-position: 50% 58%; } }
+  @media (max-width: 767px) {
+    .editorial-photo--art img { object-position: 50% 58%; }
+  }
   a:hover .editorial-photo img, .editorial-photo:hover img { transform: scale(var(--image-scale)); filter: brightness(1.05); }
   .photo-frame { position: relative; overflow: clip; border-radius: var(--radius-frame); border: 1px solid var(--line-strong); background: var(--sand); box-shadow: var(--shadow-floating); }
   .photo-frame img { object-fit: cover; }
@@ -416,10 +420,11 @@
   }
   .hero-media { position: absolute; inset: 0; z-index: 0; background: var(--brown-deep); animation: hero-image-in 1800ms var(--ease-luxe) 200ms backwards; }
   .hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  /* Framing for the hero clip (a server leaning in with a plate toward a guest). The file is cropped to its
-     16:9 picture, so a centered crop keeps the server, plate and guest on wide screens; on narrow portrait
-     screens only about a quarter of the frame width shows, so the window sits right of center to keep the
-     plate and the guest's face in view. */
+  /* Framing for the hero sequence: the dining-room clip (cropped out of its white border to a full 16:9
+     picture; a server walks in from the right and serves the front table), then a 0.6s crossfade into the
+     server leaning in with a plate toward a guest. A centered crop keeps both scenes on wide screens; on
+     narrow portrait screens only about a quarter of the frame width shows, so the window sits right of
+     center to keep the servers, plates and the guest's face in view. */
   .hero-video, .hero-poster { object-position: 50% 50%; }
   @media (max-width: 48rem) { .hero-video, .hero-poster { object-position: 58% 50%; } }
   /* On tablet and desktop the hero section is taller than a 16:9 screen, and filling it would crop the picture

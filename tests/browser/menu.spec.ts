@@ -48,7 +48,7 @@ test("public routes, guarded mutations, dish lifecycle, uploads and tracking", a
       await page.getByLabel("Dish type").selectOption("chef-special");
       await page.getByRole("button", { name: "Create dish", exact: true }).click();
       await expect(page.locator(".admin-error")).toContainText("Upload an image");
-      await page.locator('input[type="file"]').setInputFiles("public/angel/chicken-biryani-stock.webp");
+      await page.locator('input[type="file"]').setInputFiles("tests/fixtures/chicken-biryani-stock.webp");
       await expect(page.getByAltText("Dish image preview")).toBeVisible();
       await page.getByAltText("Dish image preview").scrollIntoViewIfNeeded();
       await expect.poll(() => page.getByAltText("Dish image preview").evaluate((image: HTMLImageElement) => image.naturalWidth), { timeout: 15000 }).toBeGreaterThan(0);
@@ -77,7 +77,7 @@ test("public routes, guarded mutations, dish lifecycle, uploads and tracking", a
     await page.getByLabel("Price (USD)").fill("14.56");
     if (special) {
       const previousImage = await page.getByAltText("Dish image preview").getAttribute("src");
-      await page.locator('input[type="file"]').setInputFiles("public/angel/goat-biryani-stock.webp");
+      await page.locator('input[type="file"]').setInputFiles("tests/fixtures/goat-biryani-stock.webp");
       await expect(page.getByAltText("Dish image preview")).not.toHaveAttribute("src", previousImage!);
     }
     await page.getByRole("button", { name: "Save changes" }).click();

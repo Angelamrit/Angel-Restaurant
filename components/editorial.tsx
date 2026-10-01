@@ -11,7 +11,7 @@ export function Photo({ name, mobileName, alt, className = "", priority = false,
   // Art direction: phones get a portrait frame of the same room, so a full-bleed backdrop is not a blurry sliver of a landscape photo.
   const { props } = getImageProps({ src: `/angel/${name}.webp`, alt, fill: true, sizes, loading });
   const { props: mobile } = getImageProps({ src: `/angel/${mobileName}.webp`, alt, fill: true, sizes, loading });
-  return <div className={`editorial-photo editorial-photo--art ${className}`}><picture><source media="(max-width: 767px)" srcSet={mobile.srcSet} sizes={sizes} /><img {...props} alt={alt} /></picture></div>;
+  return <div className={`editorial-photo editorial-photo--art ${className}`} data-mobile={mobileName}><picture><source media="(max-width: 767px)" srcSet={mobile.srcSet} sizes={sizes} /><img {...props} alt={alt} /></picture></div>;
 }
 
 // Secondary-page opener. With `image` it is a full-bleed photographic hero in the

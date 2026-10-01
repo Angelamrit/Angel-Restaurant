@@ -29,7 +29,7 @@ export default function GalleryPage() {
   return (
     <main id="main-content" tabIndex={-1}>
       <JsonLd data={breadcrumbs} />
-      <PageIntro eyebrow="The Angel experience" title="Come for the food." italic="Stay for the feeling." description="A glimpse of the room, the table, and the flavors that bring us together." image={{ name: "room-long-table-v2", mobileName: "dining-room-portrait-v2", alt: "Angel’s dining room on 37th Avenue" }} mark="Angel" />
+      <PageIntro eyebrow="The Angel experience" title="Come for the food." italic="Stay for the feeling." description="A glimpse of the room, the table, and the flavors that bring us together." image={{ name: "experience-dining-room", alt: "Angel’s dining room on 37th Avenue" }} mark="Angel" />
       <section className="surface-gold tone-gold section" aria-label="A glimpse of Angel"><GalleryRail /></section>
       <section className="surface-dark tone-dark section" aria-label="Angel photo collection">
         <GalleryLightbox photos={photos}>

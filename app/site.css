@@ -887,7 +887,7 @@
   /* Chef-site slide progress: the active mark fills over the auto-advance interval. */
   .cinematic-progress button span { position: relative; overflow: hidden; }
   .cinematic-progress button span::after { content: ""; position: absolute; inset: 0; width: 0; background: var(--gold-light); }
-  .cinematic-slideshow:not([data-paused="true"]) .cinematic-progress button[aria-pressed="true"] span::after { animation: progress-run 5200ms linear both; }
+  .cinematic-slideshow:not([data-paused="true"]) .cinematic-progress button[aria-pressed="true"] span::after { animation: progress-run var(--slide-interval, 5200ms) linear both; }
   @keyframes progress-run { to { width: 100%; } }
   @supports (animation-timeline: view()) {
     .plating-steps.is-single .plating-step { animation: plating-single linear both; animation-timeline: --plating; animation-range: contain 0% contain 45%; }
@@ -896,6 +896,7 @@
 }
 @media (max-width: 64rem) {
   .signature-grid, .recognition-cards, .bar-grid { grid-template-columns: 1fr; }
+
   .bar-media { padding: 0 0 2.5rem; }
   .signature-grid > :nth-child(2) { margin-top: 0; }
   .footer-grid { grid-template-columns: 1fr 1fr; }

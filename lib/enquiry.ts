@@ -84,7 +84,9 @@ export function validateEnquiry(formData: FormData): ValidationResult {
   }
 
   const occasion = raw.Occasion ?? "";
-  if (occasion !== "" && !OCCASIONS.includes(occasion as (typeof OCCASIONS)[number])) {
+  if (!occasion) {
+    fieldErrors.Occasion = "Please choose an occasion.";
+  } else if (!OCCASIONS.includes(occasion as (typeof OCCASIONS)[number])) {
     fieldErrors.Occasion = "Please choose an occasion from the list.";
   }
 
@@ -115,16 +117,13 @@ export function validateEnquiry(formData: FormData): ValidationResult {
 export async function deliverEnquiry(data: ValidatedEnquiry): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.CONTACT_FROM_EMAIL;
-  const configuredTo = process.env.CONTACT_TO_EMAIL;
-  const to = configuredTo && !/^\[.*\]$/.test(configuredTo.trim()) ? configuredTo : restaurant.inbox;
+  const to = restaurant.inbox;
   // `vercel env pull` writes the literal text "[SENSITIVE]" for protected variables; treat that like an empty value and say so.
   const unusable = (value?: string) => !value || /^\[.*\]$/.test(value.trim());
   if (unusable(apiKey) || unusable(from)) {
     console.error("Enquiry email not sent: RESEND_API_KEY or CONTACT_FROM_EMAIL is missing or still a placeholder such as [SENSITIVE]. The enquiry itself was saved.");
     return false;
   }
-  if (unusable(process.env.CONTACT_TO_EMAIL) && process.env.CONTACT_TO_EMAIL) console.error("CONTACT_TO_EMAIL is a placeholder; using the default inbox instead.");
-
   const text = [
     "Private dining enquiry",
     ...ENQUIRY_FIELDS.map((field) => `${field}: ${data[field] || "Not specified"}`),

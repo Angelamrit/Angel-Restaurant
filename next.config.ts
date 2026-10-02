@@ -49,6 +49,8 @@ const nextConfig: NextConfig = {
   images: {
     // Optimized variants are re-generated from stable source files; keep them for 30 days.
     minimumCacheTTL: 2592000,
+    // 75 is the default; 45 is only for the heavily dimmed decorative backgrounds (components/editorial.tsx).
+    qualities: [45, 75],
     // Vercel creates BLOB_READ_WRITE_TOKEN automatically, but does not provide a
     // build-time hostname. Keep optimization limited to public menu uploads.
     remotePatterns: [{ protocol: "https", hostname: "*.public.blob.vercel-storage.com", pathname: "/menu/**" }],

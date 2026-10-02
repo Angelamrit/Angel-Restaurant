@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import type { AnyBulkWriteOperation } from "mongodb";
 import { closeDatabase, collections, getDatabase, type CategoryDocument, type MenuItemDocument } from "../lib/database.ts";
+import { PAGE_VIEW_RETENTION_SECONDS } from "../lib/visitor-analytics-core.ts";
 
 nextEnv.loadEnvConfig(process.cwd());
 const mode = process.argv[2];
@@ -18,7 +19,7 @@ const dishId = (name: string) => {
 
 async function migrate() {
   const database = getDatabase();
-  const { categories, menuItems, media, rateLimits, migrations, enquiries, adminSessions, audit, eventReservations } = collections();
+  const { categories, menuItems, media, rateLimits, migrations, enquiries, adminSessions, audit, eventReservations, pageViews, visitors } = collections();
   await Promise.all([
     adminSessions.createIndex({ tokenHash: 1 }, { unique: true, name: "admin_session_token" }),
     adminSessions.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0, name: "admin_session_expiry" }),
@@ -35,8 +36,13 @@ async function migrate() {
     rateLimits.createIndex({ key: 1 }, { unique: true, name: "rate_limit_key" }),
     rateLimits.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0, name: "rate_limit_expiry" }),
     migrations.createIndex({ id: 1 }, { unique: true, name: "migration_id" }),
+    // Visitor analytics. Every report filters on a day range, then counts distinct visitors or groups by page,
+    // so one compound index answers all of them from the index alone; the TTL index bounds raw-data storage.
+    pageViews.createIndex({ day: 1, visitorId: 1, path: 1 }, { name: "page_view_day_visitor_path" }),
+    pageViews.createIndex({ at: 1 }, { expireAfterSeconds: PAGE_VIEW_RETENTION_SECONDS, name: "page_view_expiry" }),
+    visitors.createIndex({ visitorId: 1 }, { unique: true, name: "visitor_id" }),
   ]);
-  for (const id of ["001-menu", "002-events"]) await migrations.updateOne({ id }, { $setOnInsert: { id, appliedAt: new Date().toISOString() } }, { upsert: true });
+  for (const id of ["001-menu", "002-events", "003-visitor-analytics"]) await migrations.updateOne({ id }, { $setOnInsert: { id, appliedAt: new Date().toISOString() } }, { upsert: true });
   // Keep the database name visible in the command output without logging its URI.
   console.log(`MongoDB schema is ready in ${database.databaseName}.`);
 }

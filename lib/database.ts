@@ -22,6 +22,11 @@ export type EnquiryDocument = {
 export type AdminSessionDocument = { tokenHash: string; createdAt: string; expiresAt: Date };
 export type AuditDocument = { at: string; action: string; target: string; detail?: unknown };
 export type MigrationDocument = { id: string; appliedAt: string };
+// First-party visitor analytics (lib/visitor-analytics.ts). Anonymous by design: a random cookie ID, never a name,
+// contact detail or IP address. `day` is the business-timezone calendar day, so daily/weekly/monthly counts are
+// plain string range queries; `at` drives the 13-month TTL. The visitors collection keeps the all-time total.
+export type PageViewDocument = { visitorId: string; path: string; day: string; at: Date; device: "mobile" | "tablet" | "desktop"; referrer?: string };
+export type VisitorDocument = { visitorId: string; firstSeen: Date; firstDay: string };
 
 type MongoState = typeof globalThis & { angelMongoClient?: MongoClient; angelMongoDatabase?: Db; angelMongoPoolAttached?: boolean };
 const state = globalThis as MongoState;
@@ -72,6 +77,8 @@ export function collections() {
     eventReservations: database.collection<EventReservationDocument>("event_reservations"),
     rateLimits: database.collection<RateLimitDocument>("rate_limits"),
     migrations: database.collection<MigrationDocument>("migrations"),
+    pageViews: database.collection<PageViewDocument>("page_views"),
+    visitors: database.collection<VisitorDocument>("visitors"),
   };
 }
 

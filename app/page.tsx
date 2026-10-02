@@ -5,7 +5,7 @@ import type { CSSProperties } from "react";
 import { Photo, Reservation } from "@/components/editorial";
 import { VisitSection } from "@/components/neighborhood-map";
 import { Words } from "@/components/split-text";
-import { Badge, Embers } from "@/components/badge";
+import { Badge } from "@/components/badge";
 import { SectionHead, ScrollWords } from "@/components/section-head";
 import { DishShowcase } from "@/components/dish-showcase";
 import { GalleryRail } from "@/components/gallery-rail";
@@ -17,7 +17,11 @@ import { pageMetadata } from "@/lib/seo";
 import { getPublicMenu } from "@/lib/menu-repository";
 import { MenuRefresh } from "@/components/menu-refresh";
 
-export const dynamic = "force-dynamic";
+// Pre-rendered and served from cache rather than rendered for every visit. Admin menu
+// saves already call revalidatePath("/") and revalidatePath("/menu") (app/api/admin/menu),
+// so edits still appear immediately; the 10-minute window only backs that up, matching
+// the public-menu data cache in lib/menu-repository.ts.
+export const revalidate = 600;
 
 export const metadata = pageMetadata({
   title: { absolute: "Angel Indian Restaurant | Indian Food in Jackson Heights, Queens" },
@@ -53,7 +57,6 @@ export default async function Home() {
         <HeroVideo src="/videos/hero-sequence-v5.mp4" poster="/angel/hero-poster-v5.webp" posterAlt="Guests dining together in Angel’s dining room" />
         <div className="hero-scrim" aria-hidden="true" />
         <div className="hero-spot" aria-hidden="true" />
-        <Embers count={18} />
         <div className="container-shell hero-content">
           <div className="hero-grid">
             <div className="hero-copy">

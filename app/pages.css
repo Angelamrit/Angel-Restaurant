@@ -7,10 +7,13 @@
   .page-intro h1 { margin-top: 2rem; max-width: 16ch; }
   .page-intro-lede { margin-top: 2rem; }
   .page-intro-stats { margin-top: 2.5rem; max-width: 60rem; }
-  .page-intro-mark { position: absolute; top: calc(var(--header-height) + .2em); right: -.06em; z-index: 1; color: transparent; -webkit-text-stroke: 1px var(--line-strong); font-family: var(--font-editorial); font-size: clamp(9rem, 26vw, 28rem); font-style: italic; line-height: 1; letter-spacing: -.03em; white-space: nowrap; pointer-events: none; user-select: none; animation: mark-in 1800ms var(--ease-luxe) 200ms backwards; }
+  .page-intro-mark { position: absolute; top: calc(var(--header-height) + .2em); right: -.06em; z-index: 1; color: transparent; -webkit-text-stroke: 1px var(--line-strong); font-family: var(--font-editorial); font-size: clamp(9rem, 26vw, 28rem); font-style: italic; line-height: 1; letter-spacing: -.03em; white-space: nowrap; pointer-events: none; user-select: none; }
   @keyframes mark-in { from { opacity: 0; transform: translateX(6%); } }
   .page-intro--photo { display: flex; align-items: flex-end; min-height: clamp(34rem, 82svh, 54rem); background: var(--brown-deep); color: var(--ivory); }
-  .page-intro-media { position: absolute; inset: -10% 0; z-index: 0; animation: hero-image-in 1800ms var(--ease-luxe) 100ms backwards; }
+  /* No entrance animation on the intro photo or the outlined mark: both start invisible, which holds back the
+     page's largest paint (LCP). The speed pass in app/site.css also sets animation: none on them, but this file
+     loads after it and used to win. */
+  .page-intro-media { position: absolute; inset: -10% 0; z-index: 0; }
   .page-intro-media .editorial-photo { position: absolute; inset: 0; }
   .page-intro-scrim { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(90deg, rgba(21, 13, 8, 0.8), rgba(21, 13, 8, 0.3) 55%, rgba(21, 13, 8, 0.15)), linear-gradient(180deg, rgba(21, 13, 8, 0.6), transparent 35%, transparent 55%, rgba(31, 19, 13, 0.92)); }
   .page-intro--photo .page-intro-inner { width: 100%; }

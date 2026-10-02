@@ -55,7 +55,7 @@ export function GalleryLightbox({ photos, children }: { photos: GalleryPhoto[]; 
               onClick={() => { opener.current = triggers.current[index]; setActive(index); }}
               aria-haspopup="dialog"
             >
-              <Photo name={photo.name} alt={`${photo.label} — Angel editorial collection, view larger`} />
+              <Photo name={photo.name} alt={`${photo.label} — Angel editorial collection, view larger`} sizes="(max-width: 767px) 100vw, 45vw" />
             </button>
             <figcaption><span>{String(index + 1).padStart(2, "0")}</span><span>{photo.label}</span><span className="gallery-grid-cue" aria-hidden="true">View ↗</span></figcaption>
           </figure>
@@ -71,7 +71,7 @@ export function GalleryLightbox({ photos, children }: { photos: GalleryPhoto[]; 
               src={`/angel/${photos[active].name}.webp`}
               alt={`${photos[active].label} — Angel editorial collection`}
               fill
-              sizes="(max-width: 767px) 90vw, 60vw"
+              sizes="(max-width: 767px) 90vw, 40vw"
               loading="eager"
             />
             <figcaption>

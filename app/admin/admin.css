@@ -99,6 +99,14 @@ body:has(.admin-root) { padding-bottom: 0; }
 .admin-published > .admin-badge { margin-bottom: 1.5rem; }
 .admin-published > .admin-meter { margin: 1.5rem 0; }
 .admin-published > .admin-summary-row { margin-bottom: 1.5rem; }
+/* Visitor analytics (/admin/analytics): six cards in two rows, and a 7-day bar chart drawn in CSS. */
+.admin-stats-traffic { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-bottom: 1.5rem; }
+.admin-stats .admin-stat-text { font-size: 1.6rem; overflow-wrap: anywhere; }
+.admin-chart { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: clamp(.4rem, 2vw, 1rem); list-style: none; margin: 1.5rem 0; padding: 0; }
+.admin-chart li { display: grid; grid-template-rows: auto 9rem auto; justify-items: center; gap: .5rem; }
+.admin-chart-value { font-size: .85rem; color: var(--gold-light); }
+.admin-chart-bar { width: min(100%, 3rem); height: 100%; border-radius: 4px 4px 0 0; background: linear-gradient(180deg, var(--gold-light), var(--gold)); transform: scaleY(max(var(--bar, 0), .02)); transform-origin: bottom; }
+.admin-chart-day { font-size: .7rem; color: var(--fg-muted); white-space: nowrap; }
 .admin-results { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; min-height: 44px; }
 .admin-reset { color: var(--gold); min-height: 44px; font-size: .75rem; }
 .admin-nav-status { display: inline-grid; place-items: center; width: 16px; height: 16px; transition: transform 240ms var(--admin-ease); }
@@ -122,6 +130,7 @@ body:has(.admin-root) { padding-bottom: 0; }
   .admin-page-enter > .admin-form, .admin-login > .admin-panel { animation: admin-enter 480ms var(--admin-ease) 60ms backwards; }
   .admin-stats > .admin-panel { animation: admin-enter 480ms var(--admin-ease) backwards; animation-delay: calc(var(--enter-order, 0) * 45ms); }
   .admin-meter > span { animation: admin-meter-in 850ms var(--admin-ease) 160ms backwards; }
+  .admin-chart-bar { animation: admin-chart-in 850ms var(--admin-ease) 160ms backwards; }
   .admin-toast, .admin-error, .admin-empty { animation: admin-enter 240ms var(--admin-ease) backwards; }
   .admin-dialog[open] { animation: admin-dialog-in 240ms var(--admin-ease) backwards; }
   .admin-dialog[open]::backdrop { animation: admin-backdrop-in 180ms ease-out backwards; }
@@ -129,6 +138,7 @@ body:has(.admin-root) { padding-bottom: 0; }
 }
 @keyframes admin-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes admin-meter-in { from { transform: scaleX(0); } }
+@keyframes admin-chart-in { from { transform: scaleY(0); } }
 @keyframes admin-row-in { from { opacity: 0; } }
 @keyframes admin-dialog-in { from { opacity: 0; transform: translateY(8px) scale(.98); } }
 @keyframes admin-backdrop-in { from { opacity: 0; } }

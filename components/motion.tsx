@@ -99,53 +99,67 @@ export function Motion() {
     const clearSpot = () => { spotEl?.style.removeProperty("--sx"); spotEl?.style.removeProperty("--sy"); spotEl = null; };
     const clearAll = () => { clearTilt(); clearMagnet(); clearSpot(); };
 
-    const move = (event: PointerEvent) => {
-      if (!finePointer.matches || reducedMotion.matches || event.pointerType !== "mouse") return;
+    // At most one update per frame, with every layout read (closest/getBoundingClientRect)
+    // taken before any style write, so a pointer move never forces a synchronous layout.
+    let latest: PointerEvent | null = null;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const event = latest;
+      if (!event) return;
+      const { clientX: x, clientY: y } = event;
       const target = event.target as Element | null;
 
       const tilt = target?.closest<HTMLElement>("[data-tilt]") ?? null;
+      const magnet = target?.closest<HTMLElement>(".button-primary, .header-actions .button") ?? null;
+      const spot = target?.closest<HTMLElement>("[data-spotlight]") ?? null;
+      const hero = document.querySelector<HTMLElement>(".hero");
+      const tiltRect = tilt?.getBoundingClientRect();
+      const magnetRect = magnet?.getBoundingClientRect();
+      const spotRect = spot?.getBoundingClientRect();
+      const heroRect = hero?.getBoundingClientRect();
+
       if (tilt !== tiltEl) { clearTilt(); tiltEl = tilt; }
-      if (tilt) {
-        const rect = tilt.getBoundingClientRect();
-        const px = (event.clientX - rect.left) / rect.width - 0.5;
-        const py = (event.clientY - rect.top) / rect.height - 0.5;
+      if (tilt && tiltRect) {
+        const px = (x - tiltRect.left) / tiltRect.width - 0.5;
+        const py = (y - tiltRect.top) / tiltRect.height - 0.5;
         tilt.style.setProperty("--ry", `${(px * TILT_MAX * 2).toFixed(2)}deg`);
         tilt.style.setProperty("--rx", `${(py * -TILT_MAX * 2).toFixed(2)}deg`);
       }
 
-      const magnet = target?.closest<HTMLElement>(".button-primary, .header-actions .button") ?? null;
       if (magnet !== magnetEl) { clearMagnet(); magnetEl = magnet; }
-      if (magnet) {
-        const rect = magnet.getBoundingClientRect();
-        magnet.style.setProperty("--mx", `${(((event.clientX - rect.left) / rect.width - 0.5) * MAGNET_MAX).toFixed(2)}px`);
-        magnet.style.setProperty("--my", `${(((event.clientY - rect.top) / rect.height - 0.5) * MAGNET_MAX).toFixed(2)}px`);
+      if (magnet && magnetRect) {
+        magnet.style.setProperty("--mx", `${(((x - magnetRect.left) / magnetRect.width - 0.5) * MAGNET_MAX).toFixed(2)}px`);
+        magnet.style.setProperty("--my", `${(((y - magnetRect.top) / magnetRect.height - 0.5) * MAGNET_MAX).toFixed(2)}px`);
       }
 
-      const spot = target?.closest<HTMLElement>("[data-spotlight]") ?? null;
       if (spot !== spotEl) { clearSpot(); spotEl = spot; }
-      if (spot) {
-        const rect = spot.getBoundingClientRect();
-        spot.style.setProperty("--sx", `${(((event.clientX - rect.left) / rect.width) * 100).toFixed(1)}%`);
-        spot.style.setProperty("--sy", `${(((event.clientY - rect.top) / rect.height) * 100).toFixed(1)}%`);
+      if (spot && spotRect) {
+        spot.style.setProperty("--sx", `${(((x - spotRect.left) / spotRect.width) * 100).toFixed(1)}%`);
+        spot.style.setProperty("--sy", `${(((y - spotRect.top) / spotRect.height) * 100).toFixed(1)}%`);
       }
 
-      const hero = document.querySelector<HTMLElement>(".hero");
-      if (hero) {
-        const rect = hero.getBoundingClientRect();
-        if (event.clientY >= rect.top && event.clientY <= rect.bottom) {
-          if (hero.dataset.pointer !== "true") hero.dataset.pointer = "true";
-          hero.style.setProperty("--px", `${((event.clientX / window.innerWidth) * 100).toFixed(2)}vw`);
-          hero.style.setProperty("--py", `${((event.clientY / window.innerHeight) * 100).toFixed(2)}vh`);
-        }
+      if (hero && heroRect && y >= heroRect.top && y <= heroRect.bottom) {
+        if (hero.dataset.pointer !== "true") hero.dataset.pointer = "true";
+        hero.style.setProperty("--px", `${((x / window.innerWidth) * 100).toFixed(2)}vw`);
+        hero.style.setProperty("--py", `${((y / window.innerHeight) * 100).toFixed(2)}vh`);
       }
     };
 
+    const move = (event: PointerEvent) => {
+      if (!finePointer.matches || reducedMotion.matches || event.pointerType !== "mouse") return;
+      latest = event;
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    const leave = () => { latest = null; clearAll(); };
+
     document.addEventListener("pointermove", move, { passive: true });
-    document.addEventListener("pointerleave", clearAll);
+    document.addEventListener("pointerleave", leave);
     return () => {
+      cancelAnimationFrame(frame);
       clearAll();
       document.removeEventListener("pointermove", move);
-      document.removeEventListener("pointerleave", clearAll);
+      document.removeEventListener("pointerleave", leave);
     };
   }, []);
 

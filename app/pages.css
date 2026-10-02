@@ -143,7 +143,6 @@
   .dish-index-preview { aspect-ratio: 4 / 5; border-radius: var(--radius-frame); border: 1px solid var(--line-strong); box-shadow: var(--shadow-floating); }
   .dish-index-preview::after { content: ""; position: absolute; inset: 0; z-index: 2; background: linear-gradient(180deg, transparent 52%, rgba(21, 13, 8, 0.7)); pointer-events: none; }
   .dish-index-caption { position: absolute; z-index: 3; inset: auto 1.5rem 1.5rem; display: flex; align-items: baseline; gap: .9rem; color: var(--ivory); pointer-events: none; }
-  .dish-index-pause { position: absolute; top: 1.25rem; right: 1.25rem; z-index: 3; }
   .dish-index-caption-num { font-size: .6rem; font-weight: 700; letter-spacing: .2em; color: var(--gold-light); }
   .dish-index-caption-name { font-family: var(--font-editorial); font-size: clamp(1.5rem, 2.6vw, 2.4rem); font-weight: 300; line-height: 1; }
   .dish-index-list { display: flex; flex-direction: column; justify-content: center; list-style: none; margin: 0; padding: 0; }
@@ -402,11 +401,9 @@
   .gallery-motion { overflow: clip; padding-block: var(--section-space-sm) var(--section-space); }
   .gallery-motion-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
   .gallery-motion-toolbar .type-caption { font-size: .6rem; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--accent); }
-  .motion-control { min-height: 2.75rem; padding-inline: 1rem; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); font-size: .6rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--fg); transition: border-color var(--duration-ui) var(--ease-luxe), color var(--duration-ui) var(--ease-luxe); }
-  .motion-control:hover { border-color: var(--accent); color: var(--accent); }
   .gallery-window { overflow: clip; mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
   .gallery-track { width: max-content; display: flex; animation: ticker-run 60s linear infinite; }
-  .gallery-track.is-paused { animation-play-state: paused; }
+  .gallery-motion:hover .gallery-track, .gallery-motion:focus-within .gallery-track { animation-play-state: paused; }
   .gallery-group { display: flex; gap: 1rem; padding-right: 1rem; }
   .gallery-group figure { width: clamp(15rem, 28vw, 28rem); margin: 0; }
   .gallery-group figure > div { position: relative; aspect-ratio: 4 / 3; overflow: clip; border-radius: var(--radius-frame); border: 1px solid var(--line-strong); background: var(--sand); box-shadow: var(--shadow-floating); }
@@ -430,7 +427,7 @@
    --------------------------------------------------------------------------- */
 @media (max-width: 48rem) {
   .eyebrow, .type-eyebrow, .type-caption, time, .menu-item-diet, .dish-note, .dish-feature-section, .chip,
-  .menu-toggle, .menu-categories button, .diet-filter button, .motion-control, .cinematic-pause, .hero-video-pause,
+  .menu-toggle, .menu-categories button, .diet-filter button,
   .enquiry-step-num, .dish-index-caption-num, figcaption, figcaption span, figcaption a,
   .footer-credit a, .footer-bottom-left span, .footer-bottom-right a, .brand-name em,
   .enquiry-step-panel-inner label, .consent span, .certificate-highlight-link, .certificate-facts dt,
@@ -443,3 +440,66 @@
 /* The floating chat button sits above the open mobile menu (it is on a higher layer) and covered the arrow of the
    last link on small phones. It steps aside while the menu is open and returns when it closes. */
 body:has(.menu-toggle[aria-expanded="true"]) .angel-chat-launcher { visibility: hidden; opacity: 0; }
+
+/* Fluid layout for phones, including narrow 320px screens. Keep the existing
+   editorial hierarchy while letting headings, cards, and controls fit the
+   available viewport instead of forcing desktop minimum widths. */
+@media (max-width: 48rem) {
+  :root {
+    --text-display-xl: clamp(2.35rem, 12.5vw, 5rem);
+    --text-display-lg: clamp(2.05rem, 8.75vw, 4rem);
+    --text-display-md: clamp(1.75rem, 7vw, 3rem);
+    --text-display-sm: clamp(1.4rem, 5.2vw, 2.125rem);
+    --type-body-lg: clamp(1rem, 4.2vw, 1.2rem);
+    --type-body: clamp(.9rem, 3.8vw, .95rem);
+    --type-body-sm: clamp(.8rem, 3.4vw, .85rem);
+    --gutter: clamp(.875rem, 5vw, 1.25rem);
+    --section-space: clamp(3.5rem, 14vw, 5rem);
+    --section-space-sm: clamp(2.5rem, 10vw, 3.5rem);
+    --layout-gap: clamp(1.25rem, 5vw, 2rem);
+  }
+  :where(main, section, article, aside, nav, footer, .container-shell, .container-wide,
+    .page-intro-inner, .menu-controls, .menu-list-section, .menu-items, .menu-item,
+    .dish-index, .dish-index-list, .enquiry-form, .enquiry-step-panel-inner,
+    .footer-grid, .footer-bottom, .visit-grid, .contact-section) { min-width: 0; }
+  :where(.menu-item-head, .dish-feature-head, .faq-list summary, .enquiry-step-header,
+    .footer-links a, .footer-bottom-left, .footer-bottom-right) { min-width: 0; }
+  .header-inner { gap: .75rem; }
+  .brand { min-width: 0; gap: .65rem; }
+  .brand-text { min-width: 0; }
+  .brand-name { font-size: clamp(1.05rem, 4.8vw, 1.25rem); }
+  .menu-item-head h3, .dish-feature-head h3, .dish-index-name, .faq-list summary,
+  .footer-links a, .page-intro h1, .simple-page h1 { overflow-wrap: anywhere; }
+  .menu-list-section { gap: 1.25rem; }
+  .menu-items { grid-template-columns: minmax(0, 1fr); }
+  .menu-filters { flex-wrap: wrap; gap: .5rem; }
+  .diet-filter { max-width: 100%; flex-wrap: wrap; }
+  .menu-search { min-width: 0; }
+  .menu-search input { min-width: 0; }
+  .menu-item-head { gap: .4rem; }
+  .menu-item-price { flex: none; font-size: 1rem; }
+  .dish-index-item { grid-template-columns: 1.75rem minmax(0, 1fr) auto; gap: .55rem; }
+  .dish-index-name { font-size: clamp(1.35rem, 6vw, 2rem); }
+  .page-intro-stats .stat-strip dl, .stat-strip dl { gap: .75rem; }
+  .stat-strip dt, .page-intro-stats dt { overflow-wrap: anywhere; letter-spacing: .12em; }
+  .enquiry-step-panel-inner { padding-left: clamp(1rem, 6vw, 1.5rem); }
+  .enquiry-step-title { font-size: clamp(1.25rem, 5.8vw, 1.5rem); }
+  .enquiry-step-summary { max-width: 38vw; }
+  .lightbox { min-width: 0; }
+}
+
+@media (max-width: 22.5rem) {
+  :root {
+    --text-display-xl: clamp(2.35rem, 12.5vw, 2.5rem);
+    --text-display-lg: clamp(2.05rem, 9vw, 2.2rem);
+    --text-display-md: clamp(1.75rem, 7.5vw, 1.85rem);
+    --gutter: .75rem;
+  }
+  .menu-item-head { flex-wrap: wrap; }
+  .menu-item-leader { min-width: 1.25rem; }
+  .menu-item-price { font-size: .95rem; }
+  .dish-index-item { grid-template-columns: 1.5rem minmax(0, 1fr) auto; gap: .4rem; }
+  .hero-copy .eyebrow, .page-intro .eyebrow { letter-spacing: .16em; }
+  .enquiry-step-panel-inner { padding-left: .75rem; }
+  .faq-list details { padding-inline: .8rem; }
+}

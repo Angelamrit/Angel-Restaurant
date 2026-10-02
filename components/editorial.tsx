@@ -2,15 +2,17 @@ import Image, { getImageProps } from "next/image";
 import Link from "next/link";
 import { restaurant } from "@/lib/restaurant";
 import { Words } from "@/components/split-text";
-import { Badge, Embers } from "@/components/badge";
+import { Badge } from "@/components/badge";
 
-export function Photo({ name, mobileName, alt, className = "", priority = false, sizes = "(max-width: 767px) 100vw, 60vw" }: { name: string; mobileName?: string; alt: string; className?: string; priority?: boolean; sizes?: string }) {
+export function Photo({ name, mobileName, alt, className = "", priority = false, sizes = "(max-width: 767px) 100vw, 60vw", quality }: { name: string; mobileName?: string; alt: string; className?: string; priority?: boolean; sizes?: string; quality?: number }) {
   // Next 16: `loading="eager"` (not `preload`) is what the LCP heuristic checks on the rendered <img>.
   const loading = priority ? "eager" : undefined;
-  if (!mobileName) return <div className={`editorial-photo ${className}`}><Image src={`/angel/${name}.webp`} alt={alt} fill sizes={sizes} loading={loading} /></div>;
+  // A priority photo is the page's largest paint (the intro photo), so it is also fetched first.
+  const fetchPriority = priority ? "high" : undefined;
+  if (!mobileName) return <div className={`editorial-photo ${className}`}><Image src={`/angel/${name}.webp`} alt={alt} fill sizes={sizes} loading={loading} fetchPriority={fetchPriority} quality={quality} /></div>;
   // Art direction: phones get a portrait frame of the same room, so a full-bleed backdrop is not a blurry sliver of a landscape photo.
-  const { props } = getImageProps({ src: `/angel/${name}.webp`, alt, fill: true, sizes, loading });
-  const { props: mobile } = getImageProps({ src: `/angel/${mobileName}.webp`, alt, fill: true, sizes, loading });
+  const { props } = getImageProps({ src: `/angel/${name}.webp`, alt, fill: true, sizes, loading, fetchPriority, quality });
+  const { props: mobile } = getImageProps({ src: `/angel/${mobileName}.webp`, alt, fill: true, sizes, loading, fetchPriority, quality });
   return <div className={`editorial-photo editorial-photo--art ${className}`} data-mobile={mobileName}><picture><source media="(max-width: 767px)" srcSet={mobile.srcSet} sizes={sizes} /><img {...props} alt={alt} /></picture></div>;
 }
 
@@ -39,7 +41,6 @@ export function PageIntro({
         <>
           <div className="page-intro-media" aria-hidden="true"><Photo name={image.name} mobileName={image.mobileName} alt={image.alt} priority sizes="100vw" /></div>
           <div className="page-intro-scrim" aria-hidden="true" />
-          <Embers count={12} />
         </>
       )}
       {mark && <span className="page-intro-mark" aria-hidden="true">{mark}</span>}
@@ -58,7 +59,7 @@ export function PageIntro({
 export function Reservation() {
   return (
     <section id="reserve" className="section surface-dark tone-dark section-space book" aria-labelledby="book-title">
-      <div className="book-bg" aria-hidden="true"><Photo name="thali-spread" alt="" sizes="100vw" /></div>
+      <div className="book-bg" aria-hidden="true"><Photo name="thali-spread" alt="" sizes="100vw" quality={45} /></div>
       <div className="book-scrim" aria-hidden="true" />
       <div className="container-shell">
         <div className="frame frame-strong spotlight book-card" data-spotlight data-reveal="words">
@@ -78,12 +79,11 @@ export function Footer() {
   return (
     <footer className="site-footer tone-dark">
       <span className="hairline footer-hairline" aria-hidden="true" />
-      <div className="footer-photo" aria-hidden="true"><Photo name="room-long-table-v2" mobileName="dining-room-portrait-v2" alt="" sizes="100vw" /></div>
+      <div className="footer-photo" aria-hidden="true"><Photo name="room-long-table-v2" mobileName="dining-room-portrait-v2" alt="" sizes="100vw" quality={45} /></div>
       <div className="footer-bg" aria-hidden="true">
         <span className="orb orb-gold" style={{ left: "-10%", top: "-10%", width: "46vw", maxWidth: "720px", aspectRatio: "1", opacity: .5 }} />
         <span className="orb orb-ember orb-slow" style={{ right: "-12%", top: "30%", width: "40vw", maxWidth: "640px", aspectRatio: "1", opacity: .5 }} />
       </div>
-      <Embers count={12} />
       <div className="container-shell footer-top">
         <div className="footer-lead" data-reveal="words">
           <Link href="/" className="footer-brand rise"><span className="monogram" aria-hidden="true">A</span><span className="brand-name">angel <em>INDIAN RESTAURANT</em></span></Link>

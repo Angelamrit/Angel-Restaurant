@@ -8,6 +8,7 @@ import type { PublicSection } from "@/lib/menu-types";
 import { MenuRefresh } from "@/components/menu-refresh";
 import { MotionReady } from "@/components/motion-ready";
 
+// Rendered per request: the page reads the live menu, so it must not be built (or need the database) at build time.
 export const dynamic = "force-dynamic";
 
 export const metadata = pageMetadata({

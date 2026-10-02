@@ -25,6 +25,12 @@ test("missing consent is reported on its own field, not on Message", () => {
   }
 });
 
+test("missing occasion is rejected on its own field", () => {
+  const result = validateEnquiry(form({ Occasion: "" }));
+  assert.equal(result.ok, false);
+  if (!result.ok) assert.ok(result.fieldErrors.Occasion);
+});
+
 test("invalid occasion, party size, email, phone and dates are rejected", () => {
   const patches: Record<string, string>[] = [{ Occasion: "Coup" }, { Guests: "0" }, { Guests: "1.5" }, { Email: "nope" }, { Phone: "abc" }, { Phone: "123" }, { Date: inDays(-2) }, { Date: inDays(900) }, { Date: "2026-02-31" }];
   for (const patch of patches) {

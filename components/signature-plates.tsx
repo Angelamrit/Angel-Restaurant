@@ -41,7 +41,7 @@ export function SignaturePlates({ specials, categories, dishCount }: { specials:
         <div className="dish-feature">
           {groups.map((group, groupIndex) => (
             <div className={`dish-feature-row${group.length === 1 ? " is-solo" : ""}`} key={group[0].name}>
-              <DishTile dish={group[0]} index={groupIndex * 3} large eager={groupIndex === 0} />
+              <DishTile dish={group[0]} index={groupIndex * 3} large />
               {group.length > 1 && (
                 <div className="dish-feature-stack">
                   {group.slice(1).map((dish, i) => (

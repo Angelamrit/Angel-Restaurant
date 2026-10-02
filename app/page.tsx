@@ -5,7 +5,7 @@ import type { CSSProperties } from "react";
 import { Photo, Reservation } from "@/components/editorial";
 import { VisitSection } from "@/components/neighborhood-map";
 import { Words } from "@/components/split-text";
-import { Badge, Embers } from "@/components/badge";
+import { Badge } from "@/components/badge";
 import { SectionHead, ScrollWords } from "@/components/section-head";
 import { DishShowcase } from "@/components/dish-showcase";
 import { GalleryRail } from "@/components/gallery-rail";
@@ -17,6 +17,7 @@ import { pageMetadata } from "@/lib/seo";
 import { getPublicMenu } from "@/lib/menu-repository";
 import { MenuRefresh } from "@/components/menu-refresh";
 
+// Rendered per request: the page reads the live menu, so it must not be built (or need the database) at build time.
 export const dynamic = "force-dynamic";
 
 export const metadata = pageMetadata({
@@ -53,7 +54,6 @@ export default async function Home() {
         <HeroVideo src="/videos/hero-sequence-v5.mp4" poster="/angel/hero-poster-v5.webp" posterAlt="Guests dining together in Angel’s dining room" />
         <div className="hero-scrim" aria-hidden="true" />
         <div className="hero-spot" aria-hidden="true" />
-        <Embers count={18} />
         <div className="container-shell hero-content">
           <div className="hero-grid">
             <div className="hero-copy">

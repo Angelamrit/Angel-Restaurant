@@ -197,7 +197,7 @@ export function EnquiryForm() {
                     <div className="form-grid">
                       <label>
                         Occasion
-                        <select name="Occasion" defaultValue={values?.Occasion ?? ""} aria-invalid={Boolean(fieldError("Occasion"))} aria-describedby={fieldError("Occasion") ? "err-Occasion" : undefined}>
+                        <select name="Occasion" required defaultValue={values?.Occasion ?? ""} aria-invalid={Boolean(fieldError("Occasion"))} aria-describedby={fieldError("Occasion") ? "err-Occasion" : undefined}>
                           <option value="" disabled>Select an occasion</option>
                           {OCCASIONS.map((occasion) => <option key={occasion}>{occasion}</option>)}
                         </select>

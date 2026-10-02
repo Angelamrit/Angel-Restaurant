@@ -421,3 +421,26 @@
 @layer components {
   dialog.lightbox { max-width: none; max-height: none; width: 100%; height: 100%; margin: 0; border: 0; }
 }
+
+/* ---------------------------------------------------------------------------
+   Phone readability and touch targets. Deliberately outside any @layer so it wins over the layered component rules.
+   - Small uppercase labels, captions, tags and form labels were 8-10px on phones (13-59 pieces of text per page);
+     this lifts them to 11.2px without touching the tablet/desktop type scale.
+   - WCAG 2.2 AA 2.5.8 asks for at least 24x24px targets: the header's "Reserve on Resy", the footer's "Privacy & terms",
+     the press link and the consent checkbox were 10-17px tall. The visible text does not move.
+   --------------------------------------------------------------------------- */
+@media (max-width: 48rem) {
+  .eyebrow, .type-eyebrow, .type-caption, time, .menu-item-diet, .dish-note, .dish-feature-section, .chip,
+  .menu-toggle, .menu-categories button, .diet-filter button, .motion-control, .cinematic-pause, .hero-video-pause,
+  .enquiry-step-num, .dish-index-caption-num, figcaption, figcaption span, figcaption a,
+  .footer-credit a, .footer-bottom-left span, .footer-bottom-right a, .brand-name em,
+  .enquiry-step-panel-inner label, .consent span, .certificate-highlight-link, .certificate-facts dt,
+  .recognition-certificate small, .utility-strip p, .utility-right a { font-size: .7rem; }
+  /* The header strip is 35px tall: keep its two short lines inside it. */
+  .utility-strip p, .utility-right a { letter-spacing: .14em; line-height: 1.2; }
+}
+.utility-right a, .footer-bottom a, .footer-credit a, .certificate-highlight-link, figcaption a { display: inline-flex; align-items: center; min-height: 1.5rem; }
+.consent input { width: 1.5rem; height: 1.5rem; margin-top: 0; }
+/* The floating chat button sits above the open mobile menu (it is on a higher layer) and covered the arrow of the
+   last link on small phones. It steps aside while the menu is open and returns when it closes. */
+body:has(.menu-toggle[aria-expanded="true"]) .angel-chat-launcher { visibility: hidden; opacity: 0; }

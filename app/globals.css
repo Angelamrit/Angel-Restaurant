@@ -646,7 +646,9 @@
     scroll-behavior: auto !important;
   }
   .embers, .text-shimmer { animation: none; }
-  .text-shimmer { background: var(--accent-grad); }
+  /* background-image, not the background shorthand: the shorthand also resets background-clip to border-box, which
+     turned this gold tagline into a solid gold bar with no readable text for anyone using reduced motion. */
+  .text-shimmer { background-image: var(--accent-grad); background-size: auto; }
   .orb { animation: none; }
   .embers { display: none; }
   a, button, .button, .frame, .circle-btn { transform: none !important; }

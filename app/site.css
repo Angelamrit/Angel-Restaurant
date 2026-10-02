@@ -426,7 +426,13 @@
      narrow portrait screens only about a quarter of the frame width shows, so the window sits right of
      center to keep the servers, plates and the guest's face in view. */
   .hero-video, .hero-poster { object-position: 50% 50%; }
-  @media (max-width: 48rem) { .hero-video, .hero-poster { object-position: 58% 50%; } }
+  /* Phones: the first clip is aimed at the server and the front table (62%), the close-up at the guest and the
+     plate (48%); the slide between them happens during the crossfade. Chosen by measuring both clips against
+     the visible slice, not by eye: a single 58% cut the guest's face in half during the close-up. */
+  @media (max-width: 48rem) {
+    .hero-video, .hero-poster { object-position: 62% 50%; transition: object-position 600ms var(--ease-luxe); }
+    .hero-media[data-clip="2"] .hero-video { object-position: 48% 50%; }
+  }
   /* On tablet and desktop the hero section is taller than a 16:9 screen, and filling it would crop the picture
      to a zoomed-in slice. Instead the media box keeps the clip's own 16:9 shape along the top, so the whole scene
      shows, and its lower edge dissolves into the page's dark brown. */

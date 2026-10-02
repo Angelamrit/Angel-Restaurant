@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { validateEnquiry } from "../lib/enquiry.ts";
+import { restaurant } from "../lib/restaurant.ts";
 
 const inDays = (days: number) => new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);
 function form(patch: Record<string, string | null> = {}) {
@@ -81,12 +82,12 @@ test("the notification email reports success or the exact reason it failed", asy
     globalThis.fetch = (async (_url: unknown, init?: RequestInit) => { sent = JSON.parse(String(init?.body)); return new Response("{}", { status: 200 }); }) as typeof fetch;
     assert.deepEqual(await deliverEnquiry(result.data), { ok: true });
     assert.equal(sent?.reply_to, "asha@example.com");
-    assert.equal(sent?.to.length, 1);
+    assert.deepEqual(sent?.to, [restaurant.inbox, restaurant.email]);
     assert.ok(!/[\r\n]/.test(sent?.subject ?? ""), "no header injection through the name");
     assert.match(sent?.text ?? "", /Guests: 12/);
     process.env.CONTACT_TO_EMAIL = "team@example.org";
     await deliverEnquiry(result.data);
-    assert.deepEqual(sent?.to, ["team@example.org"], "CONTACT_TO_EMAIL chooses the recipient");
+    assert.deepEqual(sent?.to, ["team@example.org", restaurant.inbox, restaurant.email], "configured, restaurant inbox, and public contact addresses receive the notification");
     process.env.CONTACT_TO_EMAIL = "not an address";
     await deliverEnquiry(result.data);
     assert.notEqual(sent?.to[0], "not an address", "an invalid CONTACT_TO_EMAIL falls back to the restaurant inbox");

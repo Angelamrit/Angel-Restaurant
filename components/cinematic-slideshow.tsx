@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import type { CSSProperties } from "react";
 import { useSlideAdvance } from "@/lib/use-slide-advance";
 
 type Slide = { name: string; alt: string };
@@ -10,16 +11,20 @@ export function CinematicSlideshow({
   className = "",
   label,
   priority = false,
+  intervalMs = 5200,
+  showPause = true,
 }: {
   slides: Slide[];
   className?: string;
   label: string;
   priority?: boolean;
+  intervalMs?: number;
+  showPause?: boolean;
 }) {
-  const { active, setActive, paused, setPaused, reducedMotion } = useSlideAdvance(slides.length);
+  const { active, setActive, paused, setPaused, reducedMotion } = useSlideAdvance(slides.length, { intervalMs });
 
   return (
-    <figure className={`cinematic-slideshow editorial-photo ${className}`} aria-label={label} data-paused={paused || reducedMotion}>
+    <figure className={`cinematic-slideshow editorial-photo ${className}`} aria-label={label} data-paused={paused || reducedMotion} style={{ "--slide-interval": `${intervalMs}ms` } as CSSProperties}>
       <div className="cinematic-frames">
         {slides.map((slide, index) => (
           <div
@@ -51,7 +56,7 @@ export function CinematicSlideshow({
             ><span /></button>
           ))}
         </div>
-        {!reducedMotion && (
+        {showPause && !reducedMotion && (
           <button
             type="button"
             className="cinematic-pause"

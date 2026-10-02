@@ -133,9 +133,10 @@ export type Delivery = { ok: true } | { ok: false; reason: string };
 export async function deliverEnquiry(data: ValidatedEnquiry): Promise<Delivery> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.CONTACT_FROM_EMAIL;
-  // CONTACT_TO_EMAIL (documented in .env.example) chooses the recipient; without a valid one, the restaurant's inbox.
+  // CONTACT_TO_EMAIL (documented in .env.example) chooses the operational recipient; also notify the public contact address.
   const configuredTo = process.env.CONTACT_TO_EMAIL?.trim() ?? "";
-  const to = EMAIL_RE.test(configuredTo) ? configuredTo : restaurant.inbox;
+  const primaryTo = EMAIL_RE.test(configuredTo) ? configuredTo : restaurant.inbox;
+  const to = [...new Set([primaryTo, restaurant.inbox, restaurant.email].filter(address => EMAIL_RE.test(address)))];
   // `vercel env pull` writes the literal text "[SENSITIVE]" for protected variables; treat that like an empty value and say so.
   const unusable = (value?: string) => !value || /^\[.*\]$/.test(value.trim());
   if (unusable(apiKey) || unusable(from)) {
@@ -153,7 +154,7 @@ export async function deliverEnquiry(data: ValidatedEnquiry): Promise<Delivery> 
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         from,
-        to: [to],
+        to,
         reply_to: data.Email,
         subject: `Private dining enquiry — ${data.Name} — ${data.Date}`,
         text,

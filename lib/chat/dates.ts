@@ -83,6 +83,16 @@ const OFFSET_FROM = new RegExp(`\\b(${QUANTITY})\\s+(day|week|month)s?\\s+(?:fro
 // A month named on its own, used only to supply the month a bare day is missing
 // ("an event in December" ... "what about the 25th?").
 const MONTH_ONLY = new RegExp(`\\b(${MONTH_NAMES})\\b(?:\\s*,?\\s*(\\d{4}))?`, "i");
+// An ordinal that counts years, not days. "I want to host my 40th birthday"
+// used to resolve "40th" as a bare day, so the assistant answered "Which month
+// are you thinking of?" to a message that named no date at all. Three shapes are
+// stripped before any date pattern runs:
+//   an ordinal above 31, which cannot be a day in any month ("40th", "50th");
+//   an ordinal that an occasion follows ("21st birthday", "25th anniversary");
+//   an ordinal the visitor claims as their own ("my 40th", "my 21st").
+// "the 16th", "on the 16th" and "16th October" are untouched.
+const AGE_ORDINAL = /\b(?:3[2-9]|[4-9]\d|\d{3,})(?:st|nd|rd|th)\b|\b\d{1,3}(?:st|nd|rd|th)\s+(?:birthdays?|b-?days?|anniversar(?:y|ies)|weddings?|celebrations?)\b|\bmy\s+\d{1,3}(?:st|nd|rd|th)\b/gi;
+
 // "the 20th", "on the 3rd" — a day with no month of its own.
 // An ordinal followed by one of these words is an age or a count ("her 21st birthday"), not a day of the month.
 const NOT_A_DAY = "(?!\\s+(?:birthday|bday|b-day|anniversary|wedding|reunion|time|visit|year|floor))";
@@ -99,7 +109,9 @@ const RANGE = /\b(next|this|following)\s+(week|month|weekend)\b|\bsometime\b|\bs
  */
 export function resolveDate(text: string, context: string[] = [], now: Date = new Date()): ResolvedDate {
   const today = todayInRestaurantTz(now);
-  const value = text.toLowerCase();
+  // An age is removed before anything looks for a date, so "my 40th birthday for
+  // 30 guests" carries no date and is never sent back as "which month?".
+  const value = text.toLowerCase().replace(AGE_ORDINAL, " ");
 
   const iso = ISO.exec(value);
   if (iso) return build(Number(iso[1]), Number(iso[2]), Number(iso[3]));

@@ -14,6 +14,19 @@ export const restaurant = {
   inbox: "angelrestaurant278@gmail.com",
   address: "75-18 37th Avenue, Jackson Heights, NY 11372",
   instagram: "https://www.instagram.com/angel_indian_restaurant/",
+  // ACEVA Technology built and maintains this website. Shared with the
+  // assistant through kb.confirmed_urls.aceva so the two can never drift.
+  aceva: "https://acevatech.com/",
+  // The online ordering destinations the client approved, and the only three the
+  // assistant may ever name. Held here rather than in an environment variable so
+  // they cannot be swapped at runtime, and read by both the answer and the
+  // buttons so the two can never drift apart. Adding a fourth platform is a
+  // deliberate edit to this list, never something the model can do.
+  ordering: [
+    { name: "DoorDash", url: "https://www.doordash.com/store/748538/" },
+    { name: "Grubhub", url: "https://www.grubhub.com/restaurant/angel-indian-restaurant-7518-37th-ave-jackson-heights/1429582" },
+    { name: "Uber Eats", url: "https://www.ubereats.com/store/angel-restaurant/o47N21ZxVban0w5H1YSfww" },
+  ] as const,
   // TODO — Client Information Required: no production domain has been assigned yet.
   // NEXT_PUBLIC_SITE_URL lets deployment set the real domain; this placeholder only
   // keeps metadata/sitemap/JSON-LD builds valid until then.

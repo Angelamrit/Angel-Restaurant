@@ -304,6 +304,11 @@
   transition: background-color var(--duration-ui) var(--ease-luxe), color var(--duration-ui) var(--ease-luxe), border-color var(--duration-ui) var(--ease-luxe);
 }
 .angel-chat-cta-icon { font-size: .85em; }
+/* The ordering reply carries three options rather than one, so they share a row
+   that wraps on a narrow screen instead of three separately margined buttons
+   crowding each other. */
+.angel-chat-ctas { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .85rem; }
+.angel-chat-ctas .angel-chat-cta { margin-top: 0; }
 @media (hover: hover) { .angel-chat-cta:hover { background: var(--gold); border-color: var(--gold); color: var(--brown-deep); } }
 .angel-chat-cta:focus-visible { outline: var(--focus-width) solid var(--focus); outline-offset: 2px; }
 

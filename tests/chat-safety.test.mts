@@ -118,7 +118,7 @@ test("handling directives are kept out of the visitor-facing facts", async () =>
   const { splitFacts, isDirectiveSentence } = await import("../lib/chat/facts.ts");
   const { facts, rules } = splitFacts();
 
-  for (const phrase of ["source material", "must not be invented", "Do not describe it as a Michelin star", "Do not provide allergy"]) {
+  for (const phrase of ["source material", "must not be invented", "Never describe it as a star or agree that it is one", "Do not provide allergy"]) {
     assert.ok(!facts.includes(phrase), `internal phrasing left among the facts: ${phrase}`);
     assert.ok(rules.includes(phrase), `directive lost instead of moved: ${phrase}`);
   }
@@ -128,5 +128,6 @@ test("handling directives are kept out of the visitor-facing facts", async () =>
   assert.ok(facts.includes("Pathankot"), "ordinary facts must be untouched");
 
   assert.equal(isDirectiveSentence("Do not describe it as a Michelin star."), true);
+  assert.equal(isDirectiveSentence("Never describe it as a star or agree that it is one."), true);
   assert.equal(isDirectiveSentence("Angel serves 100% halal food."), false);
 });

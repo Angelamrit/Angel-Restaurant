@@ -35,7 +35,9 @@ const loadPublicMenu = unstable_cache(async () => {
     categories,
     items,
     sections: categories.map(category => ({ ...category, items: items.filter(dish => dish.categoryId === category.id).map(dish => ({ ...dish, price: money(dish.priceCents) })) })),
-    specials: items.filter(dish => dish.type === "chef-special" || dish.featured),
+    // "Chef's Special" is a specific seven-dish course. Keep other featured
+    // dishes in the regular menu instead of expanding this curated list.
+    specials: items.filter(dish => dish.type === "chef-special"),
   };
 }, ["public-menu"], { tags: ["public-menu"], revalidate: 600 });
 

@@ -347,7 +347,7 @@
   img[src*="experience-dining-room"] { object-position: 56% 50%; }
   img[src*="dal-makhni-naan"] { object-position: 74% 45%; }
   img[src*="lamb-karahi"] { object-position: 36% 50%; }
-  img[src*="chole-bhatura"] { object-position: 45% 55%; }
+  img[src*="chole-bhatura"] { object-position: 35% 55%; }
   img[src*="goat-dum-biryani"] { object-position: 55% 50%; }
   img[src*="dinner-spread"] { object-position: 50% 40%; }
   @media (max-width: 767px) {

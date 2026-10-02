@@ -16,7 +16,7 @@ export type RateLimitDocument = { key: string; hits: number; expiresAt: Date };
 export type EnquiryStatus = "new" | "contacted" | "closed";
 export type EnquiryDocument = {
   id: string; name: string; email: string; phone: string; guests: number; date: string; occasion: string; message: string;
-  status: EnquiryStatus; emailed: boolean; createdAt: string;
+  status: EnquiryStatus; emailed: boolean; emailError?: string; createdAt: string;
 };
 // Only a hash of the session token is stored, so a database read cannot be replayed as a login.
 export type AdminSessionDocument = { tokenHash: string; createdAt: string; expiresAt: Date };

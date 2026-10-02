@@ -15,9 +15,9 @@ export default async function Enquiries() {
     {enquiries.map(enquiry => <section className="admin-panel" key={enquiry.id}>
       <div className="admin-section-head"><h2>{enquiry.name}</h2><small>{stamp(enquiry.createdAt)}</small></div>
       <div className="admin-summary-row"><span>{[enquiry.occasion || "Occasion not given", eventDate(enquiry.date), `${enquiry.guests} guest${enquiry.guests === 1 ? "" : "s"}`].join(" · ")}</span><span className={`admin-badge${enquiry.status === "new" ? " gold" : ""}`}>{enquiry.status}</span></div>
-      <p><a href={`mailto:${enquiry.email}`}>{enquiry.email}</a>{enquiry.phone && <> · <a href={`tel:${enquiry.phone}`}>{enquiry.phone}</a></>}</p>
+      <p><a href={`mailto:${encodeURIComponent(enquiry.email).replace(/%40/g, "@")}`}>{enquiry.email}</a>{enquiry.phone && <> · <a href={`tel:${enquiry.phone}`}>{enquiry.phone}</a></>}</p>
       {enquiry.message && <p style={{ whiteSpace: "pre-wrap" }}>{enquiry.message}</p>}
-      {!enquiry.emailed && <p className="admin-muted">The notification email was not sent for this enquiry, so check it here.</p>}
+      {!enquiry.emailed && <p className="admin-muted">The notification email was not sent for this enquiry, so it is only here.{enquiry.emailError && <> <strong>Why:</strong> {enquiry.emailError}</>}</p>}
       <EnquiryStatus id={enquiry.id} status={enquiry.status} />
     </section>)}
   </>;

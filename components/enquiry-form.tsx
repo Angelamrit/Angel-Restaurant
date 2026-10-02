@@ -157,7 +157,9 @@ export function EnquiryForm() {
           <input name="website" tabIndex={-1} autoComplete="off" />
         </label>
       </div>
-      <input type="hidden" name="_t" ref={startedAtRef} defaultValue={0} />
+      {/* No defaultValue on purpose: for a hidden input React writes defaultValue back to the value attribute on every
+          re-render, which silently reset this timestamp to "0" and disabled the server's too-fast-submission check. */}
+      <input type="hidden" name="_t" ref={startedAtRef} />
 
       <div
         className="enquiry-steps"
@@ -270,7 +272,14 @@ export function EnquiryForm() {
         })}
       </div>
 
-      {state.status === "success" && (
+      {state.status === "success" && state.emailed === false && (
+        <div className="form-status" role="status">
+          <p><strong>We have saved your enquiry, but could not send our team an email alert.</strong> To be sure it reaches us quickly, please also call or email us directly.</p>
+          <p>Contact us directly: <a href={`mailto:${restaurant.inbox}`}>{restaurant.email}</a> · <a href={`tel:${restaurant.phoneHref}`}>{restaurant.phone}</a></p>
+        </div>
+      )}
+
+      {state.status === "success" && state.emailed !== false && (
         <div className="form-status" role="status">
           <p><strong>Your enquiry is on its way.</strong> Our team will be in touch shortly.</p>
           <p>Or contact us directly: <a href={`mailto:${restaurant.inbox}`}>{restaurant.email}</a> · <a href={`tel:${restaurant.phoneHref}`}>{restaurant.phone}</a></p>

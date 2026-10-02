@@ -4,7 +4,21 @@ import { SectionHead } from "@/components/section-head";
 import type { Category, MenuItem } from "@/lib/menu-types";
 import { money } from "@/lib/menu-types";
 
-type Plate = { name: string; price: string; description: string; section?: string; image: string; vegetarian: boolean; stock: boolean };
+type Plate = { name: string; price: string; description: string; section?: string; image: string; imageRatio: string; vegetarian: boolean; stock: boolean };
+
+function imageRatio(image: string) {
+  const ratios: [string, string][] = [
+    ["chicken-dum-biryani.webp", "1536 / 1024"],
+    ["amritsari-paneer-kulcha.webp", "1536 / 1024"],
+    ["vegetable-dum-biryani.webp", "1200 / 675"],
+    ["goat-dum-biryani.webp", "1448 / 1086"],
+    ["chole-bhatura.webp", "1448 / 1086"],
+    ["amritsari-kulcha-stock.webp", "1600 / 1200"],
+    ["amritsari-aloo-kulcha.webp", "1199 / 1312"],
+    ["mix-veg-kulcha.webp", "1408 / 1117"],
+  ];
+  return ratios.find(([filename]) => image.endsWith(filename))?.[1] ?? "4 / 3";
+}
 
 const order = (index: number) => ({ "--i": index } as CSSProperties);
 
@@ -26,6 +40,7 @@ export function SignaturePlates({ specials, categories, dishCount }: { specials:
     description: dish.featuredDescription || dish.description,
     section: categories.find(category => category.id === dish.categoryId)?.title,
     image: dish.image,
+    imageRatio: imageRatio(dish.image),
     vegetarian: dish.vegetarian,
     stock: dish.image.includes("-stock"),
   })).sort((a, b) => Number(a.stock) - Number(b.stock));
@@ -65,7 +80,7 @@ export function SignaturePlates({ specials, categories, dishCount }: { specials:
 function DishTile({ dish, index, large, eager }: { dish: Plate; index: number; large?: boolean; eager?: boolean }) {
   return (
     <article className={`dish-feature-tile${large ? " is-large" : ""}`} data-reveal="photo" data-tilt style={order(index)}>
-      <div className="dish-feature-image">
+      <div className="dish-feature-image" style={{ aspectRatio: dish.imageRatio }}>
         <Image
           src={dish.image}
           alt={dish.stock ? `${dish.name} — illustrative food photograph` : dish.name}

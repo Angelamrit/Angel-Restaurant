@@ -14,7 +14,7 @@ const photos = [
   { name: "dinner-spread", label: "The comfort of familiar flavors" },
   { name: "lamb-karahi", label: "A little spice, a little soul" },
   { name: "table-spread", label: "Better when shared" },
-  { name: "thali-plate", label: "An invitation to linger" },
+  { name: "angels-special", label: "An invitation to linger" },
   { name: "bar-counter", label: "Full bar" },
   { name: "storefront-street", label: "Make your way to Angel" },
   { name: "chole-bhatura", label: "Chole Bhatura" },

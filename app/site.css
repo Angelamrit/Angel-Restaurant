@@ -928,13 +928,28 @@
   .certificate-highlight-copy > p:last-child { margin-top: 1.25rem; color: rgba(246, 239, 226, .72); }
   .certificate-highlight-link { display: inline-flex; gap: .55rem; margin-top: 1.5rem; color: var(--gold-light); font-family: var(--font-functional); font-size: .62rem; font-weight: 700; letter-spacing: .18em; text-decoration: none; text-transform: uppercase; }
   .certificate-highlight-link span { transition: transform var(--duration-ui) var(--ease-luxe); }
-  .certificate-highlight-mark { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: .65rem; width: clamp(15rem, 25vw, 22rem); min-height: 12rem; padding: 2rem; border: 1px solid var(--gold); outline: 1px solid rgba(226, 189, 108, .38); outline-offset: -.65rem; color: inherit; text-align: center; text-decoration: none; transition: border-color var(--duration-ui) var(--ease-luxe), background-color var(--duration-ui) var(--ease-luxe); }
-  .certificate-highlight-mark span { color: var(--gold-light); font-size: .58rem; font-weight: 700; letter-spacing: .3em; }
-  .certificate-highlight-mark strong { color: var(--ivory); font-family: var(--font-editorial); font-size: clamp(2rem, 3vw, 3rem); font-weight: 400; line-height: 1; }
-  @media (hover: hover) { .certificate-highlight-link:hover span { transform: translate(3px, -3px); } .certificate-highlight-mark:hover { border-color: var(--gold-light); background: rgba(226, 189, 108, .06); } }
+  .certificate-facts { display: flex; flex-wrap: wrap; gap: 1.25rem clamp(1.5rem, 3vw, 2.5rem); margin-top: 1.75rem; }
+  .certificate-facts > div { padding-left: 1rem; border-left: 1px solid rgba(226, 189, 108, .55); }
+  .certificate-facts dt { color: var(--gold-light); font-family: var(--font-functional); font-size: .58rem; font-weight: 700; letter-spacing: .28em; text-transform: uppercase; }
+  .certificate-facts dd { margin-top: .35rem; color: var(--ivory); font-family: var(--font-editorial); font-size: clamp(1.4rem, 2vw, 1.9rem); line-height: 1.1; }
+  .certificate-frame { position: relative; width: clamp(20rem, 46vw, 40rem); }
+  .certificate-frame a { position: relative; display: block; overflow: hidden; border: 1px solid var(--gold); outline: 1px solid rgba(226, 189, 108, .38); outline-offset: -.5rem; box-shadow: 0 1.5rem 3.5rem rgba(0, 0, 0, .35); transition: border-color var(--duration-ui) var(--ease-luxe), transform 700ms var(--ease-luxe); }
+  .certificate-frame img { display: block; width: 100%; height: auto; }
+  /* A single soft gleam passes across the certificate when it is revealed or hovered. */
+  .certificate-frame a::after { content: ""; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 38%, rgba(255, 244, 214, .22) 50%, transparent 62%); transform: translateX(-120%); pointer-events: none; }
+  .certificate-frame figcaption { margin-top: .85rem; color: rgba(246, 239, 226, .66); font-family: var(--font-functional); font-size: .58rem; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; }
+  @media (prefers-reduced-motion: no-preference) {
+    .certificate-frame.is-revealed a::after { animation: certificate-gleam 1600ms var(--ease-luxe) 900ms forwards; }
+    @keyframes certificate-gleam { to { transform: translateX(120%); } }
+  }
+  @media (hover: hover) {
+    .certificate-highlight-link:hover span { transform: translate(3px, -3px); }
+    .certificate-frame a:hover { border-color: var(--gold-light); transform: translateY(-4px); }
+    .certificate-frame a:hover::after { transform: translateX(120%); transition: transform 1100ms var(--ease-luxe); }
+  }
   @media (max-width: 48rem) {
     .certificate-highlight-inner { grid-template-columns: 1fr; gap: 2rem; }
-    .certificate-highlight-mark { width: 100%; min-height: 10rem; }
+    .certificate-frame { width: 100%; }
   }
 
   .hero-poster { object-fit: cover; }

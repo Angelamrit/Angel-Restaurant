@@ -83,17 +83,23 @@ export default async function Home() {
 
       <section className="certificate-highlight tone-dark" aria-labelledby="certificate-title">
         <div className="container-shell certificate-highlight-inner">
-          <div className="certificate-highlight-copy">
-            <p className="eyebrow eyebrow-rule">A place worth discovering</p>
-            <h2 id="certificate-title">Recognized by the <em>MICHELIN Guide.</em></h2>
-            <Link className="certificate-highlight-link" href="/press">Explore Angel in the press <span aria-hidden="true">↗</span></Link>
-            <p>Angel Indian Restaurant · Jackson Heights, New York</p>
+          <div className="certificate-highlight-copy" data-reveal="words">
+            <p className="eyebrow eyebrow-rule rise">A place worth discovering</p>
+            <h2 id="certificate-title" className="rise">Recognized by the <em>MICHELIN Guide.</em></h2>
+            <dl className="certificate-facts rise rise-late">
+              <div><dt>Guide</dt><dd>2021</dd></div>
+              <div><dt>City</dt><dd>New York</dd></div>
+              <div><dt>Honor</dt><dd>Bib Gourmand</dd></div>
+            </dl>
+            <Link className="certificate-highlight-link rise rise-late" href="/press">Explore Angel in the press <span aria-hidden="true">↗</span></Link>
+            <p className="rise rise-late">Angel Indian Restaurant · Jackson Heights, New York</p>
           </div>
-          <Link className="certificate-highlight-mark" href="/press" aria-label="Explore Angel press recognition">
-            <span>MICHELIN</span>
-            <strong>Bib Gourmand</strong>
-            <span>RECOGNITION</span>
-          </Link>
+          <figure className="certificate-frame" data-reveal="photo">
+            <Link href="/press" aria-label="Explore Angel press recognition">
+              <Image src="/Certificates/Certificate03.PNG" alt="MICHELIN Guide 2021 New York, New Bib Gourmand Establishments, with Angel listed first" width={1774} height={887} sizes="(max-width: 767px) calc(100vw - 2rem), 40rem" />
+            </Link>
+            <figcaption>MICHELIN Guide 2021 · New Bib Gourmand Establishments</figcaption>
+          </figure>
         </div>
       </section>
 

@@ -275,7 +275,7 @@ export function EnquiryForm() {
       {state.status === "success" && state.emailed === false && (
         <div className="form-status" role="status">
           <p><strong>We have saved your enquiry, but could not send our team an email alert.</strong> To be sure it reaches us quickly, please also call or email us directly.</p>
-          <p>Contact us directly: <a href={`mailto:${restaurant.inbox}`}>{restaurant.email}</a> · <a href={`tel:${restaurant.phoneHref}`}>{restaurant.phone}</a></p>
+          <p>Contact us directly: <a href={`mailto:${restaurant.inbox}`}>{restaurant.inbox}</a> · <a href={`tel:${restaurant.phoneHref}`}>{restaurant.phone}</a></p>
         </div>
       )}
 

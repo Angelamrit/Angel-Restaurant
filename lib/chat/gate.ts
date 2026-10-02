@@ -98,7 +98,7 @@ export function greetingReply(text: string): string {
 }
 // Private-service enquiries are handled by the restaurant team, never by Resy,
 // so this is tested first everywhere below and always wins over booking wording.
-const PRIVATE_SERVICE = /(private\s+(?:dining|event|party|room|hire)|wedding|corporate\s+(?:event|dinner)|birthday\s+party|company\s+dinner|\bevents?\b|\bcater(?:ing|er|ers|ed)?\b|\bhire\b|\bbuy\s?out\b)/i;
+const PRIVATE_SERVICE = /(private\s+(?:dining|event|party|room|hire)|wedding|corporate\s+(?:event|dinner)|birthday\s+party|company\s+dinner|\bevents?\b|\bcater(?:ing|er|ers|ed)?\b|\bhire\b|\bbuy\s?out\b|(?:that|the|this)\s+(?:space|room|area|venue)|take(?:\s+over)?\s+the\s+(?:whole\s+)?(?:place|restaurant|venue|space|room))/i;
 // Celebration vocabulary, grounded in the Occasion options the existing enquiry
 // form already offers (OCCASIONS in lib/enquiry.ts) plus the natural phrasings
 // visitors use for them. These route to the private dining enquiry, never Resy.
@@ -122,7 +122,7 @@ const SUBJECT = /\b(chef|chefs|amrit|singh|angel|angel's|restaurant)\b/i;
 // asks about. These carry no intent words, so the route and its button used to
 // disappear halfway through an enquiry — "I want to celebrate my birthday" /
 // "20 people" / "can I bring a cake?" lost the way to send the enquiry.
-const PARTY_SIZE = /^\s*(?:about|around|roughly)?\s*\d{1,3}\s*(?:people|guests?|pax|persons?|adults|of\s+us)?\s*[.!?]?$|\b\d{1,3}\s*(?:people|guests?|pax|persons?)\b|\b(?:we\s+(?:are|will\s+be)|party\s+of|group\s+of|for)\s+(?:\d{1,3}|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifteen|twenty|thirty|forty|fifty)\s*(?:people|guests?|persons?|of\s+us)?\b/i;
+const PARTY_SIZE = /^\s*(?:about|around|roughly)?\s*\d{1,3}\s*(?:people|guests?|pax|persons?|adults|of\s+us)?\s*[.!?]?$|\b\d{1,3}\s*(?:people|guests?|pax|persons?|adults|of\s+us)\b|\b(?:two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifteen|twenty|thirty|forty|fifty)\s+(?:people|guests?|pax|persons?|adults|of\s+us)\b|\b(?:we\s+(?:are|will\s+be)|party\s+of|group\s+of|for)\s+(?:\d{1,3}|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifteen|twenty|thirty|forty|fifty)\s*(?:people|guests?|persons?|of\s+us)?\b/i;
 const EVENT_DETAIL = /\b(cakes?|candles?|decorations?|balloons?|deposits?|guest\s+count|head\s*count)\b/i;
 // The word that settles it: naming a table means an ordinary reservation,
 // whatever occasion is mentioned alongside it. Matched in the spellings

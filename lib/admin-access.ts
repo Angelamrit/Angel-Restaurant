@@ -3,6 +3,7 @@ import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { collections } from "./database";
+import { clientSource } from "./client-source";
 
 export const ADMIN_COOKIE = "angel_admin";
 export class AccessError extends Error {}
@@ -52,8 +53,8 @@ export function sameOrigin(request: Request) {
   if (origin !== expectedOrigin(request)) throw new AccessError("This request could not be verified. Reload and try again.");
 }
 export async function limitAttempts(request: Request) {
-  // Shared across instances. Use only Vercel's trusted proxy header; otherwise one global bucket.
-  const source = process.env.VERCEL ? request.headers.get("x-vercel-forwarded-for") || "unknown" : "local";
+  // Per visitor when the proxy's client-address header is configured (CLIENT_IP_HEADER); otherwise one shared bucket.
+  const source = clientSource(request.headers);
   const bucket = Math.floor(Date.now() / 600000);
   const key = createHash("sha256").update(`${source}:${bucket}`).digest("hex");
   const expiresAt = new Date(Date.now() + 600000);

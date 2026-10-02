@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import localFont from "next/font/local";
 import { AnalyticsProviders } from "@/components/analytics-providers";
 import "./globals.css";
@@ -121,7 +122,11 @@ const structuredData = {
   sameAs: [restaurant.instagram, restaurant.resy],
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // The per-request nonce minted by proxy.ts. Reading request headers also renders every page per
+  // request, which a nonce needs: HTML built once at deploy time could not carry a value that must
+  // differ on every visit.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <html
       lang="en"
@@ -131,6 +136,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <head>
         <script
           type="application/ld+json"
+          nonce={nonce}
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
         />
       </head>
@@ -138,7 +144,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <a className="skip-link button button-primary" href="#main-content">
           Skip to content
         </a>
-        <SiteChrome footer={<Footer />} analytics={isProduction && <AnalyticsProviders gaId={gaId} />}>
+        <SiteChrome footer={<Footer />} analytics={isProduction && <AnalyticsProviders gaId={gaId} nonce={nonce} />}>
           {children}
         </SiteChrome>
       </body>

@@ -105,6 +105,10 @@ const photoUpdates = [
   { name: "Chicken Dum Biryani", from: "chicken-biryani-stock", to: "chicken-dum-biryani" },
   { name: "Goat Dum Biryani", from: "goat-biryani-stock", to: "goat-dum-biryani" },
   { name: "Vegetable Dum Biryani", from: "vegetable-biryani-stock", to: "vegetable-dum-biryani" },
+  // The three kulcha dishes shared one stock photo; each now has its own photograph.
+  { name: "Amritsari Paneer Kulcha", from: "amritsari-kulcha-stock", to: "amritsari-paneer-kulcha" },
+  { name: "Amritsari Aloo Kulcha", from: "amritsari-kulcha-stock", to: "amritsari-aloo-kulcha" },
+  { name: "Mix Veg Kulcha", from: "amritsari-kulcha-stock", to: "mix-veg-kulcha" },
 ];
 
 async function photos() {

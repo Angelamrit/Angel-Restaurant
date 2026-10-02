@@ -8,7 +8,7 @@ import { money } from "../lib/menu-types.ts";
 test("restaurant contact details are well formed and the phone link form is derived from the display form", () => {
   assert.match(restaurant.phone, /^\d{3}-\d{3}-\d{4}$/);
   assert.equal(restaurant.phoneHref, restaurant.phone.replace(/-/g, ""));
-  assert.equal(restaurant.email, "contact@angelindianrestaurantnyc.com", "the displayed address");
+  assert.equal(restaurant.email, "angelrestaurant278@gmail.com", "the displayed address");
   assert.equal(restaurant.inbox, "angelrestaurant278@gmail.com", "mailto links and enquiry notifications must reach the real inbox");
   assert.match(restaurant.email, /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i);
   assert.match(restaurant.address, /Jackson Heights, NY 11372$/);

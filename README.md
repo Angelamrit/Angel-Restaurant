@@ -54,4 +54,4 @@ The gate and knowledge base run on the server only and are not meant to reach th
 
 ## Deploying
 
-The site deploys on Vercel with MongoDB Atlas and Vercel Blob. See the production section of [ADMIN_SETUP.md](./ADMIN_SETUP.md) for required variables and the migration order.
+The site runs on a Hostinger VPS behind nginx, with MongoDB. See [DEPLOY_HOSTINGER.md](./DEPLOY_HOSTINGER.md) for the server setup, environment variables, nginx, HTTPS and the update routine. [ADMIN_SETUP.md](./ADMIN_SETUP.md) covers the admin workspace and the migration order. (Vercel was only used for the first client preview.)

@@ -15,7 +15,7 @@ export default function StoryPage() {
       <section className="surface-gold tone-gold section" aria-labelledby="chef-title">
         <div className="container-shell story-feature">
           <div className="story-media" data-reveal="photo">
-            <DishIndex layout="stacked" label="Hover or tap a dish from Chef Amrit Pal Singh’s kitchen to preview it" slides={[{ name: "thali-plate", alt: "A generous Indian meal from Angel’s editorial collection", title: "The Angel Thali" }, { name: "tandoori-chicken", alt: "Food cooking in the tandoor at Angel", title: "From the Tandoor" }, { name: "table-spread", alt: "A table filled with Indian dishes at Angel", title: "A Generous Feast" }]} />
+            <DishIndex layout="stacked" label="Hover or tap a dish from Chef Amrit Pal Singh’s kitchen to preview it" slides={[{ name: "angels-special", alt: "Angel’s Special: an overhead spread of Indian dishes around a bread-sealed biryani", title: "Angel’s Special" }, { name: "tandoori-chicken", alt: "Food cooking in the tandoor at Angel", title: "From the Tandoor" }, { name: "table-spread", alt: "A table filled with Indian dishes at Angel", title: "A Generous Feast" }]} />
           </div>
           <div data-reveal="words">
             <p className="eyebrow eyebrow-rule rise">Chef Amrit Pal Singh</p>

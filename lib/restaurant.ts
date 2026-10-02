@@ -8,9 +8,10 @@ export const restaurant = {
   get phoneHref() {
     return this.phone.replace(/[^0-9]/g, "");
   },
-  // The address shown to visitors, and published in search data.
-  email: "contact@angelindianrestaurantnyc.com",
-  // Where mail actually arrives: mailto links and enquiry notifications go here, whatever address is displayed above.
+  // The address shown to visitors, and published in search data. The restaurant has no mailbox on its own domain,
+  // so this is the real Gmail inbox (the domain only sends enquiry notifications through Resend).
+  email: "angelrestaurant278@gmail.com",
+  // Where mail actually arrives: mailto links and enquiry notifications go here.
   inbox: "angelrestaurant278@gmail.com",
   address: "75-18 37th Avenue, Jackson Heights, NY 11372",
   instagram: "https://www.instagram.com/angel_indian_restaurant/",

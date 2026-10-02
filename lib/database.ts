@@ -1,5 +1,4 @@
 // Server infrastructure shared by route handlers, Server Components, and the database CLI.
-import { attachDatabasePool } from "@vercel/functions";
 import { MongoClient, type Db } from "mongodb";
 
 export type CategoryDocument = { id: string; filter: string; title: string; kicker: string; sortOrder: number };
@@ -28,12 +27,12 @@ export type MigrationDocument = { id: string; appliedAt: string };
 export type PageViewDocument = { visitorId: string; path: string; day: string; at: Date; device: "mobile" | "tablet" | "desktop"; referrer?: string };
 export type VisitorDocument = { visitorId: string; firstSeen: Date; firstDay: string };
 
-type MongoState = typeof globalThis & { angelMongoClient?: MongoClient; angelMongoDatabase?: Db; angelMongoPoolAttached?: boolean };
+type MongoState = typeof globalThis & { angelMongoClient?: MongoClient; angelMongoDatabase?: Db };
 const state = globalThis as MongoState;
 
 function connectionUri() {
   const uri = process.env.MONGODB_URI;
-  if (!uri) throw new Error("MONGODB_URI is required. Connect MongoDB Atlas in Vercel or set it in .env.local.");
+  if (!uri) throw new Error("MONGODB_URI is required. Set it in the server's environment (or .env.local when developing).");
   return uri;
 }
 
@@ -49,17 +48,12 @@ export function getDatabase() {
       if (state.angelMongoClient !== client) return;
       delete state.angelMongoClient;
       delete state.angelMongoDatabase;
-      delete state.angelMongoPoolAttached;
     };
     client.on("close", forget);
     // A failed first connection (network drop, Atlas IP allowlist, DNS) makes the driver close its topology
     // without emitting "close", which would leave this dead client cached and every later query failing
     // with "Topology is closed". Connect eagerly (queries share this attempt) and discard the client on failure.
     client.connect().catch(() => { forget(); void client.close().catch(() => {}); });
-  }
-  if (process.env.VERCEL && !state.angelMongoPoolAttached) {
-    attachDatabasePool(state.angelMongoClient);
-    state.angelMongoPoolAttached = true;
   }
   state.angelMongoDatabase ??= state.angelMongoClient.db(process.env.MONGODB_DB || "angel-restaurant");
   return state.angelMongoDatabase;
@@ -86,5 +80,4 @@ export async function closeDatabase() {
   await state.angelMongoClient?.close();
   delete state.angelMongoClient;
   delete state.angelMongoDatabase;
-  delete state.angelMongoPoolAttached;
 }

@@ -144,7 +144,7 @@ export default async function Home() {
         <span className="hairline section-hairline" aria-hidden="true" />
         <div className="container-shell chef-grid">
           <div className="chef-portrait" data-reveal="photo">
-            <div className="photo-frame chef-photo"><CinematicSlideshow label="The food and place behind Chef Amrit Pal Singh’s story" slides={[{ name: "thali-plate", alt: "An Indian meal served in traditional dishes, Angel editorial collection" }, { name: "dining-room-portrait-v2", alt: "Angel’s dining room on 37th Avenue" }, { name: "table-spread", alt: "A generous table of Indian dishes at Angel" }]} /></div>
+            <div className="photo-frame chef-photo"><CinematicSlideshow label="The food and place behind Chef Amrit Pal Singh’s story" slides={[{ name: "angels-special", alt: "Angel’s Special: an overhead spread of Indian dishes around a bread-sealed biryani" }, { name: "dining-room-portrait-v2", alt: "Angel’s dining room on 37th Avenue" }, { name: "table-spread", alt: "A generous table of Indian dishes at Angel" }]} /></div>
             <div className="chip-float chip-float-tr frame frame-strong"><p className="eyebrow">A generous spirit, in every detail.</p></div>
             <Photo name="tandoori-chicken" alt="Tandoori chicken from the clay oven, a closer look" className="story-image-accent photo-frame" sizes="200px" />
           </div>

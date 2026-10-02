@@ -44,7 +44,7 @@ test("the knowledge base and live menu are what ground the request", () => {
   // The system instruction travels as `instructions`, rebuilt from the KB and
   // the public menu on every request. Nothing else is sent as authority: no
   // retrieval, no tools, no external source.
-  assert.match(routeSource, /instructions: buildSystemInstruction\(promptMenu\)/, "the KB plus menu must be the instructions");
+  assert.match(routeSource, /instructions: buildSystemInstruction\(promptMenu, cta\)/, "the KB plus menu must be the instructions, with the decided route");
   assert.doesNotMatch(routeSource, /\btools:/, "no tools — the model has no outside channel");
   assert.doesNotMatch(routeSource, /web_search|file_search|vector_store|retrieval/i, "no retrieval of any kind");
 });

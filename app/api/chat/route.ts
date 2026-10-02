@@ -2,12 +2,13 @@ import { getPublicMenu } from "@/lib/menu-repository";
 import { AccessError, sameOrigin } from "@/lib/admin-access";
 import { apiError, readJson } from "@/lib/api-response";
 import { InputError } from "@/lib/menu-validation";
-import { gateInput, resolveCta, resolveDateIntent } from "@/lib/chat/gate";
+import { gateInput, resolveCta, resolveDateIntent, type Cta } from "@/lib/chat/gate";
 import { resolveDate, formatDate } from "@/lib/chat/dates";
 import { getEventDateStatus } from "@/lib/events";
 import { buildSystemInstruction, toResponsesInput } from "@/lib/chat/prompt";
 import { CHAT_MODEL, MAX_OUTPUT_TOKENS, REASONING_EFFORT, getOpenAIClient } from "@/lib/chat/client";
 import type { ResponseStreamEvent } from "openai/resources/responses/responses";
+import { formatMenuTotal, menuTotal, parseMenuTotalRequest } from "@/lib/chat/menu-total";
 import { trimHistory, validateMessage } from "@/lib/chat/validation";
 import { rateLimit, rateLimitKey } from "@/lib/chat/rate-limit";
 
@@ -36,11 +37,11 @@ const EVENT_DATE_CLARIFY = "Which month are you thinking of? Give me the full da
 const BOOKING_KIND_CLARIFY = "Are you asking about a regular table or an event?";
 // Which onward route the answer offers: "resy" for an ordinary table, "event"
 // for a celebration or private-event enquiry the restaurant team handles
-// through the existing form, "credit" for a website-credit question. Carried
-// on the failure paths too, so neither route disappears when the model is
-// unavailable.
-type Cta = "resy" | "event" | "credit" | undefined;
-const ctaHeader = (cta: Cta): Record<string, string> => (cta ? { "x-chat-cta": cta } : {});
+// through the existing form, "credit" for a website-credit question, "order"
+// for a food order through one of the approved platforms. Carried on the failure
+// paths too, so no route disappears when the model is unavailable.
+type Route = Cta | undefined;
+const ctaHeader = (cta: Route): Record<string, string> => (cta ? { "x-chat-cta": cta } : {});
 
 // User-facing envelope. Distinct from apiError()'s `{ error }` shape because the
 // widget renders these as ordinary assistant replies rather than failures: a
@@ -52,7 +53,7 @@ function gateResponse(message: string, gate: string, status = 200, extra: Record
   });
 }
 
-function streamText(stream: AsyncIterable<ResponseStreamEvent>, cta: Cta) {
+function streamText(stream: AsyncIterable<ResponseStreamEvent>, cta: Route) {
   const body = new ReadableStream<Uint8Array>({
     async start(controller) {
       // Set from the terminal event rather than inferred: the API says so
@@ -94,7 +95,7 @@ function streamText(stream: AsyncIterable<ResponseStreamEvent>, cta: Cta) {
 
 export async function POST(request: Request) {
   // Hoisted so every failure path below can still hand back the booking route.
-  let cta: Cta;
+  let cta: Route;
   try {
     // Public endpoint, so there is no admin cookie to check. Browsers always send
     // Origin on a POST, so the shared same-origin check is what keeps a metered
@@ -142,6 +143,17 @@ export async function POST(request: Request) {
       }
     }
 
+    // "How much for one of everything?" is arithmetic over the live menu, so it is
+    // answered from the menu itself rather than by the model: 84 prices summed in
+    // a context window is a number nobody can check. No button: it is
+    // information, not a route.
+    const totalRequest = parseMenuTotalRequest(message);
+    if (totalRequest) {
+      const priced = await getPublicMenu();
+      const total = menuTotal(priced.items.map((dish) => ({ name: dish.name, priceCents: dish.priceCents })), totalRequest.quantity);
+      return gateResponse(formatMenuTotal(total), "menu_total");
+    }
+
     const client = getOpenAIClient();
     if (!client) return gateResponse(UNAVAILABLE, "unavailable", 200, ctaHeader(cta));
 
@@ -158,7 +170,9 @@ export async function POST(request: Request) {
         // API keeps separate from the conversation. Visitor text can therefore
         // never occupy the same channel as the rules, which is the structural
         // half of the injection defence — the deterministic gate is the other.
-        instructions: buildSystemInstruction(promptMenu),
+        // The decided route travels with the rules, never with the visitor text,
+        // so the answer cannot offer a route other than the button on screen.
+        instructions: buildSystemInstruction(promptMenu, cta),
         input: toResponsesInput(history, message),
         // The full menu is 84 dishes and needs ~2060 output tokens to list in
         // full; at 700 the answer stopped mid-price after 28 of them. This is a

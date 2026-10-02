@@ -142,3 +142,34 @@ test("an age or anniversary is not a day of the month", () => {
   // And a genuine bare day still asks for its month.
   assert.equal(iso("is the 20th free"), "ambiguous");
 });
+
+test("an ordinal that counts years is not a day of the month", () => {
+  // "I want to host my 40th birthday" came back as "Which month are you thinking
+  // of?", because "40th" was read as a bare day with no month in view.
+  for (const age of ["40th birthday", "21st birthday", "30th birthday", "50th birthday", "my 40th", "my 21st", "our 25th anniversary", "his 60th birthday party"]) {
+    assert.equal(iso(age), "none", age);
+  }
+  // Nor when the thread has a month in it, which is what made the old reading
+  // look plausible: an age is simply not a date.
+  assert.equal(iso("40th birthday", ["I want an event in December"]), "none");
+  assert.equal(iso("my 21st", ["something in March 2027"]), "none");
+});
+
+test("a real date still resolves alongside an age", () => {
+  assert.equal(iso("I want to host my 40th birthday dinner for 30 guests"), "none", "no date was named");
+  assert.equal(iso("my 40th birthday on October 20"), "2026-10-20");
+  assert.equal(iso("my 16th birthday, December 20"), "2026-12-20");
+  // A guest count is not a date either.
+  assert.equal(iso("30 guests"), "none");
+  assert.equal(iso("for 30 people"), "none");
+});
+
+test("ordinary days of the month are untouched by the age rule", () => {
+  assert.equal(iso("on the 16th", ["an event in December"]), "2026-12-16");
+  assert.equal(iso("the 16th", ["an event in December"]), "2026-12-16");
+  assert.equal(iso("16th October"), "2026-10-16");
+  assert.equal(iso("October 16"), "2026-10-16");
+  assert.equal(iso("what about the 20th?", ["December"]), "2026-12-20");
+  // A day with no month in view is still a question, not a guess.
+  assert.equal(iso("the 16th"), "ambiguous");
+});

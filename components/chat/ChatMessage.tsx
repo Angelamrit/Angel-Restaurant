@@ -2,6 +2,7 @@
 import { memo, useMemo } from "react";
 import { parseMarkdown, type Span, type Block } from "@/lib/chat/markdown";
 import { restaurant } from "@/lib/restaurant";
+import type { ChatCta } from "@/lib/chat/memory";
 
 function Spans({ spans }: { spans: Span[] }) {
   return <>{spans.map((span, index) => span.type === "strong" ? <strong key={index}>{span.text}</strong> : <span key={index}>{span.text}</span>)}</>;
@@ -12,7 +13,7 @@ const NO_BLOCKS: Block[] = [];
 // Memoised: a streamed answer re-renders many times per second, and without this
 // every earlier message in the transcript re-rendered — and re-parsed its
 // markdown — on each chunk. Only the turn whose text actually changed now works.
-export const ChatMessage = memo(function ChatMessage({ role, text, cta }: { role: "user" | "model"; text: string; cta?: "resy" | "event" | "credit" }) {
+export const ChatMessage = memo(function ChatMessage({ role, text, cta }: { role: "user" | "model"; text: string; cta?: ChatCta }) {
   // Parsing is memoised on the text itself, so a re-render that does not change
   // the text (a new cta, a sibling updating) costs nothing.
   const blocks = useMemo(() => (role === "model" && text ? parseMarkdown(text) : NO_BLOCKS), [role, text]);
@@ -37,6 +38,9 @@ export const ChatMessage = memo(function ChatMessage({ role, text, cta }: { role
         client-side one would leave it open over the new page. */}
     {cta === "event" && <a className="angel-chat-cta" href="/private-dining#enquiry"><span>Plan your celebration</span><span className="angel-chat-cta-icon" aria-hidden="true">↗</span></a>}
     {/* Studio credit, surfaced only when a visitor asks who built the site. */}
-    {cta === "credit" && <a className="angel-chat-cta" href="https://acevatech.com" target="_blank" rel="noopener noreferrer"><span>Visit Aceva Tech</span><span className="angel-chat-cta-icon" aria-hidden="true">↗</span></a>}
+    {cta === "credit" && <a className="angel-chat-cta" href={restaurant.aceva} target="_blank" rel="noopener noreferrer"><span>Visit Aceva Tech</span><span className="angel-chat-cta-icon" aria-hidden="true">↗</span></a>}
+    {/* Ordering food, which is not a table booking: one button per approved
+        platform, read from the single list in lib/restaurant.ts. */}
+    {cta === "order" && <div className="angel-chat-ctas">{restaurant.ordering.map((platform) => <a key={platform.name} className="angel-chat-cta" href={platform.url} target="_blank" rel="noopener noreferrer"><span>Order via {platform.name}</span><span className="angel-chat-cta-icon" aria-hidden="true">↗</span></a>)}</div>}
   </div>;
 });

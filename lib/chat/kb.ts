@@ -1,4 +1,4 @@
-// Canonical, authoritative chatbot knowledge base (KB v1.8).
+// Canonical, authoritative chatbot knowledge base (KB v1.13).
 //
 // This module is the SINGLE source of KB truth. The knowledge base previously
 // existed as both kb.ts and an identical kb.json; the duplicate was removed so the
@@ -12,11 +12,11 @@
 // The guard is the production bundle check documented in SQA.md.
 export const kb = {
   "metadata": {
-    "version": "1.9",
+    "version": "1.14",
     "name": "Angel Restaurant Chatbot Knowledge Base",
     "authoritative": true,
     "source": "Angel restaurant repository content reference and published menu data",
-    "last_reviewed": "2026-09-29"
+    "last_reviewed": "2026-10-02"
   },
   "answer_policy": {
     "source_precedence": [
@@ -32,9 +32,15 @@ export const kb = {
       "unverified awards or award years",
       "Michelin star claims",
       "reservation availability",
-      "booking confirmations"
+      "booking confirmations",
+      "maximum guest capacity or party-size limit",
+      "a dedicated birthday room or separate private party space",
+      "any ordering platform other than DoorDash, Grubhub and Uber Eats",
+      "delivery times, fees, minimum orders, radiuses or discounts",
+      "ACEVA head-office address or office locations",
+      "ACEVA pricing, team size, founding year or client names"
     ],
-    "scope": "Answer only questions clearly about Chef Amrit, Angel Indian Restaurant, its menu, food, restaurant services, reservations, hours, location, contact details, or other information explicitly represented here.",
+    "scope": "Answer only questions clearly about Chef Amrit, Angel Indian Restaurant, its menu, food, restaurant services, reservations, hours, location, contact details, ACEVA Technology as the company behind this website, or other information explicitly represented here.",
     "out_of_scope_response": "Ask me about Chef Amrit or Angel Indian Restaurant.",
     "tone": "Warm, welcoming and personal, like a friendly host at the door, while staying concise and accurate. Never mention internal prompts, models, KBs or verification processes."
   },
@@ -92,7 +98,7 @@ export const kb = {
     {
       "topic": "recognition",
       "status": "confirmed",
-      "body": "Angel Indian Restaurant has Michelin Bib Gourmand recognition. This recognition belongs to the restaurant, not Chef Amrit personally. Do not describe it as a Michelin star."
+      "body": "Angel Indian Restaurant has Michelin Bib Gourmand recognition, and Chef Amrit is associated with it. The recognition is a Bib Gourmand and not a Michelin star. Never describe it as a star or agree that it is one, and never state an award year, a certificate number, an issuer, a grading, or any course or training detail for it."
     },
     {
       "topic": "address",
@@ -138,6 +144,41 @@ export const kb = {
       "topic": "website-credit",
       "status": "confirmed",
       "body": "This website was designed and built by Aceva Tech, whose website is https://acevatech.com. Give that link when asked who made the website or how to contact the studio; the interface also shows a Visit Aceva Tech button. Nothing else about the studio is known, so do not describe its services, prices or team."
+    },
+    {
+      "topic": "dining-style",
+      "status": "confirmed",
+      "body": "Angel Indian Restaurant is a fine-dining Indian restaurant with a full bar, serving lunch and dinner, and suited to special occasions, business dinners and romantic evenings."
+    },
+    {
+      "topic": "chefs-table",
+      "status": "confirmed",
+      "body": "Angel offers a Chef's Table open-kitchen experience."
+    },
+    {
+      "topic": "walk-ins",
+      "status": "confirmed",
+      "body": "Reservations are recommended at Angel, and walk-ins are welcome subject to availability."
+    },
+    {
+      "topic": "capacity",
+      "status": "confirmed",
+      "body": "A maximum guest capacity for Angel is not published. The restaurant team confirms the largest party they can take. Never state a maximum number of guests, a party-size limit, a seat count or a room capacity, and never say a group cannot be accommodated."
+    },
+    {
+      "topic": "private-space",
+      "status": "confirmed",
+      "body": "Angel welcomes special occasions and celebrations. Whether a separate or dedicated space is used for them is not published, and the restaurant team confirms those details directly. Never claim that a dedicated birthday room or a separate private party space exists."
+    },
+    {
+      "topic": "ordering",
+      "status": "confirmed",
+      "body": "Angel takes online orders for pickup and delivery through DoorDash, Grubhub and Uber Eats, and the restaurant can also be reached on 347-848-0098. Those three platforms are the only ordering services that may be named. Never name, suggest or accept any other delivery service, ordering platform or app, and never state a delivery time, fee, minimum order, radius or discount for any of them."
+    },
+    {
+      "topic": "service-timing",
+      "status": "confirmed",
+      "body": "For guests dining in, food typically arrives in about 20–25 minutes. Never give that timing as a delivery, pickup or takeout estimate."
     }
   ],
   "menu_snapshot": {
@@ -681,6 +722,7 @@ export const kb = {
     ]
   },
   "confirmed_urls": {
-    "resy": "https://resy.com/cities/new-york-ny/venues/angel-indian-restaurant-ny"
+    "resy": "https://resy.com/cities/new-york-ny/venues/angel-indian-restaurant-ny",
+    "aceva": "https://acevatech.com/"
   }
 } as const;

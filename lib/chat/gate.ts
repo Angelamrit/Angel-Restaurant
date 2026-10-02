@@ -22,6 +22,11 @@ import type { ChatTurn } from "./validation";
 // Explicit extension for the same plain-node test loader.
 import { resolveDate } from "./dates.ts";
 
+// The onward route an answer offers. lib/chat/memory.ts repeats this union for
+// the client, which cannot import this module: the scope lexicon below reads the
+// knowledge base, and a client import would ship the whole KB to the browser.
+export type Cta = "resy" | "event" | "credit" | "order";
+
 export type GateResult =
   | { allowed: true }
   | { allowed: false; kind: "redirect" | "profanity" | "gibberish" | "injection" | "greeting"; message: string };
@@ -97,10 +102,14 @@ const PRIVATE_SERVICE = /(private\s+(?:dining|event|party|room|hire)|wedding|cor
 // Celebration vocabulary, grounded in the Occasion options the existing enquiry
 // form already offers (OCCASIONS in lib/enquiry.ts) plus the natural phrasings
 // visitors use for them. These route to the private dining enquiry, never Resy.
-const CELEBRATION = /\b(birthdays?|anniversar(?:y|ies)|engagements?|weddings?|celebrations?|celebrate|celebrating|graduations?|reunions?|christening|banquet|baby\s+shower|bridal\s+shower|rehearsal\s+dinner|family\s+gathering|get[-\s]together)\b/i;
+const CELEBRATION = /\b(birthdays?|b-?days?|anniversar(?:y|ies)|engagements?|weddings?|celebrations?|celebrate|celebrating|graduations?|reunions?|christening|banquet|baby\s+shower|bridal\s+shower|rehearsal\s+dinner|family\s+gathering|get[-\s]together)\b/i;
 // A bare continuation ("how do I do that?") carries no intent words of its own,
-// so it inherits the intent of the exchange directly above it.
-const CONTINUATION = /^(?:and\s+)?(?:how|what|where|when|who)\b[^?]*\b(?:that|this|it|them|those)\b\??$|^(?:how|what)\s+(?:do|should|can|would)\s+i\b/i;
+// so it inherits the intent of the exchange directly above it. The pronoun no
+// longer has to be the last word: "and where are they based?" is as much a
+// continuation as "how do I contact them?", and it used to lose the button.
+// Both halves stay bounded to one short question, so a new subject never
+// inherits a button from an earlier one.
+const CONTINUATION = /^(?:and\s+)?(?:how|what|where|when|who)\b[^?]{0,40}\b(?:that|this|it|them|those|they|their)\b[^?]{0,24}\??$|^(?:how|what)\s+(?:do|should|can|would)\s+i\b/i;
 // Who designed/built the website itself, distinct from "who made this dish" —
 // the site/website noun is required so ordinary food questions never match.
 const SITE_CREDIT = /\bwho\s+(?:built|made|designed|developed|created|coded)\s+(?:this|the)\s+(?:site|website)\b|\b(?:this|the)\s+(?:site|website)\b(?:\s+\w+){0,4}\s+(?:built|made|designed|developed|created|coded)\s+by\b|\bweb\s*(?:design(?:er)?|develop(?:er|ment)?)\b|\bsite\s+credit(?:s)?\b|\baceva\b|\b(?:developers?|designers?)\s+(?:of|behind)\s+(?:this|the)\s+(?:site|website)\b|\bcontact\s+(?:the\s+)?(?:developers?|designers?)\b/i;
@@ -108,9 +117,27 @@ const SITE_CREDIT = /\bwho\s+(?:built|made|designed|developed|created|coded)\s+(
 // the full phrases ("chef amrit", "angel restaurant"), so without this a visitor
 // asking "tell me about chef" or "who is amrit?" was refused as out of scope.
 const SUBJECT = /\b(chef|chefs|amrit|singh|angel|angel's|restaurant)\b/i;
+// A bare detail that answers the thread rather than opening a new subject: a
+// party size ("20 people", "we are 6"), or something the event workflow itself
+// asks about. These carry no intent words, so the route and its button used to
+// disappear halfway through an enquiry — "I want to celebrate my birthday" /
+// "20 people" / "can I bring a cake?" lost the way to send the enquiry.
+const PARTY_SIZE = /^\s*(?:about|around|roughly)?\s*\d{1,3}\s*(?:people|guests?|pax|persons?|adults|of\s+us)?\s*[.!?]?$|\b\d{1,3}\s*(?:people|guests?|pax|persons?)\b|\b(?:we\s+(?:are|will\s+be)|party\s+of|group\s+of|for)\s+(?:\d{1,3}|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifteen|twenty|thirty|forty|fifty)\s*(?:people|guests?|persons?|of\s+us)?\b/i;
+const EVENT_DETAIL = /\b(cakes?|candles?|decorations?|balloons?|deposits?|guest\s+count|head\s*count)\b/i;
 // The word that settles it: naming a table means an ordinary reservation,
-// whatever occasion is mentioned alongside it.
-const TABLE_WORD = /\btables?\b/i;
+// whatever occasion is mentioned alongside it. Matched in the spellings
+// visitors type, because "can i get a tabel for 2" carried no table signal at
+// all and lost its Resy button.
+const TABLE_WORD = /\btab(?:le|el)s?\b/i;
+// Ordering food: delivery, pickup, takeout, "I want to order". Deliberately
+// broad, because the words a visitor reaches for vary and being turned away for
+// using the wrong one is the failure this exists to prevent. Semantic
+// understanding still happens at the model; this only decides the route.
+const ORDERING = /\b(?:order(?:s|ing|ed)?|deliver(?:y|ies|ed|s)?|takeaway|take[-\s]?away|takeout|take[-\s]?out|pick[-\s]?up|collection|to[-\s]go)\b|\bonline\s+(?:food|menu|order\w*)\b|\bfood\s+online\b/i;
+// Booking words that mean the visitor wants a table, not food sent out. "Can I
+// order a table?" is a reservation, and "can I order food and reserve a table?"
+// names the table explicitly, so the table route wins the button there.
+const ORDERING_IS_REALLY_BOOKING = /\btab(?:le|el)s?\b|\b(?:reserve|reservations?|resy|book|booking)\b/i;
 // An ordinary meal with no occasion named.
 const MEAL = /\b(dinner|lunch|brunch|supper)\b/i;
 // Opening hours. "Are you open Sunday?" names a day and uses "open", which
@@ -129,7 +156,7 @@ const AVAILABILITY = /\b(available|availability|free|open|booked|reserved|taken|
 const RESERVATION = /\b(reserve|reservations?|resy|book|booking|availability|available)\b/i;
 // Booking phrasing that never uses one of those words: "can I get a table
 // tonight", "a table for four", "table Saturday".
-const TABLE_REQUEST = /\b(?:get|getting|want|need|have|grab|find)\s+(?:us\s+|me\s+)?(?:a\s+)?table\b|\btable\s+(?:for|tonight|tomorrow|today|this|on|at|next|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i;
+const TABLE_REQUEST = /\b(?:get|getting|want|need|have|grab|find|order|book|reserve)\s+(?:us\s+|me\s+)?(?:a\s+)?tab(?:le|el)s?\b|\btab(?:le|el)s?\s+(?:for|tonight|tomorrow|today|this|on|at|next|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i;
 
 const strongTopics = [
   "angel indian restaurant", "angel restaurant", "chef amrit", "amrit pal singh", "menu", "dish", "dishes", "food", "halal", "vegetarian", "vegan", "tandoor", "biryani", "curry", "naan", "lamb", "chicken", "goat", "paneer", "dal", "private dining", "private event", "bar", "pathankot", "punjab", "australia", "rahi", "adda", "michelin", "bib gourmand", "jackson heights", "queens", "74 st", "broadway", "allergy", "dietary"
@@ -165,6 +192,9 @@ function isNoise(text: string) {
 function isClearlyInScope(text: string) {
   const normalized = text.toLowerCase();
   if (SITE_CREDIT.test(normalized)) return true;
+  // "Delivery?", "takeout?", "order food" — a one-word ordering question is a
+  // real question, and being treated as noise is exactly what must not happen.
+  if (ORDERING.test(normalized)) return true;
   if (PRIVATE_SERVICE.test(normalized)) return true;
   if (CELEBRATION.test(normalized)) return true;
   // Booking language is in scope on its own. Without this, "I want to make a
@@ -184,9 +214,32 @@ export function hasSiteCreditIntent(text: string) {
   return SITE_CREDIT.test(text.toLowerCase());
 }
 
+/**
+ * Does the visitor want to order food — delivery, pickup or takeout?
+ *
+ * False when the message names a table or a reservation: those are bookings that
+ * happen to use the word "order", and Resy must keep them. False for a
+ * website-credit question too.
+ */
+export function hasOrderingIntent(text: string) {
+  const normalized = text.toLowerCase();
+  if (hasSiteCreditIntent(normalized)) return false;
+  if (ORDERING_IS_REALLY_BOOKING.test(normalized)) return false;
+  return ORDERING.test(normalized);
+}
+
 export function hasReservationIntent(text: string) {
   const normalized = text.toLowerCase();
+  if (hasSiteCreditIntent(normalized)) return false;
+  // A food order is not a table, so it must not take the Resy route.
+  if (hasOrderingIntent(normalized)) return false;
   if (PRIVATE_SERVICE.test(normalized)) return false;
+  // A celebration belongs to the restaurant team, and a booking verb does not
+  // change that: "I want to book an anniversary party" is an enquiry, and it
+  // used to carry the Resy button while the answer correctly described an
+  // enquiry. Naming a table settles it the other way, exactly as it does in
+  // resolveDateIntent: "bday dinner for 4, just a normal table" is a table.
+  if (CELEBRATION.test(normalized)) return TABLE_WORD.test(normalized);
   return RESERVATION.test(normalized) || TABLE_REQUEST.test(normalized);
 }
 
@@ -196,6 +249,9 @@ export function hasReservationIntent(text: string) {
 // birthday?" is a normal reservation that happens to name an occasion.
 export function hasCelebrationIntent(text: string) {
   const normalized = text.toLowerCase();
+  if (hasSiteCreditIntent(normalized)) return false;
+  // "Can I get delivery for my birthday?" is an ordering question first.
+  if (hasOrderingIntent(normalized)) return false;
   if (hasReservationIntent(normalized)) return false;
   return PRIVATE_SERVICE.test(normalized) || CELEBRATION.test(normalized);
 }
@@ -203,11 +259,13 @@ export function hasCelebrationIntent(text: string) {
 // Which call to action, if any, the answer should carry. Intent in the current
 // message always wins; only an explicit continuation inherits from the turn
 // above it, so the button never lingers over an unrelated later question.
-export function resolveCta(text: string, history: ChatTurn[]): "resy" | "event" | "credit" | undefined {
+export function resolveCta(text: string, history: ChatTurn[]): Cta | undefined {
   if (hasSiteCreditIntent(text)) return "credit";
+  if (hasOrderingIntent(text)) return "order";
   if (hasReservationIntent(text)) return "resy";
   if (hasCelebrationIntent(text)) return "event";
-  if (!CONTINUATION.test(text.trim())) return undefined;
+  const trimmed = text.trim();
+  if (!CONTINUATION.test(trimmed) && !PARTY_SIZE.test(trimmed) && !EVENT_DETAIL.test(trimmed)) return undefined;
   // Scan back until a turn actually carries an intent. Stopping at the first
   // user turn lost the button whenever a bare date sat in between:
   // "I want to celebrate my birthday" / "What about October 15?" / "How do I
@@ -218,6 +276,7 @@ export function resolveCta(text: string, history: ChatTurn[]): "resy" | "event" 
     const turn = history[index];
     if (turn.role !== "user") continue;
     if (hasSiteCreditIntent(turn.text)) return "credit";
+    if (hasOrderingIntent(turn.text)) return "order";
     if (hasReservationIntent(turn.text)) return "resy";
     if (hasCelebrationIntent(turn.text)) return "event";
   }
@@ -240,6 +299,10 @@ export type DateIntent = "event" | "table" | "clarify" | "none";
 
 export function resolveDateIntent(text: string, history: ChatTurn[]): DateIntent {
   const normalized = text.toLowerCase();
+  // Neither a website-credit question nor a food order is a booking question, whatever
+  // date either happens to name.
+  if (hasSiteCreditIntent(normalized)) return "none";
+  if (hasOrderingIntent(normalized)) return "none";
   // 1. Naming a table is decisive, even alongside an occasion:
   //    "can I book a table for my birthday?" is an ordinary reservation.
   if (TABLE_WORD.test(normalized)) return "table";

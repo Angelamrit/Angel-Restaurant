@@ -2,6 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { ChatMessage } from "./ChatMessage";
+import { MEMORY_KEY, decodeMemory, encodeMemory, isChatCta, type ChatCta as Cta } from "@/lib/chat/memory";
 // Imported here rather than in app/layout.tsx so the stylesheet travels with this
 // component's chunk. SiteChrome loads the widget lazily and only outside /admin,
 // so administration pages request neither the markup nor these styles.
@@ -20,7 +21,6 @@ const PINNED_SLACK = 56;
 const EXIT_MS = 240;
 const reducedMotion = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-type Cta = "resy" | "event" | "credit";
 type Turn = { id: number; role: "user" | "model"; text: string; cta?: Cta };
 
 // Placing the caret in the composer opens the on-screen keyboard on a touch
@@ -33,10 +33,29 @@ let turnId = 0;
 const nextId = () => ++turnId;
 const modelTurn = (id: number, text: string, cta?: Cta): Turn => ({ id, role: "model", text, cta });
 
+// Conversation memory, read once as the initial transcript. An effect would
+// cost a second render on every visit, and nothing is at risk here: the
+// transcript only renders inside the dialog, which is closed on the first
+// paint, so a restored conversation changes nothing about the markup the
+// server sent and there is no hydration mismatch to answer for.
+//
+// Without this the assistant forgets an exchange the visitor can still see:
+// following the celebration button is a full navigation, which remounts the
+// widget and would otherwise empty the transcript mid-conversation.
+const restoreTurns = (): Turn[] => {
+  if (typeof window === "undefined") return [];
+  try {
+    return decodeMemory(sessionStorage.getItem(MEMORY_KEY)).map((turn) => ({ ...turn, id: nextId() }));
+  } catch {
+    // Private mode, a blocked origin or a cleared store: start fresh.
+    return [];
+  }
+};
+
 export function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
-  const [turns, setTurns] = useState<Turn[]>([]);
+  const [turns, setTurns] = useState<Turn[]>(restoreTurns);
   const [loading, setLoading] = useState(false);
   // Held open for the length of the exit animation, then unmounted.
   const [closing, setClosing] = useState(false);
@@ -85,6 +104,17 @@ export function ChatWidget() {
     const el = transcriptRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   });
+
+  // Written once an exchange settles rather than on every streamed frame: a
+  // synchronous storage write per animation frame would cost more than the
+  // feature is worth. An empty transcript is never written, so opening the chat
+  // without sending anything never erases a stored conversation.
+  useEffect(() => {
+    if (loading || turns.length === 0) return;
+    try {
+      sessionStorage.setItem(MEMORY_KEY, encodeMemory(turns.map(({ role, text, cta }) => ({ role, text, cta }))));
+    } catch { /* quota or private mode: memory is best effort, never fatal */ }
+  }, [turns, loading]);
 
   useEffect(() => () => {
     abortRef.current?.abort();
@@ -146,7 +176,7 @@ export function ChatWidget() {
       // Reservation intent is decided on the server, beside the gate, so the
       // browser never needs the knowledge base to know when to offer Resy.
       const header = response.headers.get("x-chat-cta");
-      const cta = header === "resy" || header === "event" || header === "credit" ? (header as Cta) : undefined;
+      const cta = isChatCta(header) ? header : undefined;
       if (type.includes("application/json")) {
         // `cta` is honoured here too: when the model is unavailable the visitor
         // still gets the booking route rather than only "try again shortly".

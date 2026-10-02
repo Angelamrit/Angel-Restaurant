@@ -125,6 +125,11 @@ export function Footer() {
       <div className="container-shell footer-bottom">
         <div className="footer-bottom-left"><span>© {new Date().getFullYear()} Angel Indian Restaurant</span><span>100% halal food · Full bar · Queens, New York</span><a className="circle-btn" href="#top" aria-label="Back to top">↑</a></div>
         <div className="footer-bottom-right"><Link href="/privacy">Privacy &amp; terms</Link></div>
+        <p className="footer-credit">
+          <a href={restaurant.aceva} target="_blank" rel="noopener noreferrer">Designed &amp; built by Aceva Tech</a>
+          <a href={restaurant.aceva} target="_blank" rel="noopener noreferrer" aria-label="Aceva Tech website, acevatech.com (opens in a new tab)">acevatech.com ↗</a>
+          <a href={restaurant.acevaInstagram} target="_blank" rel="noopener noreferrer" aria-label="Aceva Tech on Instagram, @acevatechnology (opens in a new tab)">Instagram @acevatechnology ↗</a>
+        </p>
       </div>
     </footer>
   );

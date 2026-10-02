@@ -2,13 +2,7 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { collections } from "./database";
 
-// Rate-limit identity. Only Vercel's own proxy header may be trusted: x-real-ip
-// and x-forwarded-for are ordinary request headers, so a caller can rotate them
-// per request and defeat the limiter. Off Vercel there is no trusted source, so
-// every caller shares one bucket.
-export function clientSource(headers: Headers) {
-  return process.env.VERCEL ? headers.get("x-vercel-forwarded-for")?.trim() || "unknown" : "local";
-}
+export { clientSource } from "./client-source.ts";
 
 // Counters live in MongoDB (with a TTL index on expiresAt), so the limit holds
 // across serverless instances and cold starts. Returns true while under the limit.

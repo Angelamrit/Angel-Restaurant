@@ -21,9 +21,33 @@ export async function saveEnquiry(data: Record<EnquiryField, string>): Promise<E
   }
 }
 
+// The same details already saved in the last ten minutes (a double click, a refresh, a retry after a slow response).
+// Fails open: if the lookup cannot be made the enquiry is accepted rather than lost.
+export async function isRecentDuplicate(data: Record<EnquiryField, string>) {
+  try {
+    const since = new Date(Date.now() - 10 * 60_000).toISOString();
+    // Exact matches only (as typed, or lower-cased); no pattern is ever built from visitor input.
+    const hit = await collections().enquiries.findOne(
+      { email: { $in: [data.Email, data.Email.toLowerCase()] }, date: data.Date, occasion: data.Occasion, guests: Number(data.Guests), createdAt: { $gte: since } },
+      { projection: { _id: 1 } },
+    );
+    return !!hit;
+  } catch {
+    return false;
+  }
+}
+
 export async function markEnquiryEmailed(id: string) {
   try {
-    await collections().enquiries.updateOne({ id }, { $set: { emailed: true } });
+    await collections().enquiries.updateOne({ id }, { $set: { emailed: true }, $unset: { emailError: "" } });
+  } catch {
+    // Non-critical: the enquiry itself is already stored.
+  }
+}
+
+export async function markEnquiryEmailFailed(id: string, reason: string) {
+  try {
+    await collections().enquiries.updateOne({ id }, { $set: { emailed: false, emailError: reason.slice(0, 300) } });
   } catch {
     // Non-critical: the enquiry itself is already stored.
   }

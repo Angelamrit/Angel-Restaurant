@@ -17,6 +17,9 @@ export type EnquiryValues = Partial<Record<EnquiryField, string>>;
 
 export type EnquiryState = {
   status: "idle" | "success" | "error";
+  // On success: false when the enquiry was saved but the notification email did not go out. The team still sees it in
+  // the admin, but the visitor is told, rather than assured it is "on its way".
+  emailed?: boolean;
   // "date_taken": an event is already held on the requested date. Decided by
   // lib/events.ts, the same service the assistant reads, never here.
   code?: "validation" | "rate_limit" | "delivery" | "config" | "date_taken";
@@ -31,7 +34,14 @@ type ValidationResult =
   | { ok: true; data: ValidatedEnquiry }
   | { ok: false; fieldErrors: Partial<Record<EnquiryErrorField, string>>; values: EnquiryValues };
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Letters, digits and the punctuation real addresses use, with a dotted domain. Deliberately excludes ? & , ; < > " and
+// spaces, so an address can never carry mailto: parameters (?bcc=...) into the admin page's reply link or extra recipients.
+const EMAIL_RE = /^[A-Za-z0-9.!#$%'*+/=^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)+$/;
+// Link-stuffing is the commonest enquiry-form spam; a real enquiry rarely needs even one link.
+const LINK_RE = /(?:https?:\/\/|www\.)\S+|\b[a-z0-9-]+\.(?:com|net|org|ru|xyz|top|info|biz|shop|site|online|click|link)\/\S*/gi;
+export const countLinks = (text: string) => (text.match(LINK_RE) ?? []).length;
+// Control characters (other than tab and newline) have no place in stored text or the notification email.
+const stripControl = (value: string) => value.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f\u2028\u2029]/g, "");
 
 // Strips characters that could be used for email-header injection (\r\n) or
 // that simply have no business in a subject line or reply-to header.
@@ -55,6 +65,7 @@ export function validateEnquiry(formData: FormData): ValidationResult {
   const name = raw.Name ?? "";
   if (name.length < 1) fieldErrors.Name = "Please tell us your name.";
   else if (name.length > 100) fieldErrors.Name = "Name is too long.";
+  else if (countLinks(name) > 0 || /[<>]/.test(name)) fieldErrors.Name = "Please enter your name.";
 
   const email = raw.Email ?? "";
   if (!EMAIL_RE.test(email) || email.length > 254) fieldErrors.Email = "Please enter a valid email address.";
@@ -92,6 +103,7 @@ export function validateEnquiry(formData: FormData): ValidationResult {
 
   const message = raw.Message ?? "";
   if (message.length > 2000) fieldErrors.Message = "Message is too long.";
+  else if (countLinks(message) > 1) fieldErrors.Message = "Please remove the links from your message. We will reply to you by email.";
 
   const consent = formData.get("Consent");
   if (consent !== "on") fieldErrors.Consent = "Please confirm you agree to be contacted.";
@@ -103,26 +115,32 @@ export function validateEnquiry(formData: FormData): ValidationResult {
   return {
     ok: true,
     data: {
-      Name: sanitizeHeaderValue(name),
+      Name: sanitizeHeaderValue(stripControl(name)),
       Email: sanitizeHeaderValue(email),
       Phone: phone,
       Guests: String(guestsNum),
       Date: date,
       Occasion: occasion,
-      Message: message,
+      Message: stripControl(message),
     },
   };
 }
 
-export async function deliverEnquiry(data: ValidatedEnquiry): Promise<boolean> {
+export type Delivery = { ok: true } | { ok: false; reason: string };
+
+// Sends the notification and says why when it cannot. The reason never contains a visitor's details; it is stored
+// with the enquiry so the administrator can see what to fix (see app/admin/(workspace)/enquiries/page.tsx).
+export async function deliverEnquiry(data: ValidatedEnquiry): Promise<Delivery> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.CONTACT_FROM_EMAIL;
-  const to = restaurant.inbox;
+  // CONTACT_TO_EMAIL (documented in .env.example) chooses the recipient; without a valid one, the restaurant's inbox.
+  const configuredTo = process.env.CONTACT_TO_EMAIL?.trim() ?? "";
+  const to = EMAIL_RE.test(configuredTo) ? configuredTo : restaurant.inbox;
   // `vercel env pull` writes the literal text "[SENSITIVE]" for protected variables; treat that like an empty value and say so.
   const unusable = (value?: string) => !value || /^\[.*\]$/.test(value.trim());
   if (unusable(apiKey) || unusable(from)) {
     console.error("Enquiry email not sent: RESEND_API_KEY or CONTACT_FROM_EMAIL is missing or still a placeholder such as [SENSITIVE]. The enquiry itself was saved.");
-    return false;
+    return { ok: false, reason: `Email is not configured on this deployment: ${unusable(apiKey) ? "RESEND_API_KEY" : "CONTACT_FROM_EMAIL"} is missing or a placeholder.` };
   }
   const text = [
     "Private dining enquiry",
@@ -147,10 +165,11 @@ export async function deliverEnquiry(data: ValidatedEnquiry): Promise<boolean> {
       // tell apart. Only Resend's own error name and message are logged, never the visitor's details.
       const detail = await response.json().catch(() => ({})) as { name?: string; message?: string };
       console.error("Enquiry email rejected by Resend", response.status, detail.name ?? "", detail.message ?? "");
+      return { ok: false, reason: `Resend rejected the email (${response.status}${detail.name ? ` ${detail.name}` : ""}): ${(detail.message ?? "no details given").slice(0, 200)}` };
     }
-    return response.ok;
+    return { ok: true };
   } catch (error) {
     console.error("Enquiry email could not be sent", error instanceof Error ? error.name : "unknown error");
-    return false;
+    return { ok: false, reason: `Resend could not be reached (${error instanceof Error ? error.name : "unknown error"}).` };
   }
 }

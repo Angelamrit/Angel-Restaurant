@@ -75,7 +75,7 @@ export default async function Home() {
           </div>
           <ul className="hero-stats">
             <li className="frame frame-soft"><p className="eyebrow">MICHELIN</p><strong>Bib Gourmand</strong></li>
-            <li className="frame frame-soft"><p className="eyebrow">100% HALAL FOOD</p><strong>Full bar</strong></li>
+            <li className="frame frame-soft"><p className="eyebrow">ANGEL INDIAN RESTAURANT</p><strong>Full bar</strong></li>
             <li className="frame frame-soft"><p className="eyebrow">EST. 2019</p><strong>Jackson Heights · NY</strong></li>
           </ul>
         </div>
@@ -221,12 +221,12 @@ export default async function Home() {
           <div className="container-shell bar-grid" style={{ position: "relative" }}>
             <div className="bar-media" data-reveal="photo" data-tilt>
               <Photo name="bar-counter" alt="Angel’s bar, with bottles on lit shelves under hanging Edison bulbs" className="photo-frame bar-photo" sizes="(max-width: 767px) 100vw, 45vw" />
-              <div className="chip-float chip-float-bl frame frame-strong"><p className="eyebrow">100% halal food</p><strong>Full bar</strong></div>
+              <div className="chip-float chip-float-bl frame frame-strong"><p className="eyebrow">Angel Indian Restaurant</p><strong>Full bar</strong></div>
             </div>
             <div className="bar-copy">
               <SectionHead number="05" label="Full bar" title="Does Angel have a bar?" italic="Yes. Angel has a full bar." lede="A full bar. A warm room. Good company." id="bar-title" />
               <ul className="bar-chips rise" data-reveal data-stagger-children aria-label="At a glance">
-                {["100% halal food", "Full bar", "MICHELIN · Bib Gourmand", "Jackson Heights · NY"].map(fact => <li className="chip" key={fact}>{fact}</li>)}
+                {["Full bar", "MICHELIN · Bib Gourmand", "Jackson Heights · NY"].map(fact => <li className="chip" key={fact}>{fact}</li>)}
               </ul>
               <div className="frame frame-strong bar-card" data-reveal="words">
                 <div className="bar-card-head rise"><p className="eyebrow">{drinks.title}{drinks.kicker ? ` · ${drinks.kicker}` : ""}</p><span className="apricot-rule" data-reveal="line" aria-hidden="true" /></div>

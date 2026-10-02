@@ -734,10 +734,17 @@
   .footer-stats { display: grid; grid-template-columns: repeat(3, auto); justify-content: space-between; gap: 1rem; margin-top: auto; padding-top: 1.5rem; }
   .footer-mark { position: relative; z-index: 2; margin-top: clamp(3rem, 6vw, 5rem); padding-bottom: 1rem; border-bottom: 1px solid rgba(246, 239, 226, 0.1); }
   .footer-wordmark { display: block; font-family: var(--font-editorial); font-size: clamp(5rem, 16vw, 15rem); font-weight: 300; line-height: .85; letter-spacing: -.02em; color: transparent; -webkit-text-stroke: 1px rgba(226, 189, 108, 0.45); user-select: none; }
-  .footer-bottom { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; padding-block: 1.75rem 2.5rem; font-size: .62rem; letter-spacing: .12em; color: rgba(246, 239, 226, 0.6); }
-  .footer-bottom-left, .footer-bottom-right { display: flex; align-items: center; gap: 1.25rem; }
+  .footer-bottom { position: relative; z-index: 2; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem 1.5rem; padding-block: 1.75rem 2.5rem; font-size: .62rem; letter-spacing: .12em; color: rgba(246, 239, 226, 0.6); }
+  .footer-bottom-left, .footer-bottom-right { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.25rem; min-width: 0; }
+  .footer-bottom-right { margin-left: auto; }
   .footer-bottom a { color: inherit; text-decoration: none; }
   .footer-bottom a:hover { color: var(--gold-light); }
+  /* Creator credit: its own full-width row under the legal line, so it can never share a line with, or be pushed under, the back-to-top button. */
+  .footer-credit { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.5rem; margin: 0; padding: 1.25rem 5rem 0 0; /* right gap keeps the links clear of the floating chat button, which sits over the page corner */ border-top: 1px solid rgba(246, 239, 226, 0.12); min-width: 0; }
+  .footer-credit a { display: inline-flex; align-items: center; min-height: 1.5rem; color: inherit; text-decoration: none; min-width: 0; overflow-wrap: anywhere; }
+  .footer-credit a:hover { color: var(--gold-light); }
+  .footer-credit a:focus-visible { outline: var(--focus-width, 2px) solid var(--focus, currentColor); outline-offset: 3px; }
+  .footer-bottom-left > *, .footer-bottom-right > * { min-width: 0; overflow-wrap: anywhere; }
   .local-time { display: inline-flex; align-items: center; gap: .6rem; font-size: .55rem; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; }
   .local-time::before { content: ""; width: .45rem; height: .45rem; border-radius: 50%; background: var(--gold); box-shadow: 0 0 10px rgba(226, 189, 108, 0.9); animation: pulse-glow 2.4s ease-in-out infinite; }
   .local-time b { color: var(--gold-light); font-weight: 700; }
@@ -794,6 +801,7 @@
   .footer-top .badge { display: none; }
   .footer-grid { grid-template-columns: 1fr; }
   .footer-bottom { flex-direction: column; align-items: flex-start; }
+  .footer-bottom-right { margin-left: 0; }
   .chapter-rail { display: none; }
 }
 

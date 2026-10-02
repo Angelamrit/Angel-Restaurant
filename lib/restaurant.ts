@@ -17,6 +17,7 @@ export const restaurant = {
   // ACEVA Technology built and maintains this website. Shared with the
   // assistant through kb.confirmed_urls.aceva so the two can never drift.
   aceva: "https://acevatech.com/",
+  acevaInstagram: "https://www.instagram.com/acevatechnology/",
   // The online ordering destinations the client approved, and the only three the
   // assistant may ever name. Held here rather than in an environment variable so
   // they cannot be swapped at runtime, and read by both the answer and the

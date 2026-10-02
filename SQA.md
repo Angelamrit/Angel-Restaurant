@@ -35,7 +35,7 @@ Remaining review items:
 - The streamed menu loading boundary currently requires JavaScript to reveal the completed menu. Homepage and visit information have separate no-JavaScript regression coverage; a complete no-JavaScript menu fallback remains open.
 
 - Homepage/menu are force-dynamic and public menu queries are only deduplicated within a request. Measure database latency in the deployment region before introducing caching; invalidation must preserve immediate admin menu updates.
-- CSP is report-only. Audit production third-party scripts and reports before enforcing it.
+- CSP is enforced (proxy.ts, lib/csp.ts): per-request nonce with strict-dynamic, no unsafe-inline for scripts. Violations post to /api/csp-report and appear in the server log as "CSP violation"; check that log after each deploy that adds a third-party script.
 - Global styles, multiple font weights and decorative CSS remain optimization candidates. Measure production route transfer before splitting or removing them.
 - Full automated contrast auditing, real-device/browser coverage, deployed Core Web Vitals and production enquiry delivery still require verification. The browser regression suite does not certify these.
 

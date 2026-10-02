@@ -1,42 +1,16 @@
 import type { NextConfig } from "next";
 
-const isDev = process.env.NODE_ENV === "development";
-const isPreview = process.env.VERCEL_ENV === "preview";
-
-// Static (no-nonce) CSP: a nonce-based policy forces every page to render
-// dynamically (see node_modules/next/dist/docs/01-app/02-guides/content-security-policy.md),
-// which this brochure site does not need. 'unsafe-inline' on script-src is required
-// because Next emits inline RSC payload scripts on every page, and app/layout.tsx
-// ships an inline Restaurant JSON-LD script.
-// Do not add script hashes alongside 'unsafe-inline' — browsers drop 'unsafe-inline'
-// the moment any hash or nonce is present, which would break Next's own inline scripts.
-const previewToolbar = isPreview ? " https://vercel.live" : "";
-
-const csp = [
-  "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://www.googletagmanager.com${previewToolbar}`,
-  "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://www.google-analytics.com https://www.googletagmanager.com${previewToolbar}`,
-  `font-src 'self'${previewToolbar}`,
-  "media-src 'self'",
-  `connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com${previewToolbar}`,
-  `frame-src ${isPreview ? "https://vercel.live" : "'none'"}`,
-  "object-src 'none'",
-  "base-uri 'self'",
-  "form-action 'self'",
-  "frame-ancestors 'none'",
-  ...(isDev ? [] : ["upgrade-insecure-requests"]),
-].join("; ");
-
-// TODO: this ships as Content-Security-Policy-Report-Only for the first deploy.
-// After a browsing pass with no console violations (see plan verification steps),
-// rename the header key below to "Content-Security-Policy" to enforce it.
+// The Content Security Policy is NOT set here: proxy.ts builds it per request around a fresh
+// nonce (see lib/csp.ts), which is what lets script-src drop 'unsafe-inline'. Only the static
+// security headers below live in this file.
 const securityHeaders = [
-  { key: "Content-Security-Policy-Report-Only", value: csp },
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+  // Our images, video and scripts may only be embedded by this site itself (stops hot-linking and
+  // cross-site reads through <img>/<script>). Search and link-preview crawlers fetch directly, not via a browser embed.
+  { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()" },
 ];

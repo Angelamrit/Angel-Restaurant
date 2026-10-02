@@ -10,8 +10,7 @@ The immutable migration snapshot is `db/original-menu.json`: **84 dishes, eight 
 
 Use Node 24 LTS (minimum 22.18, for [native TypeScript script execution](https://nodejs.org/download/release/v22.18.0/docs/api/typescript.html)). Copy `.env.example` to `.env.local` and set `ADMIN_ACCESS_KEY` to at least 32 unpredictable characters. Generate a value with a password manager, or `node -p "require('node:crypto').randomBytes(32).toString('hex')"`. Never commit that value.
 
-Set `MONGODB_URI` to an Atlas development connection string locally (or pull it
-from Vercel), and leave Blob variables empty if you do not need upload testing.
+Set `MONGODB_URI` to a development MongoDB connection string (an Atlas development cluster, or a local MongoDB), and leave `BLOB_READ_WRITE_TOKEN` empty: uploads are then stored under `.data/uploads`.
 Then run:
 
 ```sh
@@ -28,18 +27,17 @@ Seed records its completion in the `migrations` collection. Re-running it does n
 
 ## Production setup
 
-Provision MongoDB Atlas through the Vercel Marketplace and a public Vercel Blob
-store. Atlas injects `MONGODB_URI` into the selected Vercel environments. No
-cloud resources, accounts or deployments were created by this implementation.
+The site runs on the Hostinger VPS: follow [DEPLOY_HOSTINGER.md](./DEPLOY_HOSTINGER.md) for the server, nginx, HTTPS and the update routine. Use any MongoDB you control (Atlas, or MongoDB on the server). Dish photos are stored on the server under `.data/uploads` unless `BLOB_READ_WRITE_TOKEN` is set. No cloud resources, accounts or deployments were created by this implementation.
 
 Set these server environment variables before enabling the deployment:
 
 | Variable | Purpose |
 | --- | --- |
-| `MONGODB_URI` | Atlas connection string, injected by the Vercel MongoDB Atlas integration |
+| `MONGODB_URI` | MongoDB connection string (Atlas, or a MongoDB on the server) |
 | `MONGODB_DB` | Optional database name; defaults to `angel-restaurant` |
 | `ADMIN_ACCESS_KEY` | Temporary shared administrator key, minimum 32 random characters |
-| `BLOB_READ_WRITE_TOKEN` | Server-only token for the public Blob store |
+| `BLOB_READ_WRITE_TOKEN` | Optional, server-only. Leave unset on the VPS (photos then go to `.data/uploads`). Only needed to keep using a Vercel Blob store |
+| `CLIENT_IP_HEADER` | Behind nginx, set to `x-real-ip` so rate limits (enquiry form, chat, admin sign-in) apply per visitor. See DEPLOY_HOSTINGER.md |
 | `ADMIN_ORIGIN` | Optional canonical admin origin for reverse proxies; otherwise the incoming request URL origin is checked |
 | `NEXT_PUBLIC_SITE_URL` | Existing public canonical domain |
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Optional existing GA4 property ID |
@@ -49,9 +47,9 @@ Set these server environment variables before enabling the deployment:
 
 Run `npm run db:migrate`, `npm run db:seed`, and `npm run db:verify` against the production database **before** switching traffic. The migration creates collection indexes, including the TTL index used for temporary login rate limits. No schema writes or seeding occur during visitor requests or builds.
 
-MongoDB is required in every environment; there is no SQLite fallback. Vercel always requires MongoDB Atlas for menu and administrator data.
+MongoDB is required in every environment; there is no SQLite fallback.
 
-The database uses the official `mongodb` driver with `@vercel/functions` pool lifecycle support. `@vercel/blob` provides durable image storage and `sharp` performs image validation/re-encoding. There is no ORM or authentication provider.
+The database uses the official `mongodb` driver. Dish photos are stored on the server (or, optionally, in a Vercel Blob store via `@vercel/blob`) and `sharp` performs image validation/re-encoding. There is no ORM or authentication provider.
 
 ## Data and publishing
 
@@ -69,9 +67,9 @@ Old/replaced and abandoned uploads are retained rather than deleting a file that
 
 ## Analytics
 
-The existing Vercel Analytics and optional GA4 are retained. `lib/analytics.ts` provides `trackEvent`; menu filters and homepage dish previews call it, and delegated link tracking captures reservation/directions/contact/call/WhatsApp clicks. Search terms, email addresses, telephone numbers and query strings are not sent. Admin routes are excluded, including after client-side navigation. Production collection respects Do Not Track; development dispatches `angel:analytics` DOM events for QA without sending provider traffic.
+Optional GA4 is retained; Vercel Analytics was removed with the move off Vercel, and page views are counted by the site's own anonymous counter (`/admin/analytics`). `lib/analytics.ts` provides `trackEvent`; menu filters and homepage dish previews call it, and delegated link tracking captures reservation/directions/contact/call/WhatsApp clicks. Search terms, email addresses, telephone numbers and query strings are not sent. Admin routes are excluded, including after client-side navigation. Production collection respects Do Not Track; development dispatches `angel:analytics` DOM events for QA without sending provider traffic.
 
-`/admin/analytics` honestly shows configuration states and links to provider reports. It does **not** claim to import traffic totals or historical records. Enable Web Analytics in Vercel; custom events may require the applicable Vercel plan. Configure GA4 and verify production events in its DebugView/realtime reports. Provider reporting APIs/credentials are needed to bring daily/weekly visitor counts, trends and device reports into this workspace. Browser blocking or privacy settings can prevent delivery; local event dispatch cannot establish provider receipt.
+`/admin/analytics` honestly shows configuration states and links to provider reports. It does **not** claim to import traffic totals or historical records. Configure GA4 and verify production events in its DebugView/realtime reports. Provider reporting APIs/credentials are needed to bring daily/weekly visitor counts, trends and device reports into this workspace. Browser blocking or privacy settings can prevent delivery; local event dispatch cannot establish provider receipt.
 
 ## Tomorrow's authentication work
 
@@ -101,4 +99,4 @@ Main implementation groups:
 - `app/menu/page.tsx`, `app/page.tsx`, `components/menu-explorer.tsx`, `components/dish-showcase.tsx`: public data integration.
 - `components/site-chrome.tsx`, `components/analytics-*`, `lib/analytics.ts`: public/admin shell separation and existing analytics integration.
 
-Known deployment limitations: MongoDB Atlas and Vercel Blob need real credentials and live smoke tests; provider analytics delivery/import needs deployment verification; permanent authentication and upload garbage collection remain separate work. Category management is intentionally deferred.
+Known deployment limitations: MongoDB and the Resend sender need real credentials and live smoke tests; provider analytics delivery/import needs deployment verification; permanent authentication and upload garbage collection remain separate work. Category management is intentionally deferred.

@@ -29,12 +29,15 @@ export default function PrivacyPage() {
           anyone else, and we use it only to respond to your enquiry.
         </p>
         <p>
-          This website uses Google Analytics and Vercel Analytics to understand how visitors use the site, such as which
-          pages are viewed and roughly how many people visit. These tools use cookies or similar technology and collect
-          information like your approximate location, device and browser type, and the pages you view; they do not
-          collect your name or contact details unless you choose to give them to us through the enquiry form. You can
-          block this kind of tracking using your browser&rsquo;s privacy settings or an ad blocker without affecting your
-          ability to use the site.
+          This website uses Google Analytics, and a simple visitor counter of its own, to understand how visitors use the
+          site, such as which pages are viewed and roughly how many people visit. Google Analytics uses cookies or similar
+          technology and collects information like your approximate location, device and browser type, and the pages you
+          view. Our own counter sets one first-party cookie holding a random identifier (it contains no personal details)
+          and records only that identifier, the page viewed, the time, whether the device is a phone, tablet or computer,
+          and the website you came from; it does not store your IP address. Neither tool collects your name or contact
+          details unless you choose to give them to us through the enquiry form. You can block this kind of tracking using
+          your browser&rsquo;s privacy settings, Do Not Track or an ad blocker without affecting your ability to use the
+          site.
         </p>
         <h2>Reservations</h2>
         <p>

@@ -1,14 +1,13 @@
 "use client";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import { Analytics } from "@vercel/analytics/next";
 const subscribe = () => () => {};
 const clientSnapshot = () => navigator.doNotTrack !== "1";
 const serverSnapshot = () => false;
 
 // The ~90 KB Google tag mounts once the page has finished loading and the browser is idle
 // (or 4s at the latest), so it does not compete with hydration and first paint on slow
-// phones. Vercel Analytics is a ~1 KB deferred script and still mounts straight away.
+// phones. Page views are counted by the site's own anonymous counter (components/page-view-tracker.tsx).
 function useAfterLoadIdle() {
   const [ready, setReady] = useState(false);
   useEffect(() => {
@@ -31,7 +30,7 @@ function useAfterLoadIdle() {
   return ready;
 }
 
-export function AnalyticsProviders({ gaId }: { gaId?: string }) {
+export function AnalyticsProviders({ gaId, nonce }: { gaId?: string; nonce?: string }) {
   const enabled = useSyncExternalStore(subscribe, clientSnapshot, serverSnapshot);
   const ready = useAfterLoadIdle();
   useEffect(() => {
@@ -40,5 +39,5 @@ export function AnalyticsProviders({ gaId }: { gaId?: string }) {
     browser[`ga-disable-${gaId}`] = !enabled;
     return () => { browser[`ga-disable-${gaId}`] = true; };
   }, [gaId, enabled]);
-  return enabled ? <><Analytics beforeSend={event => new URL(event.url).pathname.startsWith("/admin") ? null : event} />{gaId && ready && <GoogleAnalytics gaId={gaId} />}</> : null;
+  return enabled && gaId && ready ? <GoogleAnalytics gaId={gaId} nonce={nonce} /> : null;
 }

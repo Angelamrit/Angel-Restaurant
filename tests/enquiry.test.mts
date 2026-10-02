@@ -82,12 +82,14 @@ test("the notification email reports success or the exact reason it failed", asy
     globalThis.fetch = (async (_url: unknown, init?: RequestInit) => { sent = JSON.parse(String(init?.body)); return new Response("{}", { status: 200 }); }) as typeof fetch;
     assert.deepEqual(await deliverEnquiry(result.data), { ok: true });
     assert.equal(sent?.reply_to, "asha@example.com");
-    assert.deepEqual(sent?.to, [restaurant.inbox, restaurant.email]);
+    // The public address and the inbox are the same Gmail address, so it appears once, not twice.
+    assert.equal(restaurant.email, restaurant.inbox);
+    assert.deepEqual(sent?.to, [restaurant.inbox]);
     assert.ok(!/[\r\n]/.test(sent?.subject ?? ""), "no header injection through the name");
     assert.match(sent?.text ?? "", /Guests: 12/);
     process.env.CONTACT_TO_EMAIL = "team@example.org";
     await deliverEnquiry(result.data);
-    assert.deepEqual(sent?.to, ["team@example.org", restaurant.inbox, restaurant.email], "configured, restaurant inbox, and public contact addresses receive the notification");
+    assert.deepEqual(sent?.to, ["team@example.org", restaurant.inbox], "the configured recipient and the restaurant inbox both receive the notification, once each");
     process.env.CONTACT_TO_EMAIL = "not an address";
     await deliverEnquiry(result.data);
     assert.notEqual(sent?.to[0], "not an address", "an invalid CONTACT_TO_EMAIL falls back to the restaurant inbox");

@@ -8,11 +8,8 @@ import type { PublicSection } from "@/lib/menu-types";
 import { MenuRefresh } from "@/components/menu-refresh";
 import { MotionReady } from "@/components/motion-ready";
 
-// Pre-rendered and served from cache rather than rendered for every visit. Admin menu
-// saves already call revalidatePath("/") and revalidatePath("/menu") (app/api/admin/menu),
-// so edits still appear immediately; the 10-minute window only backs that up, matching
-// the public-menu data cache in lib/menu-repository.ts.
-export const revalidate = 600;
+// Rendered per request: the page reads the live menu, so it must not be built (or need the database) at build time.
+export const dynamic = "force-dynamic";
 
 export const metadata = pageMetadata({
   title: "Menu: Tandoori, Biryani & Curries in Jackson Heights",

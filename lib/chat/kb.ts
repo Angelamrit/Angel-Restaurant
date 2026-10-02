@@ -1,4 +1,4 @@
-// Canonical, authoritative chatbot knowledge base (KB v1.13).
+// Canonical, authoritative chatbot knowledge base (KB v1.15).
 //
 // This module is the SINGLE source of KB truth. The knowledge base previously
 // existed as both kb.ts and an identical kb.json; the duplicate was removed so the
@@ -12,7 +12,7 @@
 // The guard is the production bundle check documented in SQA.md.
 export const kb = {
   "metadata": {
-    "version": "1.14",
+    "version": "1.15",
     "name": "Angel Restaurant Chatbot Knowledge Base",
     "authoritative": true,
     "source": "Angel restaurant repository content reference and published menu data",
@@ -37,6 +37,11 @@ export const kb = {
       "a dedicated birthday room or separate private party space",
       "any ordering platform other than DoorDash, Grubhub and Uber Eats",
       "delivery times, fees, minimum orders, radiuses or discounts",
+      "a current or standing Michelin distinction, or any award year other than 2021",
+      "coverage by any publication not named in these facts",
+      "a full buyout, exclusive hire, minimum spend or deposit",
+      "exact or current ratings and review counts",
+      "the wording of Angel's website, its headings or its taglines",
       "ACEVA head-office address or office locations",
       "ACEVA pricing, team size, founding year or client names"
     ],
@@ -68,7 +73,7 @@ export const kb = {
     {
       "topic": "career",
       "status": "confirmed",
-      "body": "Before Angel, Chef Amrit Pal Singh worked at Rahi and Adda in New York."
+      "body": "Before Angel, Chef Amrit Pal Singh cooked at Rahi in Manhattan, which has since become Semma, and helped open Adda in Long Island City in 2018. He was hired for both by Chef Chintan Pandya."
     },
     {
       "topic": "opening",
@@ -83,7 +88,7 @@ export const kb = {
     {
       "topic": "philosophy",
       "status": "confirmed",
-      "body": "The cooking is rooted in Indian traditions, with an ingredient-led approach and a focus on bold flavors without using excess cream or spice to conceal the food's flavor."
+      "body": "The cooking is rooted in Indian traditions, with an ingredient-led approach and a focus on bold flavors without using excess cream or spice to conceal the food's flavor. Chef Amrit sums this up as simple but good, and says of the food: \"My family and my customers eat the same food.\" Every new dish is tasted at home with his family before it reaches the menu."
     },
     {
       "topic": "halal",
@@ -98,7 +103,7 @@ export const kb = {
     {
       "topic": "recognition",
       "status": "confirmed",
-      "body": "Angel Indian Restaurant has Michelin Bib Gourmand recognition, and Chef Amrit is associated with it. The recognition is a Bib Gourmand and not a Michelin star. Never describe it as a star or agree that it is one, and never state an award year, a certificate number, an issuer, a grading, or any course or training detail for it."
+      "body": "Angel Indian Restaurant was given Michelin Bib Gourmand recognition in 2021, among that year's new New York Bib Gourmands, and Chef Amrit is associated with it. Never mention that recognition without the year 2021, and never say that Angel has, holds, is or currently carries a Bib Gourmand: it was named one in 2021. A Bib Gourmand recognises good quality, good value cooking. The recognition is a Bib Gourmand and not a Michelin star. Never describe it as a star or agree that it is one. Never give any award year other than 2021, and never state a certificate number, an issuer, a grading, or any course or training detail for it. Never present it as a current or standing distinction: if asked whether it still stands, say 2021 is what can be confirmed and the restaurant team can confirm anything more recent."
     },
     {
       "topic": "address",
@@ -139,6 +144,81 @@ export const kb = {
       "topic": "dietary",
       "status": "confirmed",
       "body": "The printed menu marks specific dishes as vegan. The menu also asks guests to tell the restaurant about a food allergy or special dietary requirement before ordering. Do not provide allergy or cross-contamination guarantees."
+    },
+    {
+      "topic": "michelin-description",
+      "status": "confirmed",
+      "body": "The MICHELIN Guide's own description of Angel praised the vegetarian cooking, saying that plate after plate would demonstrate the real magic of going meatless, and called dum biryani the signature order, capped in a dome of golden-brown pastry and filled with fragrant basmati rice, ginger, caramelised onions and peas. It also singled out the house-made paneer khurchan in a dark, zesty curry of tomatoes and peppers. Attribute these words to the MICHELIN Guide and to no one else."
+    },
+    {
+      "topic": "press-eater",
+      "status": "confirmed",
+      "body": "Eater New York's critic Robert Sietsema chose Angel's vegetable dum biryani as one of the best New York restaurant dishes of 2019. He wrote that the biryani is baked under a sealed lid, that the lid is made of pastry, making for a very picturesque pie, and that excavating the pie is a deliriously pleasurable experience. He also noted Angel's connection to Adda."
+    },
+    {
+      "topic": "press-infatuation",
+      "status": "confirmed",
+      "body": "The Infatuation has reviewed Angel twice. Its 2024 review of the original location scored Angel 8.6 out of 10 and described a server cutting open the bread balloon on top of the goat dum biryani to reveal layers of onions, herbs, rice and goat. Its 2026 review of the 37th Avenue location calls the goat dum biryani as showstopping as ever, with a crisp pastry lid that is sliced open at the table, recommends the lassuni gobi, the fish moilee and the house-made paneer, and describes the newer room as larger, though still not huge, and a little more upscale, with a full bar. The 8.6 score belongs to the 2024 review of the original location only."
+    },
+    {
+      "topic": "press-timeout",
+      "status": "confirmed",
+      "body": "Time Out New York includes Angel in its best Indian restaurants in New York, calling it a no-frills-yet-beloved restaurant in Jackson Heights and recommending any of the biryanis or the chole bhature."
+    },
+    {
+      "topic": "press-culinary-backstreets",
+      "status": "confirmed",
+      "body": "Culinary Backstreets profiled Angel in 2022 under Chef Amrit's guiding principle, simple but good, reported that he was born in Pathankot in the mid-1980s, and described the original dining room as small and almost bare of decoration, screened from an open kitchen."
+    },
+    {
+      "topic": "press-hellgate",
+      "status": "confirmed",
+      "body": "Hell Gate reviewed Angel in February 2025 under the headline that Angel Indian Restaurant still brings the heat in Jackson Heights, and reported that Chef Amrit cooked at Rahi, now Semma, and helped open Adda."
+    },
+    {
+      "topic": "press-limits",
+      "status": "confirmed",
+      "body": "A review is the publication's own opinion and never a fact about Angel; say which publication said it. Never claim that The New Yorker, Condé Nast Traveller, Resy, the New York Times or any publication not named in these facts has written about Angel, because that cannot be confirmed. Never invent or guess a headline, a date, a score, a star rating, a ranking, a list position or a quotation for any publication, and never attribute one publication's words to another."
+    },
+    {
+      "topic": "ratings",
+      "status": "confirmed",
+      "body": "When Angel's ratings were last checked, on 2 October 2026, the Google rating for the 37th Avenue address was 4.7 from roughly 3,900 reviews, and the Yelp rating was 4.5. Offer these as the figures from when they were last checked rather than as today's, because ratings move. Never state a rating or a review count as exact or current, never add up or compare counts, and never quote a rating for a platform not named here."
+    },
+    {
+      "topic": "location-history",
+      "status": "confirmed",
+      "body": "Angel opened in 2019 at 74-14 37th Road in Jackson Heights and now trades a few blocks away at 75-18 37th Avenue, a larger space that was previously the restaurant Samudra. The 37th Avenue location opened in July 2025 and the original 37th Road location has since closed, so there is one Angel today. Never describe Angel as having two locations, a second branch or an additional site, and never give an exact closing date for the original room."
+    },
+    {
+      "topic": "experience",
+      "status": "confirmed",
+      "body": "The 37th Avenue room is a fine-dining space with a full bar, and Angel describes it as suited to special occasions, business dinners and romantic evenings. Chef Amrit cooks in an open kitchen, which Angel presents as a Chef's Table experience, and reservations are recommended with walk-ins welcome subject to availability. The original 37th Road room was much smaller and plainer, so describe the current room rather than the old one unless the visitor asks about the move."
+    },
+    {
+      "topic": "biryani",
+      "status": "confirmed",
+      "body": "Angel's dum biryanis are slow-cooked under a sealed baked lid that is cut open at the table, and they come with raita. The menu lists vegetable, chicken and goat dum biryani. Published accounts describe the lid variously as pastry, as naan and as a bread balloon, so call it a baked bread-and-pastry lid rather than naming one material, and never promise the same presentation for any other dish."
+    },
+    {
+      "topic": "dal-makhni-pairing",
+      "status": "confirmed",
+      "body": "Dal makhni is black lentils cooked slowly with herbs and chilli, and Angel serves it with garlic naan and basmati rice in copper serving ware. That pairing is the restaurant's own suggestion rather than a reviewer's recommendation."
+    },
+    {
+      "topic": "buyout",
+      "status": "confirmed",
+      "body": "Whether Angel offers a full buyout or exclusive hire of the restaurant is not published, and neither is any minimum spend. Never confirm, deny, price or describe a buyout, an exclusive hire, a minimum spend or a deposit; the restaurant team settles all of that directly."
+    },
+    {
+      "topic": "chef-family",
+      "status": "confirmed",
+      "body": "Chef Amrit grew up cooking in his family's kitchen in Pathankot, where his father, a former army officer, cooked at home. His younger brother runs restaurants in Sydney. Never name, describe or discuss any other family member, and never say what any relative taught him or cooked."
+    },
+    {
+      "topic": "positioning",
+      "status": "confirmed",
+      "body": "Angel presents itself as a fine-dining Indian restaurant in Jackson Heights, Queens, serving 100% halal food with a full bar at lunch and dinner. Never quote or paraphrase the wording of Angel's website, never describe what any page or heading says, and never repeat a tagline as though it were a fact."
     },
     {
       "topic": "website-credit",

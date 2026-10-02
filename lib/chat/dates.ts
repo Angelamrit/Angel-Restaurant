@@ -83,6 +83,37 @@ const OFFSET_FROM = new RegExp(`\\b(${QUANTITY})\\s+(day|week|month)s?\\s+(?:fro
 // A month named on its own, used only to supply the month a bare day is missing
 // ("an event in December" ... "what about the 25th?").
 const MONTH_ONLY = new RegExp(`\\b(${MONTH_NAMES})\\b(?:\\s*,?\\s*(\\d{4}))?`, "i");
+// Spelled-out ordinals. A visitor who types "the twentieth of December" means the
+// same day as "the 20th", and the date patterns below only read digits, so the
+// words are rewritten to digits first. Longest names are listed first so
+// "twenty-first" is never matched as "first".
+const ORDINAL_WORDS = new Map([
+  ["twenty-first", 21], ["twenty first", 21], ["twenty-second", 22], ["twenty second", 22],
+  ["twenty-third", 23], ["twenty third", 23], ["twenty-fourth", 24], ["twenty fourth", 24],
+  ["twenty-fifth", 25], ["twenty fifth", 25], ["twenty-sixth", 26], ["twenty sixth", 26],
+  ["twenty-seventh", 27], ["twenty seventh", 27], ["twenty-eighth", 28], ["twenty eighth", 28],
+  ["twenty-ninth", 29], ["twenty ninth", 29], ["thirty-first", 31], ["thirty first", 31],
+  ["thirtieth", 30], ["twentieth", 20], ["nineteenth", 19], ["eighteenth", 18],
+  ["seventeenth", 17], ["sixteenth", 16], ["fifteenth", 15], ["fourteenth", 14],
+  ["thirteenth", 13], ["twelfth", 12], ["eleventh", 11], ["tenth", 10], ["ninth", 9],
+  ["eighth", 8], ["seventh", 7], ["sixth", 6], ["fifth", 5], ["fourth", 4],
+  ["third", 3], ["second", 2], ["first", 1],
+]);
+const ORDINAL_WORD = new RegExp(String.raw`\b(${[...ORDINAL_WORDS.keys()].join("|")})\b`, "gi");
+const suffix = (day: number) => (day % 10 === 1 && day !== 11 ? "st" : day % 10 === 2 && day !== 12 ? "nd" : day % 10 === 3 && day !== 13 ? "rd" : "th");
+const MONTH_IN_VIEW = new RegExp(String.raw`\b(?:${MONTHS.join("|")})\b`, "i");
+// Below this, an ordinal word is everyday speech more often than it is a date.
+const AMBIGUOUS_BELOW = 10;
+const digitiseOrdinals = (text: string) => {
+  const monthInView = MONTH_IN_VIEW.test(text);
+  return text.replace(ORDINAL_WORD, (word) => {
+    const day = ORDINAL_WORDS.get(word.toLowerCase());
+    if (!day) return word;
+    if (!monthInView && day < AMBIGUOUS_BELOW) return word;
+    return `${day}${suffix(day)}`;
+  });
+};
+
 // An ordinal that counts years, not days. "I want to host my 40th birthday"
 // used to resolve "40th" as a bare day, so the assistant answered "Which month
 // are you thinking of?" to a message that named no date at all. Three shapes are
@@ -111,7 +142,7 @@ export function resolveDate(text: string, context: string[] = [], now: Date = ne
   const today = todayInRestaurantTz(now);
   // An age is removed before anything looks for a date, so "my 40th birthday for
   // 30 guests" carries no date and is never sent back as "which month?".
-  const value = text.toLowerCase().replace(AGE_ORDINAL, " ");
+  const value = digitiseOrdinals(text.toLowerCase()).replace(AGE_ORDINAL, " ");
 
   const iso = ISO.exec(value);
   if (iso) return build(Number(iso[1]), Number(iso[2]), Number(iso[3]));

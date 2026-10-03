@@ -12,6 +12,8 @@
     "db:seed": "node scripts/database.mts seed",
     "db:verify": "node scripts/database.mts verify",
     "db:photos": "node scripts/database.mts photos",
+    "admin:password": "node scripts/admin-password.mts",
+    "assets:optimize": "node scripts/optimize-public-images.mjs",
     "test": "node --test tests/*.test.mts",
     "test:e2e": "playwright test",
     "test:chat": "node tests/chat-live.mjs"

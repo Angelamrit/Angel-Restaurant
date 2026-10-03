@@ -33,7 +33,6 @@ function PreviewCopy({ dish, index }: { dish: Dish; index: number }) {
 
 export function DishShowcase({ dishes }: { dishes: Dish[] }) {
   const { active, setActive, setPaused, reducedMotion } = useSlideAdvance(dishes.length);
-  const [manualPaused, setManualPaused] = useState(false);
   const [hovering, setHovering] = useState(false);
   const [narrow, setNarrow] = useState(false);
   const buttons = useRef<(HTMLButtonElement | null)[]>([]);
@@ -48,7 +47,7 @@ export function DishShowcase({ dishes }: { dishes: Dish[] }) {
   }, []);
 
   // On a phone the open panel is under its dish, so the carousel must not move it while it is being read.
-  useEffect(() => { setPaused(manualPaused || hovering || narrow); }, [manualPaused, hovering, narrow, setPaused]);
+  useEffect(() => { setPaused(hovering || narrow); }, [hovering, narrow, setPaused]);
 
   const activeIndex = Math.min(active, Math.max(dishes.length - 1, 0));
 
@@ -94,7 +93,7 @@ export function DishShowcase({ dishes }: { dishes: Dish[] }) {
             {narrow && index === activeIndex && (
               <figure className="frame frame-strong dish-preview dish-preview--inline">
                 <div className="dish-preview-frame is-active">
-                  <Image src={dish.image} alt={dish.name} fill sizes="100vw" />
+                  <Image src={dish.image} alt={dish.name} fill sizes="100vw" quality={45} />
                   <PreviewCopy dish={dish} index={index} />
                 </div>
               </figure>
@@ -103,23 +102,15 @@ export function DishShowcase({ dishes }: { dishes: Dish[] }) {
         ))}
       </ul>
       {!narrow && (
-        <figure className="frame frame-strong dish-preview" data-reveal="photo" data-tilt data-paused={manualPaused || hovering || reducedMotion}>
+        <figure className="frame frame-strong dish-preview" data-reveal="photo" data-tilt data-paused={hovering || reducedMotion}>
           {dishes.map((dish, index) => (
             <div className={`dish-preview-frame${index === activeIndex ? " is-active" : ""}`} aria-hidden={index !== activeIndex} key={dish.id}>
-              {index === activeIndex && <Image src={dish.image} alt={dish.name} fill sizes="50vw" />}
+              {index === activeIndex && <Image src={dish.image} alt={dish.name} fill sizes="50vw" quality={45} />}
               <PreviewCopy dish={dish} index={index} />
             </div>
           ))}
           {/* Re-keyed on the active dish so the fill restarts with every advance. */}
           <span className="dish-preview-progress" aria-hidden="true" key={activeIndex} />
-          {!reducedMotion && dishes.length > 1 && (
-            <button
-              type="button"
-              className="cinematic-pause dish-preview-pause"
-              aria-pressed={manualPaused}
-              onClick={() => setManualPaused((value) => !value)}
-            >{manualPaused ? "Play" : "Pause"} <span aria-hidden="true">{manualPaused ? "▷" : "Ⅱ"}</span></button>
-          )}
         </figure>
       )}
     </div>

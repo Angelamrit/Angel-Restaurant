@@ -205,12 +205,6 @@
           "vegan": true
         },
         {
-          "name": "Dal Makhni",
-          "price": "$18.99",
-          "description": "Black lentil cooked over a low flame with herbs and chilli.",
-          "vegetarian": true
-        },
-        {
           "name": "Dal Tadka",
           "price": "$17.99",
           "description": "Whole yellow lentil, cumin, red onion, ginger, garlic.",
@@ -259,11 +253,6 @@
           "description": "Marinated chicken, red chilli powder, garam masala."
         },
         {
-          "name": "Butter Chicken",
-          "price": "$19.99",
-          "description": "Clay oven cooked dark chicken meat, simmered in tomato sauce."
-        },
-        {
           "name": "Chicken Vindaloo",
           "price": "$19.99",
           "description": "Goan style chicken cooked with potatoes in a chilli sauce with a touch of vinegar."
@@ -287,11 +276,6 @@
           "name": "Chicken Korma",
           "price": "$19.99",
           "description": "Cashew, fried onion, ginger, garlic and spices."
-        },
-        {
-          "name": "Lamb Rogan Josh",
-          "price": "$21.99",
-          "description": "Cubes of lamb cooked in a tomato and onion sauce."
         },
         {
           "name": "Lamb Bhuna",
@@ -384,6 +368,22 @@
           "name": "Goat Dum Biryani",
           "price": "$25.99",
           "description": "Goat, basmati rice and saffron. Served with raita."
+        },
+        {
+          "name": "Dal Makhni",
+          "price": "$18.99",
+          "description": "Black lentil cooked over a low flame with herbs and chilli.",
+          "vegetarian": true
+        },
+        {
+          "name": "Butter Chicken",
+          "price": "$19.99",
+          "description": "Clay oven cooked dark chicken meat, simmered in tomato sauce."
+        },
+        {
+          "name": "Lamb Rogan Josh",
+          "price": "$21.99",
+          "description": "Cubes of lamb cooked in a tomato and onion sauce."
         }
       ]
     },
@@ -592,7 +592,7 @@
     },
     {
       "name": "Lamb Rogan Josh",
-      "section": "Main course",
+      "section": "Chef’s special",
       "price": "$21.99",
       "description": "Cubes of lamb cooked in a rich tomato and onion sauce.",
       "image": "lamb-rogan-josh-v2",
@@ -601,11 +601,20 @@
     },
     {
       "name": "Dal Makhni",
-      "section": "Main course",
+      "section": "Chef’s special",
       "price": "$18.99",
       "description": "Black lentil cooked over a low flame with herbs and chilli. Order it with garlic naan.",
       "image": "dal-makhni",
       "vegetarian": true,
+      "stock": false
+    },
+    {
+      "name": "Butter Chicken",
+      "section": "Chef’s special",
+      "price": "$19.99",
+      "description": "Clay oven cooked dark chicken meat, simmered in tomato sauce.",
+      "image": "butter-chicken",
+      "vegetarian": false,
       "stock": false
     }
   ],

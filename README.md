@@ -14,7 +14,7 @@ Restaurant website built with Next.js (App Router), TypeScript and Tailwind 4, w
 
 ```bash
 npm install
-cp .env.example .env.local   # then fill in MONGODB_URI and ADMIN_ACCESS_KEY
+cp .env.example .env.local   # then fill in MONGODB_URI, and run: npm run admin:password -- --write
 npm run db:migrate           # creates indexes
 npm run db:seed              # loads the original menu once
 npm run dev

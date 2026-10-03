@@ -6,6 +6,16 @@ import { buildCsp, makeNonce } from "@/lib/csp";
 // as x-nonce: Next reads it to tag its own scripts, and app/layout.tsx passes it to the Google
 // Analytics loader and the JSON-LD block. The other security headers live in next.config.ts.
 export function proxy(request: NextRequest) {
+  // Behind a TLS-terminating reverse proxy, trust its original-protocol header
+  // (the proxy must overwrite this header with the connection's scheme).
+  const originalProtocol = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim().toLowerCase()
+    || request.nextUrl.protocol.replace(":", "");
+  if (process.env.NODE_ENV === "production" && originalProtocol !== "https") {
+    const secureUrl = request.nextUrl.clone();
+    secureUrl.protocol = "https:";
+    return NextResponse.redirect(secureUrl, 308);
+  }
+
   const nonce = makeNonce();
   const csp = buildCsp({ nonce, dev: process.env.NODE_ENV === "development" });
 
@@ -25,7 +35,7 @@ export const config = {
   // never render HTML, so they need no nonce. Router prefetches are skipped as the docs recommend.
   matcher: [
     {
-      source: "/((?!api/|_next/static|_next/image|favicon.ico|angel/|videos/|Certificates/|icon|apple-icon|opengraph-image|robots.txt|sitemap.xml|manifest.webmanifest).*)",
+      source: "/((?!api/|_next/static|_next/image|favicon.ico|angel/|angel-vps/|videos/|Certificates/|icon|apple-icon|opengraph-image|robots.txt|sitemap.xml|manifest.webmanifest).*)",
       missing: [
         { type: "header", key: "next-router-prefetch" },
         { type: "header", key: "purpose", value: "prefetch" },

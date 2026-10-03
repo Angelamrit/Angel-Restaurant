@@ -154,3 +154,5 @@ body:has(.admin-root) { padding-bottom: 0; }
   .admin-tabs { gap: 1rem; font-size: .78rem; }
   .admin-topbar { letter-spacing: .06em; flex-wrap: wrap; padding-block: .8rem; }
 }
+
+.admin-form .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }

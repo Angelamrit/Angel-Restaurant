@@ -1,3 +1,5 @@
+import { InputError } from "../menu-validation.ts";
+
 export type ChatRole = "user" | "model";
 export type ChatTurn = { role: ChatRole; text: string };
 
@@ -19,6 +21,20 @@ export function validateMessage(value: unknown): string {
   const text = value.trim();
   if (!text || text.length > MAX_MESSAGE) throw new Error("Invalid message.");
   return text;
+}
+
+export function parseChatRequest(value: unknown): { message: string; history: ChatTurn[] } {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new InputError("Please send a message.");
+  }
+  const body = value as { message?: unknown; history?: unknown };
+  let message: string;
+  try {
+    message = validateMessage(body.message);
+  } catch {
+    throw new InputError("Please send a message.");
+  }
+  return { message, history: trimHistory(body.history) };
 }
 
 export function trimHistory(value: unknown): ChatTurn[] {

@@ -68,7 +68,7 @@ export function GalleryLightbox({ photos, children }: { photos: GalleryPhoto[]; 
           <figure className="lightbox-figure">
             <Image
               key={photos[active].name}
-              src={`/angel/${photos[active].name}.webp`}
+              src={`/angel-vps/${photos[active].name}.avif`}
               alt={`${photos[active].label} — Angel editorial collection`}
               fill
               sizes="(max-width: 767px) 90vw, 40vw"

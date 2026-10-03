@@ -24,6 +24,13 @@ export async function sendEnquiry(_prev: EnquiryState, formData: FormData): Prom
   // A timestamp from the future is as telling as one that is too recent: nothing real produces it.
   if (startedAt > 0 && (Date.now() - startedAt < 3000 || startedAt > Date.now() + 60_000)) return { status: "success" };
 
+  // Reject malformed enquiries before touching rate-limit storage. Validation
+  // is local and cheap; invalid submissions should not wait on database I/O.
+  const result = validateEnquiry(formData);
+  if (!result.ok) {
+    return { status: "error", code: "validation", fieldErrors: result.fieldErrors, values: result.values };
+  }
+
   const requestHeaders = await headers();
   // Fails open: if the counter store is down the enquiry is still worth taking.
   if (!(await withinLimit("enquiry", clientSource(requestHeaders), 10 * 60_000, 3, true))) {
@@ -34,11 +41,6 @@ export async function sendEnquiry(_prev: EnquiryState, formData: FormData): Prom
   // caps what can reach the restaurant's inbox and database in an hour, however many addresses it uses.
   if (!(await withinLimit("enquiry-all", "everyone", 60 * 60_000, 40, true))) {
     return { status: "error", code: "rate_limit" };
-  }
-
-  const result = validateEnquiry(formData);
-  if (!result.ok) {
-    return { status: "error", code: "validation", fieldErrors: result.fieldErrors, values: result.values };
   }
 
   // The same enquiry sent twice in ten minutes (a double click, a refresh, a retry after a slow response) is

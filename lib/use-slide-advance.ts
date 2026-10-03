@@ -2,12 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-// Shared by every image index/slideshow on the site (CinematicSlideshow,
-// DishShowcase, DishIndex): advances `active` on a fixed interval unless
-// paused, reduced motion is on, the tab is hidden, or there's nothing to
-// advance through. Callers that let this drive visible motion for more than
-// a few seconds unattended must expose a visible way to pause it (WCAG 2.2
-// SC 2.2.2) — CinematicSlideshow's Play/Pause button is the reference.
+// Shared by every image index and slideshow. It stops for reduced motion, hidden tabs,
+// hover or keyboard focus as requested by the individual interactive component.
 export function useSlideAdvance(length: number, { intervalMs = 5200, autoplay = true }: { intervalMs?: number; autoplay?: boolean } = {}) {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(!autoplay);

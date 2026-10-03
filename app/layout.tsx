@@ -94,9 +94,10 @@ const structuredData = {
   url: restaurant.siteUrl,
   telephone: `+1${restaurant.phoneHref}`,
   email: restaurant.email,
-  image: new URL("/angel/room-long-table-v2.webp", restaurant.siteUrl).toString(),
+  image: new URL("/angel-vps/room-long-table-v2.avif", restaurant.siteUrl).toString(),
   hasMenu: new URL("/menu", restaurant.siteUrl).toString(),
   servesCuisine: ["Indian"],
+  founder: { "@type": "Person", name: "Amrit Pal Singh", jobTitle: "Chef and owner", url: restaurant.chefSite },
   address: {
     "@type": "PostalAddress",
     streetAddress: "75-18 37th Avenue",

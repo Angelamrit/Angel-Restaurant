@@ -27,7 +27,7 @@ test("public routes, guarded mutations, dish lifecycle, uploads and tracking", a
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/admin/menu/new");
   await expect(page).toHaveURL(/\/admin$/);
-  await page.getByLabel("Administrator access key").fill("angel-local-e2e-only-access-key-2026");
+  await page.getByLabel("Administrator password").fill("Zx4#mK9!vTq2");
   await page.getByRole("button", { name: "Open workspace" }).click();
   await expect(page).toHaveURL(/\/admin\/dashboard$/);
   await expect(page.locator(".site-header")).toHaveCount(0);

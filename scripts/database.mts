@@ -7,7 +7,7 @@ import { PAGE_VIEW_RETENTION_SECONDS } from "../lib/visitor-analytics-core.ts";
 
 nextEnv.loadEnvConfig(process.cwd());
 const mode = process.argv[2];
-if (!['migrate', 'seed', 'verify', 'photos'].includes(mode)) throw new Error("Use migrate, seed, verify, or photos.");
+if (!['migrate', 'seed', 'verify', 'photos', 'specials'].includes(mode)) throw new Error("Use migrate, seed, verify, photos, or specials.");
 
 type Dish = { name: string; price: string; description?: string; vegetarian?: boolean; vegan?: boolean; tag?: string };
 type Snapshot = { menu: { id: string; filter: string; title: string; kicker?: string; items: Dish[] }[]; signatureDishes: { name: string; image: string; description: string }[] };
@@ -101,6 +101,7 @@ const photoUpdates = [
   { name: "Tandoori Chicken", from: "tandoori-aceva", to: "tandoori-chicken" },
   { name: "Lamb Rogan Josh", from: "lamb-curry-aceva", to: "lamb-rogan-josh-v2" },
   { name: "Dal Makhni", from: "dal-naan-aceva", to: "dal-makhni" },
+<<<<<<< Updated upstream
   { name: "Chole Bhatura", from: "chole-bhature-stock", to: "chole-bhatura-v2" },
   { name: "Chicken Dum Biryani", from: "chicken-biryani-stock", to: "chicken-dum-biryani-v2" },
   { name: "Goat Dum Biryani", from: "goat-biryani-stock", to: "goat-dum-biryani-v2" },
@@ -112,6 +113,16 @@ const photoUpdates = [
   { name: "Chicken Dum Biryani", from: "chicken-dum-biryani", to: "chicken-dum-biryani-v2" },
   { name: "Goat Dum Biryani", from: "goat-dum-biryani", to: "goat-dum-biryani-v2" },
   { name: "Vegetable Dum Biryani", from: "vegetable-dum-biryani", to: "vegetable-dum-biryani-v2" },
+=======
+  { name: "Chole Bhatura", from: "chole-bhature-stock", to: "chole-bhatura" },
+  { name: "Chole Bhatura", from: "chole-bhatura-v2", to: "chole-bhatura" },
+  { name: "Chicken Dum Biryani", from: "chicken-biryani-stock", to: "chicken-dum-biryani" },
+  { name: "Chicken Dum Biryani", from: "chicken-dum-biryani-v2", to: "chicken-dum-biryani" },
+  { name: "Goat Dum Biryani", from: "goat-biryani-stock", to: "goat-dum-biryani" },
+  { name: "Goat Dum Biryani", from: "goat-dum-biryani-v2", to: "goat-dum-biryani" },
+  { name: "Vegetable Dum Biryani", from: "vegetable-biryani-stock", to: "vegetable-dum-biryani" },
+  { name: "Vegetable Dum Biryani", from: "vegetable-dum-biryani-v2", to: "vegetable-dum-biryani" },
+>>>>>>> Stashed changes
   // The three kulcha dishes shared one stock photo; each now has its own photograph.
   { name: "Amritsari Paneer Kulcha", from: "amritsari-kulcha-stock", to: "amritsari-paneer-kulcha" },
   { name: "Amritsari Aloo Kulcha", from: "amritsari-kulcha-stock", to: "amritsari-aloo-kulcha" },
@@ -131,11 +142,44 @@ async function photos() {
   console.log("The public menu cache refreshes within 10 minutes, or immediately on the next admin save.");
 }
 
+// Promote three existing main-course dishes into the curated Chef's Special
+// course. Keep prices, descriptions, availability and visibility as edited in
+// the admin; only repair their course/type/image and register those image URLs.
+async function specials() {
+  const { menuItems, media } = collections();
+  const names = ["Lamb Rogan Josh", "Dal Makhni", "Butter Chicken"];
+  const chef = snapshot.menu.find(section => section.id === "chefs-special");
+  if (!chef) throw new Error("Chef's Special course is missing from the menu snapshot.");
+  const now = new Date().toISOString();
+  for (const [position, name] of names.entries()) {
+    const dish = chef.items.find(item => item.name === name);
+    const featured = snapshot.signatureDishes.find(item => item.name === name);
+    if (!dish || !featured) throw new Error(`Chef's Special source data is missing for ${name}.`);
+    const image = `/angel/${featured.image}.webp`;
+    await media.updateOne({ url: image }, { $setOnInsert: { id: dishId(image), url: image, createdAt: now } }, { upsert: true });
+    const result = await menuItems.updateOne(
+      { id: dishId(name) },
+      { $set: { categoryId: chef.id, type: "chef-special", image, sortOrder: chef.items.findIndex(item => item.name === name) }, $setOnInsert: { updatedAt: now } },
+    );
+    if (!result.matchedCount) {
+      const record: MenuItemDocument = {
+        id: dishId(name), name, description: dish.description || "", priceCents: Math.round(Number(dish.price.slice(1)) * 100),
+        categoryId: chef.id, type: "chef-special", image, available: true, visible: true, sortOrder: position,
+        vegetarian: !!dish.vegetarian, vegan: !!dish.vegan, tag: dish.tag || "", featured: true,
+        featuredDescription: featured.description || "", createdAt: now, updatedAt: now,
+      };
+      await menuItems.insertOne(record);
+    }
+    console.log(`${name}: now listed as a Chef's Special.`);
+  }
+}
+
 try {
   if (mode === "migrate") await migrate();
   if (mode === "seed") await seed();
   if (mode === "verify") await verify();
   if (mode === "photos") await photos();
+  if (mode === "specials") await specials();
 } finally {
   await closeDatabase();
 }

@@ -19,6 +19,9 @@ export type EnquiryDocument = {
 };
 // Only a hash of the session token is stored, so a database read cannot be replayed as a login.
 export type AdminSessionDocument = { tokenHash: string; createdAt: string; expiresAt: Date };
+// The administrator password after it has been changed from the workspace. `basedOn` fingerprints the credential in the
+// environment it replaced, so changing the environment credential later (recovery) supersedes this record.
+export type AdminCredentialDocument = { _id: "admin"; hash: string; basedOn: string; updatedAt: string };
 export type AuditDocument = { at: string; action: string; target: string; detail?: unknown };
 export type MigrationDocument = { id: string; appliedAt: string };
 // First-party visitor analytics (lib/visitor-analytics.ts). Anonymous by design: a random cookie ID, never a name,
@@ -66,6 +69,7 @@ export function collections() {
     menuItems: database.collection<MenuItemDocument>("menu_items"),
     media: database.collection<MediaDocument>("media"),
     adminSessions: database.collection<AdminSessionDocument>("admin_sessions"),
+    adminCredentials: database.collection<AdminCredentialDocument>("admin_credentials"),
     audit: database.collection<AuditDocument>("audit_log"),
     enquiries: database.collection<EnquiryDocument>("enquiries"),
     eventReservations: database.collection<EventReservationDocument>("event_reservations"),

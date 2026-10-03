@@ -3,6 +3,7 @@ import { DishIndex } from "@/components/dish-index";
 import { Words } from "@/components/split-text";
 import { JsonLd } from "@/components/json-ld";
 import { pageMetadata, breadcrumbList } from "@/lib/seo";
+import { restaurant } from "@/lib/restaurant";
 
 export const metadata = pageMetadata({ title: "Our Story: Chef Amrit Pal Singh", description: "How Chef Amrit Pal Singh brought India’s family kitchens to Jackson Heights, Queens, and opened Angel Indian Restaurant in 2019.", path: "/story" });
 const breadcrumbs = breadcrumbList([{ name: "Our story", path: "/story" }]);
@@ -23,6 +24,7 @@ export default function StoryPage() {
             <p className="rise rise-late">In Pathankot, India, Amrit Pal Singh grew up around food and family. His journey took him to culinary training in Australia, then to the kitchens of Rahi and Adda in New York.</p>
             <p className="rise rise-late">In October 2019, he invested his savings in a restaurant of his own in Jackson Heights. He named it Angel, after his young daughter.</p>
             <p className="rise rise-late">The approach has stayed close to home: preserve the true taste of each ingredient. Give it care, rather than hiding it behind excess cream or spice.</p>
+            <div className="button-row rise rise-late"><a className="button button-outline" href={restaurant.chefSite} target="_blank" rel="noopener" aria-label="Chef Amrit’s website (opens in a new tab)"><span>Chef Amrit’s website</span><span className="button-icon" aria-hidden="true">↗</span></a></div>
           </div>
         </div>
       </section>

@@ -7,6 +7,7 @@ import { money } from "@/lib/menu-types";
 type Plate = { name: string; price: string; description: string; section?: string; image: string; imageRatio: string; vegetarian: boolean; stock: boolean };
 
 function imageRatio(image: string) {
+<<<<<<< Updated upstream
   const ratios: [string, string][] = [
     ["chicken-dum-biryani-v2.webp", "1536 / 1024"],
     ["amritsari-paneer-kulcha.webp", "1536 / 1024"],
@@ -18,6 +19,23 @@ function imageRatio(image: string) {
     ["mix-veg-kulcha.webp", "1408 / 1117"],
   ];
   return ratios.find(([filename]) => image.endsWith(filename))?.[1] ?? "4 / 3";
+=======
+  const ratios: Record<string, string> = {
+    "chicken-dum-biryani": "1536 / 1024",
+    "amritsari-paneer-kulcha": "1536 / 1024",
+    "vegetable-dum-biryani": "1200 / 675",
+    "goat-dum-biryani": "1448 / 1086",
+    "chole-bhatura": "1448 / 1086",
+    "amritsari-kulcha-stock": "1600 / 1200",
+    "amritsari-aloo-kulcha": "1199 / 1312",
+    "mix-veg-kulcha": "1408 / 1117",
+    "lamb-rogan-josh": "1122 / 1402",
+    "dal-makhni": "1122 / 1402",
+    "butter-chicken": "1254 / 1254",
+  };
+  const filename = image.split("/").at(-1)?.replace(/\.(?:avif|webp|jpe?g|png)$/i, "");
+  return (filename && ratios[filename]) || "4 / 3";
+>>>>>>> Stashed changes
 }
 
 const order = (index: number) => ({ "--i": index } as CSSProperties);
@@ -46,7 +64,10 @@ export function SignaturePlates({ specials, categories, dishCount }: { specials:
   })).sort((a, b) => Number(a.stock) - Number(b.stock));
   if (plates.length === 0) return null;
 
-  const groups = chunk(plates, 3);
+  const pairedNames = new Set(["Butter Chicken", "Lamb Rogan Josh"]);
+  const pairedPlates = plates.filter(dish => pairedNames.has(dish.name));
+  const groups = chunk(plates.filter(dish => !pairedNames.has(dish.name)), 3);
+  const pairedStart = groups.reduce((total, group) => total + group.length, 0);
 
   return (
     <section className="surface-gold tone-gold section" aria-label="Signature plates">
@@ -66,6 +87,13 @@ export function SignaturePlates({ specials, categories, dishCount }: { specials:
               )}
             </div>
           ))}
+          {pairedPlates.length > 0 && (
+            <div className="dish-feature-row dish-feature-row--pair">
+              {pairedPlates.map((dish, i) => (
+                <DishTile dish={dish} index={pairedStart + i} key={dish.name} />
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="menu-note type-caption dish-feature-close">
@@ -79,12 +107,13 @@ export function SignaturePlates({ specials, categories, dishCount }: { specials:
 
 function DishTile({ dish, index, large, eager }: { dish: Plate; index: number; large?: boolean; eager?: boolean }) {
   return (
-    <article className={`dish-feature-tile${large ? " is-large" : ""}`} data-reveal="photo" data-tilt style={order(index)}>
+    <article className={`dish-feature-tile${large ? " is-large" : ""}${dish.name === "Lamb Rogan Josh" ? " is-lamb-rogan-josh" : ""}`} data-reveal="photo" data-tilt style={order(index)}>
       <div className="dish-feature-image" style={{ aspectRatio: dish.imageRatio }}>
         <Image
           src={dish.image}
           alt={dish.stock ? `${dish.name} — illustrative food photograph` : dish.name}
           fill
+          quality={45}
           sizes={large ? "(max-width: 767px) 100vw, (max-width: 1023px) 60vw, 40vw" : "(max-width: 767px) 100vw, (max-width: 1023px) 30vw, 20vw"}
           loading={eager ? "eager" : undefined}
           fetchPriority={eager ? "high" : undefined}

@@ -8,10 +8,15 @@ import { InputError, validateMenu } from "./menu-validation";
 import { requireAdmin } from "./admin-access";
 import { audit } from "./audit";
 
-function item(row: MenuItemDocument): MenuItem {
+function item(row: MenuItemDocument, optimizeLocalImage = true): MenuItem {
+  // Keep database paths stable for admin edits and older seeded data, while
+  // serving the compact AVIF copies for first-party menu photography.
+  const image = optimizeLocalImage
+    ? row.image.replace(/^\/angel\/([^/]+)\.webp$/, "/angel-vps/$1.avif")
+    : row.image;
   return {
     id: row.id, name: row.name, description: row.description, priceCents: row.priceCents,
-    categoryId: row.categoryId, type: row.type, image: row.image, available: row.available,
+    categoryId: row.categoryId, type: row.type, image, available: row.available,
     visible: row.visible, sortOrder: row.sortOrder, vegetarian: row.vegetarian, vegan: row.vegan,
     tag: row.tag, featured: row.featured, featuredDescription: row.featuredDescription,
     createdAt: row.createdAt, updatedAt: row.updatedAt,
@@ -30,7 +35,7 @@ const loadPublicMenu = unstable_cache(async () => {
     getCategories(),
     collections().menuItems.find({ visible: true, available: true }, { projection: { _id: 0 } }).sort({ sortOrder: 1, name: 1, id: 1 }).toArray(),
   ]);
-  const items = rows.map(item);
+  const items = rows.map(row => item(row));
   return {
     categories,
     items,
@@ -45,13 +50,13 @@ export const getPublicMenu = cache(loadPublicMenu);
 
 export async function getAdminMenu() {
   await requireAdmin();
-  return (await collections().menuItems.find({}, { projection: { _id: 0 } }).sort({ sortOrder: 1, name: 1, id: 1 }).toArray()).map(item);
+  return (await collections().menuItems.find({}, { projection: { _id: 0 } }).sort({ sortOrder: 1, name: 1, id: 1 }).toArray()).map(row => item(row, false));
 }
 
 export async function getAdminItem(id: string) {
   await requireAdmin();
   const row = await collections().menuItems.findOne({ id }, { projection: { _id: 0 } });
-  return row ? item(row) : null;
+  return row ? item(row, false) : null;
 }
 
 export async function saveMenu(input: unknown, creating: boolean, version?: string) {

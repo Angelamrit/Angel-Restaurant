@@ -5,7 +5,7 @@ import { pageMetadata, breadcrumbList } from "@/lib/seo";
 
 export const metadata = pageMetadata({
   title: "Privacy & Terms",
-  description: "How angelindianrestaurant.com handles the information you share, uses analytics, and the terms for using this website.",
+  description: "How Angel Indian Restaurant handles the information you share, uses analytics, and the terms for using this website.",
   path: "/privacy",
 });
 const breadcrumbs = breadcrumbList([{ name: "Privacy & terms", path: "/privacy" }]);

@@ -36,13 +36,13 @@ export default function PressPage() {
           <div className="press-certificate-grid">
             <figure className="press-certificate frame frame-strong">
               <a href="/Certificates/Certificate01.jpeg" target="_blank" rel="noopener noreferrer" aria-label="View the Thrillist recognition full size">
-                <Image src="/Certificates/Certificate01.jpeg" alt="Framed Thrillist feature naming Angel Indian Restaurant among the 15 best Indian restaurants in NYC, October 2022" width={1083} height={1600} sizes="(max-width: 767px) calc(100vw - 4rem), 26rem" />
+                <Image src="/angel-vps/certificates/Certificate01.avif" alt="Framed Thrillist feature naming Angel Indian Restaurant among the 15 best Indian restaurants in NYC, October 2022" width={1083} height={1600} sizes="(max-width: 767px) calc(100vw - 4rem), 26rem" />
               </a>
               <figcaption><span>Thrillist</span><span>October 2022</span></figcaption>
             </figure>
             <figure className="press-certificate frame frame-strong">
               <a href="/Certificates/Certificate02.jpeg" target="_blank" rel="noopener noreferrer" aria-label="View the Eater recognition full size">
-                <Image src="/Certificates/Certificate02.jpeg" alt="Framed Eater feature, The Best Indian Restaurants in NYC, September 2024" width={679} height={1024} sizes="(max-width: 767px) calc(100vw - 4rem), 26rem" />
+                <Image src="/angel-vps/certificates/Certificate02.avif" alt="Framed Eater feature, The Best Indian Restaurants in NYC, September 2024" width={679} height={1024} sizes="(max-width: 767px) calc(100vw - 4rem), 26rem" />
               </a>
               <figcaption><span>Eater</span><span>September 2024</span></figcaption>
             </figure>

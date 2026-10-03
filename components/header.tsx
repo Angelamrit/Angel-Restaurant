@@ -18,6 +18,8 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
   const toggle = useRef<HTMLButtonElement>(null);
+  // The mobile toggle names the page you are on ("Our story +"); the home page and unknown routes keep "Menu".
+  const section = links.find(([href]) => pathname === href || pathname.startsWith(href + "/"))?.[1] ?? "Menu";
 
   useEffect(() => {
     const close = (event: KeyboardEvent) => { if (event.key === "Escape") { setOpen(false); toggle.current?.focus(); } };
@@ -79,7 +81,7 @@ export function Header() {
           </nav>
           <div className="header-actions">
             <a className="button button-primary header-cta" href={restaurant.resy}><span>Reserve a table</span><span className="button-icon" aria-hidden="true">↗</span></a>
-            <button ref={toggle} className="menu-toggle" aria-expanded={open} aria-controls="mobile-navigation" onClick={() => setOpen(!open)}>{open ? "Close −" : "Menu +"}</button>
+            <button ref={toggle} className="menu-toggle" aria-expanded={open} aria-controls="mobile-navigation" aria-label={`${section}: ${open ? "close" : "open"} navigation menu`} onClick={() => setOpen(!open)}>{open ? "Close −" : `${section} +`}</button>
           </div>
         </div>
         <nav id="mobile-navigation" className="mobile-navigation" aria-label="Mobile navigation" data-open={open}>

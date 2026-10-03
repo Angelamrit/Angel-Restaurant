@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from "react";
 import type { PublicSection } from "@/lib/menu-types";
 import { trackEvent } from "@/lib/analytics";
 import { SectionHead } from "@/components/section-head";
@@ -53,34 +53,39 @@ export function MenuExplorer({ menu, categories }: { menu: PublicSection[]; cate
   const categoryPillStyle = useFilterPill(categoryGroupRef, category);
   const dietPillStyle = useFilterPill(dietGroupRef, diet);
 
+  // The buttons and the sliding pill follow the tap at once; the long list (and its heading and count) re-renders just
+  // behind it as interruptible work, so a tap is acknowledged on the next frame instead of after the whole list.
+  const filters = useMemo(() => ({ category, diet, query }), [category, diet, query]);
+  const shown = useDeferredValue(filters);
+
   const sections = useMemo(() => {
-    const search = query.trim().toLowerCase();
+    const search = shown.query.trim().toLowerCase();
     return menu
-      .filter((section) => category === "All dishes" || section.filter === category)
+      .filter((section) => shown.category === "All dishes" || section.filter === shown.category)
       .map((section) => ({
         ...section,
         // A diet badge only earns its place where the section is mixed; "Vegan" always does.
         mixed: section.items.some((item) => !item.vegetarian),
         items: section.items.filter((item) => {
-          if (diet === "vegetarian" && !item.vegetarian) return false;
-          if (diet === "vegan" && !item.vegan) return false;
+          if (shown.diet === "vegetarian" && !item.vegetarian) return false;
+          if (shown.diet === "vegan" && !item.vegan) return false;
           if (!search) return true;
           return `${item.name} ${item.description ?? ""}`.toLowerCase().includes(search);
         }),
       }))
       .filter((section) => section.items.length > 0);
-  }, [category, diet, query, menu]);
+  }, [shown, menu]);
 
   const count = sections.reduce((total, section) => total + section.items.length, 0);
-  const dietLabel = diet === "vegan" ? "Vegan" : "Vegetarian";
+  const dietLabel = shown.diet === "vegan" ? "Vegan" : "Vegetarian";
 
   return (
     <div className="menu-explorer">
       <div aria-live="polite">
         <SectionHead
           label={`${count} ${count === 1 ? "dish" : "dishes"}`}
-          title={category}
-          aside={diet !== "all" && <span className="chip chip-solid">{dietLabel}</span>}
+          title={shown.category}
+          aside={shown.diet !== "all" && <span className="chip chip-solid">{dietLabel}</span>}
         />
       </div>
 
@@ -110,7 +115,7 @@ export function MenuExplorer({ menu, categories }: { menu: PublicSection[]; cate
       </div>
 
       {/* Keyed on the filters so every change replays the arrival, the way .dish-feature-tile does. */}
-      <div className="menu-list" key={`${category}-${diet}-${query}`}>
+      <div className="menu-list" key={`${shown.category}-${shown.diet}-${shown.query}`}>
         {sections.map((section, index) => (
           <section className="menu-list-section" key={section.id} aria-labelledby={`${section.id}-title`}>
             <header className="menu-list-head" data-reveal>

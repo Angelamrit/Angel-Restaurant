@@ -79,7 +79,7 @@ export function Footer() {
   return (
     <footer className="site-footer tone-dark">
       <span className="hairline footer-hairline" aria-hidden="true" />
-      <div className="footer-photo" aria-hidden="true"><Photo name="room-long-table-v2" mobileName="dining-room-portrait-v2" alt="" sizes="100vw" quality={45} /></div>
+      <div className="footer-photo" aria-hidden="true"><Photo name="room-long-table-v2" mobileName="dining-room-portrait-v3" alt="" sizes="100vw" quality={45} /></div>
       <div className="footer-bg" aria-hidden="true">
         <span className="orb orb-gold" style={{ left: "-10%", top: "-10%", width: "46vw", maxWidth: "720px", aspectRatio: "1", opacity: .5 }} />
         <span className="orb orb-ember orb-slow" style={{ right: "-12%", top: "30%", width: "40vw", maxWidth: "640px", aspectRatio: "1", opacity: .5 }} />

@@ -338,7 +338,7 @@
   .editorial-photo img { object-fit: cover; transform: scale(1); transition: transform var(--duration-cinematic) var(--ease-luxe), filter var(--duration-cinematic) var(--ease-luxe); }
   /* Per-photo focal points for object-fit: cover. */
   img[src*="room-long-table-v2"] { object-position: 62% 72%; }
-  img[src*="dining-room-portrait-v2"] { object-position: 50% 58%; }
+  img[src*="dining-room-portrait-v3"] { object-position: 50% 58%; }
   img[src*="room-guests-v2"] { object-position: 50% 66%; }
   img[src*="bar-counter"] { object-position: 50% 40%; }
   img[src*="storefront-street"] { object-position: 50% 0%; }

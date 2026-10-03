@@ -99,12 +99,19 @@ async function verify() {
 // administrator has uploaded since is left alone. Safe to run more than once.
 const photoUpdates = [
   { name: "Tandoori Chicken", from: "tandoori-aceva", to: "tandoori-chicken" },
-  { name: "Lamb Rogan Josh", from: "lamb-curry-aceva", to: "lamb-rogan-josh" },
+  { name: "Lamb Rogan Josh", from: "lamb-curry-aceva", to: "lamb-rogan-josh-v2" },
   { name: "Dal Makhni", from: "dal-naan-aceva", to: "dal-makhni" },
-  { name: "Chole Bhatura", from: "chole-bhature-stock", to: "chole-bhatura" },
-  { name: "Chicken Dum Biryani", from: "chicken-biryani-stock", to: "chicken-dum-biryani" },
-  { name: "Goat Dum Biryani", from: "goat-biryani-stock", to: "goat-dum-biryani" },
-  { name: "Vegetable Dum Biryani", from: "vegetable-biryani-stock", to: "vegetable-dum-biryani" },
+  { name: "Chole Bhatura", from: "chole-bhature-stock", to: "chole-bhatura-v2" },
+  { name: "Chicken Dum Biryani", from: "chicken-biryani-stock", to: "chicken-dum-biryani-v2" },
+  { name: "Goat Dum Biryani", from: "goat-biryani-stock", to: "goat-dum-biryani-v2" },
+  { name: "Vegetable Dum Biryani", from: "vegetable-biryani-stock", to: "vegetable-dum-biryani-v2" },
+  // These five photographs were later replaced under the same file name. Browsers and the image optimizer keep a
+  // file for 30 days, so the new versions live under new names; dishes already moved to the old name follow here.
+  { name: "Lamb Rogan Josh", from: "lamb-rogan-josh", to: "lamb-rogan-josh-v2" },
+  { name: "Chole Bhatura", from: "chole-bhatura", to: "chole-bhatura-v2" },
+  { name: "Chicken Dum Biryani", from: "chicken-dum-biryani", to: "chicken-dum-biryani-v2" },
+  { name: "Goat Dum Biryani", from: "goat-dum-biryani", to: "goat-dum-biryani-v2" },
+  { name: "Vegetable Dum Biryani", from: "vegetable-dum-biryani", to: "vegetable-dum-biryani-v2" },
   // The three kulcha dishes shared one stock photo; each now has its own photograph.
   { name: "Amritsari Paneer Kulcha", from: "amritsari-kulcha-stock", to: "amritsari-paneer-kulcha" },
   { name: "Amritsari Aloo Kulcha", from: "amritsari-kulcha-stock", to: "amritsari-aloo-kulcha" },

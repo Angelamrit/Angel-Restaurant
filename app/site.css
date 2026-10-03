@@ -941,9 +941,11 @@
 
   /* Chef-site slide progress: the active mark fills over the auto-advance interval. */
   .cinematic-progress button span { position: relative; overflow: hidden; }
-  .cinematic-progress button span::after { content: ""; position: absolute; inset: 0; width: 0; background: var(--gold-light); }
+  /* The fill grows with transform, not width: width forces layout and paint on every frame for the whole interval,
+     which made an idle home page (autoplaying slideshow) spend most of a phone CPU on rendering. */
+  .cinematic-progress button span::after { content: ""; position: absolute; inset: 0; background: var(--gold-light); transform: scaleX(0); transform-origin: left center; }
   .cinematic-slideshow:not([data-paused="true"]) .cinematic-progress button[aria-pressed="true"] span::after { animation: progress-run var(--slide-interval, 5200ms) linear both; }
-  @keyframes progress-run { to { width: 100%; } }
+  @keyframes progress-run { to { transform: scaleX(1); } }
   @supports (animation-timeline: view()) {
     .plating-steps.is-single .plating-step { animation: plating-single linear both; animation-timeline: --plating; animation-range: contain 0% contain 45%; }
     @keyframes plating-single { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }

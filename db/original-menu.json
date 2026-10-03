@@ -541,7 +541,7 @@
       "section": "Chef’s special",
       "price": "$22.99",
       "description": "Chicken, fragrant basmati rice and saffron. Served with raita.",
-      "image": "chicken-dum-biryani",
+      "image": "chicken-dum-biryani-v2",
       "vegetarian": false,
       "stock": false
     },
@@ -550,7 +550,7 @@
       "section": "Chef’s special",
       "price": "$25.99",
       "description": "Goat, basmati rice and saffron. Served with raita.",
-      "image": "goat-dum-biryani",
+      "image": "goat-dum-biryani-v2",
       "vegetarian": false,
       "stock": false
     },
@@ -559,7 +559,7 @@
       "section": "Chef’s special",
       "price": "$17.99",
       "description": "Chickpeas, fried flat bread and spices.",
-      "image": "chole-bhatura",
+      "image": "chole-bhatura-v2",
       "vegetarian": true,
       "stock": false
     },
@@ -577,7 +577,7 @@
       "section": "Chef’s special",
       "price": "$20.99",
       "description": "Fresh vegetables, paneer, basmati rice and saffron. Served with raita.",
-      "image": "vegetable-dum-biryani",
+      "image": "vegetable-dum-biryani-v2",
       "vegetarian": true,
       "stock": false
     },
@@ -595,7 +595,7 @@
       "section": "Main course",
       "price": "$21.99",
       "description": "Cubes of lamb cooked in a rich tomato and onion sauce.",
-      "image": "lamb-rogan-josh",
+      "image": "lamb-rogan-josh-v2",
       "vegetarian": false,
       "stock": false
     },

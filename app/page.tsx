@@ -34,7 +34,7 @@ const order = (index: number) => ({ "--i": index } as CSSProperties);
 // the presentation and motion are new. Do not reword or add claims here.
 const signature = [
   { name: "tandoori-chicken", alt: "Tandoori chicken from the clay oven", caption: "01 / FIRE & SPICE", title: "From the tandoor" },
-  { name: "lamb-rogan-josh", alt: "Lamb rogan josh, cooked in a tomato and onion sauce", caption: "02 / SLOW & SOULFUL", title: "A little comfort" },
+  { name: "lamb-rogan-josh-v2", alt: "Lamb rogan josh, cooked in a tomato and onion sauce", caption: "02 / SLOW & SOULFUL", title: "A little comfort" },
   { name: "dal-makhni-naan", alt: "Dal makhni with garlic naan", caption: "03 / MADE TO SHARE", title: "The familiar favorites" },
 ];
 
@@ -144,7 +144,7 @@ export default async function Home() {
         <span className="hairline section-hairline" aria-hidden="true" />
         <div className="container-shell chef-grid">
           <div className="chef-portrait" data-reveal="photo">
-            <div className="photo-frame chef-photo"><CinematicSlideshow label="The food and place behind Chef Amrit Pal Singh’s story" slides={[{ name: "angels-special", alt: "Angel’s Special: an overhead spread of Indian dishes around a bread-sealed biryani" }, { name: "dining-room-portrait-v2", alt: "Angel’s dining room on 37th Avenue" }, { name: "table-spread", alt: "A generous table of Indian dishes at Angel" }]} /></div>
+            <div className="photo-frame chef-photo"><CinematicSlideshow label="The food and place behind Chef Amrit Pal Singh’s story" slides={[{ name: "angels-special", alt: "Angel’s Special: an overhead spread of Indian dishes around a bread-sealed biryani" }, { name: "dining-room-portrait-v3", alt: "Angel’s dining room on 37th Avenue" }, { name: "table-spread", alt: "A generous table of Indian dishes at Angel" }]} /></div>
             <div className="chip-float chip-float-tr frame frame-strong"><p className="eyebrow">A generous spirit, in every detail.</p></div>
             <Photo name="tandoori-chicken" alt="Tandoori chicken from the clay oven, a closer look" className="story-image-accent photo-frame" sizes="200px" />
           </div>
@@ -190,7 +190,7 @@ export default async function Home() {
       {/* Stay a little longer: pinned room scene, footage sharpens as you scroll */}
       <section className="plating tone-dark" aria-labelledby="room-title">
         <div className="plating-sticky">
-          <div className="plating-media"><Photo name="room-long-table-v2" mobileName="dining-room-portrait-v2" alt="Angel’s dining room on 37th Avenue" sizes="100vw" /></div>
+          <div className="plating-media"><Photo name="room-long-table-v2" mobileName="dining-room-portrait-v3" alt="Angel’s dining room on 37th Avenue" sizes="100vw" /></div>
           <div className="plating-veil" aria-hidden="true" />
           <div className="container-shell plating-copy">
             <div className="plating-steps is-single">
@@ -226,7 +226,7 @@ export default async function Home() {
           </div>
           <div className="container-shell bar-grid" style={{ position: "relative" }}>
             <div className="bar-media" data-reveal="photo" data-tilt>
-              <Photo name="bar-counter" alt="Angel’s bar, with bottles on lit shelves under hanging Edison bulbs" className="photo-frame bar-photo" sizes="(max-width: 767px) 100vw, 45vw" />
+              <Photo name="bar-counter-v2" alt="Angel’s bar, with bottles on lit shelves under hanging Edison bulbs" className="photo-frame bar-photo" sizes="(max-width: 767px) 100vw, 45vw" />
               <div className="chip-float chip-float-bl frame frame-strong"><p className="eyebrow">Angel Indian Restaurant</p><strong>Full bar</strong></div>
             </div>
             <div className="bar-copy">

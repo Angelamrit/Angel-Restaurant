@@ -8,11 +8,11 @@ type Plate = { name: string; price: string; description: string; section?: strin
 
 function imageRatio(image: string) {
   const ratios: [string, string][] = [
-    ["chicken-dum-biryani.webp", "1536 / 1024"],
+    ["chicken-dum-biryani-v2.webp", "1536 / 1024"],
     ["amritsari-paneer-kulcha.webp", "1536 / 1024"],
-    ["vegetable-dum-biryani.webp", "1200 / 675"],
-    ["goat-dum-biryani.webp", "1448 / 1086"],
-    ["chole-bhatura.webp", "1448 / 1086"],
+    ["vegetable-dum-biryani-v2.webp", "1200 / 675"],
+    ["goat-dum-biryani-v2.webp", "1448 / 1086"],
+    ["chole-bhatura-v2.webp", "1448 / 1086"],
     ["amritsari-kulcha-stock.webp", "1600 / 1200"],
     ["amritsari-aloo-kulcha.webp", "1199 / 1312"],
     ["mix-veg-kulcha.webp", "1408 / 1117"],

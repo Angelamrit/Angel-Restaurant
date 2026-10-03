@@ -3,7 +3,7 @@
 //   npm run admin:password             prints  ADMIN_PASSWORD_HASH=...  to copy into your environment
 //   npm run admin:password -- --write  also puts it into .env.local (replacing any existing hash)
 //
-// The password is typed (hidden) twice, checked against the rules in lib/admin-password.ts (8 to 16 characters with
+// The password is typed (hidden) twice, checked against the rules in lib/admin-password.ts (at least 8 characters with
 // upper case, lower case, a number and a symbol), and only its salted hash is written. The password itself is never
 // printed, stored or logged, and is never accepted on the command line, where shell history would keep it.
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -41,7 +41,7 @@ function ask(prompt: string): Promise<string> {
   });
 }
 
-console.log(`Choose the administrator password: ${PASSWORD_MIN} to ${PASSWORD_MAX} characters, with an uppercase letter, a lowercase letter, a number and a symbol.\n`);
+console.log(`Choose the administrator password: at least ${PASSWORD_MIN} characters, with a letter, a number and a special character.\n`);
 const password = await ask("New password: ");
 const problems = passwordProblems(password);
 if (problems.length) {

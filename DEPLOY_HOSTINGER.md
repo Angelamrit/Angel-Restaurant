@@ -32,7 +32,7 @@ Create `/var/www/angel/.env.production.local` (git ignores `.env*`). Next.js rea
 NODE_ENV=production
 NEXT_PUBLIC_SITE_URL=https://angelindianrestaurantnyc.com   # needed at BUILD time: canonical URLs, sitemap, share cards
 ADMIN_ORIGIN=https://angelindianrestaurantnyc.com           # the exact public origin, https, no trailing slash
-ADMIN_PASSWORD_HASH=<the line printed by: npm run admin:password>   # 8 to 16 characters; only the hash lives on the server
+ADMIN_PASSWORD_HASH=<the line printed by: npm run admin:password>   # at least 8 characters; only the hash lives on the server
 
 MONGODB_URI=<Atlas connection string, or mongodb://127.0.0.1:27017 for a MongoDB on this server>
 MONGODB_DB=angel-restaurant

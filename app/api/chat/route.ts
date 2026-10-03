@@ -2,6 +2,7 @@ import { getPublicMenu } from "@/lib/menu-repository";
 import { AccessError, sameOrigin } from "@/lib/admin-access";
 import { apiError, readJson } from "@/lib/api-response";
 import { InputError } from "@/lib/menu-validation";
+import { methodNotAllowed, optionsAllowed } from "@/lib/api-methods";
 import { gateInput, resolveCta, resolveDateIntent, type Cta } from "@/lib/chat/gate";
 import { resolveDate, formatDate } from "@/lib/chat/dates";
 import { getEventDateStatus } from "@/lib/events";
@@ -9,7 +10,7 @@ import { buildSystemInstruction, toResponsesInput } from "@/lib/chat/prompt";
 import { CHAT_MODEL, MAX_OUTPUT_TOKENS, REASONING_EFFORT, getOpenAIClient } from "@/lib/chat/client";
 import type { ResponseStreamEvent } from "openai/resources/responses/responses";
 import { formatMenuTotal, menuTotal, parseMenuTotalRequest } from "@/lib/chat/menu-total";
-import { trimHistory, validateMessage } from "@/lib/chat/validation";
+import { parseChatRequest } from "@/lib/chat/validation";
 import { rateLimit, rateLimitKey } from "@/lib/chat/rate-limit";
 
 export const runtime = "nodejs";
@@ -17,6 +18,14 @@ export const dynamic = "force-dynamic";
 // The upstream call below is given 30 seconds; without this the platform's own
 // shorter default would kill the function first and truncate a streamed answer.
 export const maxDuration = 30;
+
+const allowedMethods = "POST, OPTIONS";
+export const GET = () => methodNotAllowed(allowedMethods);
+export const HEAD = () => methodNotAllowed(allowedMethods);
+export const PUT = () => methodNotAllowed(allowedMethods);
+export const PATCH = () => methodNotAllowed(allowedMethods);
+export const DELETE = () => methodNotAllowed(allowedMethods);
+export const OPTIONS = () => optionsAllowed(allowedMethods);
 
 const encoder = new TextEncoder();
 const UNAVAILABLE = "Please try again shortly.";
@@ -117,14 +126,11 @@ export async function POST(request: Request) {
     // API key from being driven cross-site.
     sameOrigin(request);
 
-    if (!(await rateLimit(rateLimitKey(request)))) return gateResponse(UNAVAILABLE, "rate_limit", 429, { "Retry-After": "60" });
-
     // readJson() enforces the same 20 KB bounded body as every other route here,
     // rejecting an oversized payload before it is buffered or parsed.
-    const body = await readJson(request) as { message?: unknown; history?: unknown };
-    let message: string;
-    try { message = validateMessage(body.message); } catch { throw new InputError("Please send a message."); }
-    const history = trimHistory(body.history);
+    const { message, history } = parseChatRequest(await readJson(request));
+
+    if (!(await rateLimit(rateLimitKey(request)))) return gateResponse(UNAVAILABLE, "rate_limit", 429, { "Retry-After": "60" });
 
     const gate = gateInput(message, history);
     if (!gate.allowed) return gateResponse(gate.message, gate.kind, 200, { "x-chat-gate": gate.kind });

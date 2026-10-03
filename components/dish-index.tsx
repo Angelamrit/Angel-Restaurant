@@ -21,10 +21,9 @@ export function DishIndex({
   priority?: boolean;
   layout?: "split" | "stacked";
 }) {
-  const { active, setActive, setPaused, reducedMotion } = useSlideAdvance(slides.length);
-  const [manualPaused, setManualPaused] = useState(false);
+  const { active, setActive, setPaused } = useSlideAdvance(slides.length);
   const [hovering, setHovering] = useState(false);
-  useEffect(() => { setPaused(manualPaused || hovering); }, [manualPaused, hovering, setPaused]);
+  useEffect(() => { setPaused(hovering); }, [hovering, setPaused]);
   const current = slides[active];
 
   return (
@@ -38,10 +37,11 @@ export function DishIndex({
               key={slide.name}
             >
               {index === active && <Image
-                src={`/angel/${slide.name}.webp`}
+                src={`/angel-vps/${slide.name}.avif`}
                 alt={slide.alt}
                 fill
                 sizes="(max-width: 767px) 100vw, 55vw"
+                quality={45}
                 // Next 16: `loading="eager"` is what the LCP heuristic reads on the
                 // rendered <img>, so only the real first slide gets it.
                 loading={priority && index === 0 ? "eager" : undefined}
@@ -53,14 +53,6 @@ export function DishIndex({
           <span className="dish-index-caption-num" aria-hidden="true">{pad(active)}</span>
           <span className="dish-index-caption-name">{current.title}</span>
         </figcaption>
-        {!reducedMotion && slides.length > 1 && (
-          <button
-            type="button"
-            className="cinematic-pause dish-index-pause"
-            aria-pressed={manualPaused}
-            onClick={() => setManualPaused((value) => !value)}
-          >{manualPaused ? "Play" : "Pause"} <span aria-hidden="true">{manualPaused ? "▷" : "Ⅱ"}</span></button>
-        )}
       </figure>
       <ul
         className="dish-index-list"

@@ -44,6 +44,15 @@
   .dish-feature:has(.dish-feature-tile:hover) .dish-feature-tile:not(:hover) { opacity: .55; }
   .dish-feature-image { position: relative; flex: 0 0 auto; aspect-ratio: 4 / 3; overflow: clip; border: 1px solid rgba(61, 35, 19, .3); border-radius: calc(var(--radius-frame) - .3rem); background: var(--sand); transform: perspective(1100px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform 700ms var(--ease-luxe); }
   .dish-feature-image img { object-fit: contain; transition: transform var(--duration-cinematic) var(--ease-luxe), filter var(--duration-cinematic) var(--ease-luxe); }
+  @media (min-width: 48.001rem) {
+    .dish-feature-row--pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .dish-feature-row--pair .dish-feature-tile:first-child { width: min(100%, 31rem); }
+    .dish-feature-tile.is-lamb-rogan-josh { width: min(100%, 24rem); justify-self: end; text-align: right; }
+    .dish-feature-tile.is-lamb-rogan-josh .dish-feature-image { width: 100%; }
+    .dish-feature-tile.is-lamb-rogan-josh .dish-feature-num { text-align: right; }
+    .dish-feature-tile.is-lamb-rogan-josh .dish-feature-head { justify-content: flex-end; }
+    .dish-feature-tile.is-lamb-rogan-josh .dish-feature-line { display: none; }
+  }
   .dish-feature-image::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 60%, rgba(31, 19, 13, 0.55)); pointer-events: none; }
   @media (hover: hover) { .dish-feature-tile:hover .dish-feature-image img { filter: brightness(1.05); } }
   .dish-tag { position: absolute; z-index: 2; inset: .9rem .9rem auto auto; }
@@ -140,7 +149,10 @@
 
   /* Hover-preview dish index (story page) */
   .dish-index { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(16rem, .65fr); gap: clamp(1.5rem, 4vw, 4rem); align-items: stretch; }
-  .dish-index-preview { aspect-ratio: 4 / 5; border-radius: var(--radius-frame); border: 1px solid var(--line-strong); box-shadow: var(--shadow-floating); }
+  /* width/justify-self: a grid item with an aspect-ratio and no width of its own is NOT stretched by Safari/iOS
+     (the spec says "normal" alignment acts like "start" for such boxes), so it shrank to its empty content
+     instead of filling the column. Chrome stretches it, which is why this only showed on iPhones. */
+  .dish-index-preview { width: 100%; justify-self: stretch; aspect-ratio: 4 / 5; border-radius: var(--radius-frame); border: 1px solid var(--line-strong); box-shadow: var(--shadow-floating); }
   .dish-index-preview::after { content: ""; position: absolute; inset: 0; z-index: 2; background: linear-gradient(180deg, transparent 52%, rgba(21, 13, 8, 0.7)); pointer-events: none; }
   .dish-index-caption { position: absolute; z-index: 3; inset: auto 1.5rem 1.5rem; display: flex; align-items: baseline; gap: .9rem; color: var(--ivory); pointer-events: none; }
   .dish-index-caption-num { font-size: .6rem; font-weight: 700; letter-spacing: .2em; color: var(--gold-light); }
@@ -277,7 +289,7 @@
   /* Private dining */
   .private-dining { display: grid; grid-template-columns: 1fr; gap: clamp(2rem, 5vw, 4rem); padding-block: var(--section-space); }
   .private-dining > div:first-child { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(18rem, .75fr); gap: clamp(2rem, 5vw, 5rem); align-items: center; }
-  .private-media { aspect-ratio: 16 / 10; }
+  .private-media { width: 100%; justify-self: stretch; aspect-ratio: 16 / 10; }
   .private-media .cinematic-slideshow { position: absolute; inset: 0; }
   .private-copy { max-width: 36rem; }
   .private-copy h2 { margin-top: 1.5rem; }
@@ -412,7 +424,7 @@
   .gallery-group figcaption { padding: .9rem .5rem 0; font-family: var(--font-editorial); font-size: 1.35rem; font-weight: 300; transition: color var(--duration-ui) var(--ease-luxe); }
   .gallery-group figure:hover figcaption { color: var(--accent); }
 }
-@media (max-width: 48rem) { .gallery-group figure { width: 74vw; } .gallery-track { animation-duration: 40s; } }
+@media (max-width: 48rem) { .gallery-group { gap: .75rem; padding-right: .75rem; } .gallery-group figure { width: 46vw; } .gallery-group figcaption { padding-top: .6rem; font-size: 1.05rem; } .gallery-track { animation-duration: 40s; } }
 @media (prefers-reduced-motion: reduce) { .gallery-track { animation: none; transform: none; } .gallery-group[aria-hidden="true"] { display: none; } }
 @layer components {
   dialog.lightbox { max-width: none; max-height: none; width: 100%; height: 100%; margin: 0; border: 0; }

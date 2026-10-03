@@ -8,7 +8,7 @@ The immutable migration snapshot is `db/original-menu.json`: **84 dishes, eight 
 
 ## Local setup
 
-Use Node 24 LTS (minimum 22.18, for [native TypeScript script execution](https://nodejs.org/download/release/v22.18.0/docs/api/typescript.html)). Copy `.env.example` to `.env.local` and set `ADMIN_ACCESS_KEY` to at least 32 unpredictable characters. Generate a value with a password manager, or `node -p "require('node:crypto').randomBytes(32).toString('hex')"`. Never commit that value.
+Use Node 24 LTS (minimum 22.18, for [native TypeScript script execution](https://nodejs.org/download/release/v22.18.0/docs/api/typescript.html)). Copy `.env.example` to `.env.local`, then run `npm run admin:password -- --write`. It asks for the administrator password twice (typing is hidden) and saves only a salted scrypt hash as `ADMIN_PASSWORD_HASH`. The password must be 8 to 16 characters with an uppercase letter, a lowercase letter, a number and a symbol, with no spaces, no common words and not the restaurant's name. The password itself is never stored, printed or logged, and is never passed on the command line. Never commit the hash either.
 
 Set `MONGODB_URI` to a development MongoDB connection string (an Atlas development cluster, or a local MongoDB), and leave `BLOB_READ_WRITE_TOKEN` empty: uploads are then stored under `.data/uploads`.
 Then run:
@@ -35,7 +35,8 @@ Set these server environment variables before enabling the deployment:
 | --- | --- |
 | `MONGODB_URI` | MongoDB connection string (Atlas, or a MongoDB on the server) |
 | `MONGODB_DB` | Optional database name; defaults to `angel-restaurant` |
-| `ADMIN_ACCESS_KEY` | Temporary shared administrator key, minimum 32 random characters |
+| `ADMIN_PASSWORD_HASH` | The administrator password as a salted hash. Create it with `npm run admin:password` (add `-- --write` to save it into `.env.local`). Password rules: 8 to 16 characters with an uppercase letter, a lowercase letter, a number and a symbol; no spaces, common words or the restaurant's name |
+| `ADMIN_ACCESS_KEY` | Legacy shared key, minimum 32 random characters. Honoured only while `ADMIN_PASSWORD_HASH` is unset; ignored once the hash exists |
 | `BLOB_READ_WRITE_TOKEN` | Optional, server-only. Leave unset on the VPS (photos then go to `.data/uploads`). Only needed to keep using a Vercel Blob store |
 | `CLIENT_IP_HEADER` | Behind nginx, set to `x-real-ip` so rate limits (enquiry form, chat, admin sign-in) apply per visitor. See DEPLOY_HOSTINGER.md |
 | `ADMIN_ORIGIN` | Optional canonical admin origin for reverse proxies; otherwise the incoming request URL origin is checked |
@@ -71,11 +72,17 @@ Optional GA4 is retained; Vercel Analytics was removed with the move off Vercel,
 
 `/admin/analytics` honestly shows configuration states and links to provider reports. It does **not** claim to import traffic totals or historical records. Configure GA4 and verify production events in its DebugView/realtime reports. Provider reporting APIs/credentials are needed to bring daily/weekly visitor counts, trends and device reports into this workspace. Browser blocking or privacy settings can prevent delivery; local event dispatch cannot establish provider receipt.
 
+## Changing and recovering the password
+
+**Change it from the workspace:** Settings > Change password. The administrator must enter the **current password**, then the new one twice, and the new one must meet the rules (the form shows a live checklist). On success every *other* signed-in device is signed out; the device that made the change stays signed in. The new password is stored as a salted hash in the `admin_credentials` collection, never as text, and both the change and any failed attempt appear in the activity log. Attempts to change the password are throttled separately from sign-in (10 per 10 minutes).
+
+**Forgot the password:** run `npm run admin:password` on the server (or `-- --write` locally), put the printed `ADMIN_PASSWORD_HASH` in the environment and restart. A new environment hash always takes over: any password previously set from the workspace is recorded against the environment credential it replaced, so it stops working the moment that credential changes. (Putting the *old* environment hash back would bring the workspace-set password back with it.)
+
 ## Tomorrow's authentication work
 
 Replace the temporary session implementation in `lib/admin-access.ts` and `/api/admin/session` with the chosen provider's session/role checks. All private reads and mutations use the shared authorization seam; replacing it does not require rewriting the menu system. Add administrator identities, restaurant roles, recovery, MFA and per-user auditing. Public visitors continue to need no account.
 
-Temporary protection uses an eight-hour session: a random token in an HTTP-only, same-site cookie whose hash is stored in the `admin_sessions` collection (so signing out revokes it, and the login key is not used as a signing secret); secure cookies in production; constant-time key comparison; database-backed login throttling (HTTP 429); same-origin checks on mutations; and no secret in client code. Rotating the key blocks new logins, but existing sessions live until they expire or are signed out; to revoke all of them at once, empty the `admin_sessions` collection. Administrator actions (sign-ins, failed sign-ins, dish create/update/delete, uploads, enquiry status changes) are written to the `audit_log` collection and shown under Settings → Recent activity. A deleted dish's full record is kept in its audit entry so it can be re-created by hand. Image uploads are limited to 30 per hour. This is a temporary gate, not a finalized account system. Without Vercel's trusted client-IP header the login throttle deliberately uses a shared bucket.
+Temporary protection uses an eight-hour session: a random token in an HTTP-only, same-site cookie whose hash is stored in the `admin_sessions` collection (so signing out revokes it, and the password is never used as a signing secret); secure cookies in production; constant-time key comparison; database-backed login throttling (HTTP 429); same-origin checks on mutations; and no secret in client code. Rotating the key blocks new logins, but existing sessions live until they expire or are signed out; to revoke all of them at once, empty the `admin_sessions` collection. Administrator actions (sign-ins, failed sign-ins, dish create/update/delete, uploads, enquiry status changes) are written to the `audit_log` collection and shown under Settings → Recent activity. A deleted dish's full record is kept in its audit entry so it can be re-created by hand. Image uploads are limited to 30 per hour. This is a temporary gate, not a finalized account system. Without Vercel's trusted client-IP header the login throttle deliberately uses a shared bucket.
 
 ## Verification and files
 

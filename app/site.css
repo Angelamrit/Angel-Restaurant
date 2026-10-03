@@ -1,6 +1,42 @@
 /* Site shell, motion system and homepage. Tokens and primitives live in globals.css;
    secondary pages in pages.css. */
 @layer components {
+  .site-loading { min-height: 100svh; padding-bottom: clamp(4rem, 9vw, 8rem); background: var(--brown-deep); color: var(--ivory); }
+  .site-loading-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
+  .site-skeleton-intro { display: flex; align-items: flex-end; min-height: clamp(28rem, 66svh, 48rem); padding-block: calc(var(--header-height) + 5rem) clamp(3rem, 8vw, 7rem); background: linear-gradient(180deg, var(--brown) 0%, var(--brown-deep) 100%); }
+  .site-skeleton-intro-copy { width: 100%; }
+  .site-skeleton-block { display: block; border-radius: .3rem; background: linear-gradient(100deg, rgba(246,239,226,.055), rgba(226,189,108,.12) 50%, rgba(246,239,226,.055)); }
+  .site-skeleton-eyebrow { width: 9rem; height: .7rem; margin-bottom: 1.5rem; }
+  .site-skeleton-title { width: min(58%, 40rem); height: clamp(2.5rem, 7vw, 6.5rem); margin-bottom: .8rem; }
+  .site-skeleton-title-short { width: min(38%, 25rem); }
+  .site-skeleton-copy { width: min(46rem, 82%); height: .9rem; margin-top: 1.2rem; }
+  .site-skeleton-copy-short { width: min(30rem, 64%); margin-top: .7rem; }
+  .site-loading-feature { display: grid; grid-template-columns: 1fr .82fr; align-items: center; gap: clamp(2rem, 8vw, 8rem); padding-block: clamp(4rem, 9vw, 8rem); }
+  .site-skeleton-feature-copy .site-skeleton-title { width: min(90%, 34rem); height: clamp(2rem, 5vw, 4rem); }
+  .site-skeleton-feature-copy .site-skeleton-copy { width: 100%; }
+  .site-skeleton-photo { width: 100%; aspect-ratio: 4 / 3; border-radius: .6rem; }
+  .site-loading-menu-body { padding-block: clamp(3rem, 7vw, 6rem); }
+  .site-skeleton-heading { width: min(18rem, 70%); height: clamp(2rem, 4vw, 3.5rem); margin-bottom: 2rem; }
+  .site-skeleton-controls { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: clamp(2rem, 5vw, 4rem); }
+  .site-skeleton-controls .site-skeleton-block { width: 6.5rem; height: 2.6rem; border-radius: 999px; }
+  .site-skeleton-dishes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; border: 1px solid var(--line); background: var(--line); }
+  .site-skeleton-dish { position: relative; min-height: 7.5rem; padding: 1.5rem; background: var(--brown-deep); }
+  .site-skeleton-dish-title { width: min(68%, 18rem); height: 1.2rem; }
+  .site-skeleton-dish-price { position: absolute; top: 1.5rem; right: 1.5rem; width: 3.5rem; height: 1rem; }
+  .site-skeleton-dish-description { width: 92%; height: .65rem; margin-top: 1.1rem; }
+  .site-skeleton-dish-description-short { width: 58%; margin-top: .45rem; }
+  @media (max-width: 48rem) {
+    .site-skeleton-intro { min-height: 31rem; }
+    .site-skeleton-title { width: 88%; }
+    .site-skeleton-title-short { width: 63%; }
+    .site-skeleton-copy { width: 96%; }
+    .site-loading-feature { grid-template-columns: 1fr; gap: 2rem; }
+    .site-skeleton-photo { aspect-ratio: 16 / 10; }
+    .site-skeleton-dishes { grid-template-columns: 1fr; }
+  }
+}
+
+@layer components {
   [hidden] { display: none !important; }
 
   /* =========================================================================
@@ -368,12 +404,11 @@
   .cinematic-frame.is-active img { animation: var(--frame-motion, cinematic-frame-motion) 6.8s linear both; }
   @keyframes cinematic-frame-motion { from { transform: scale(1.02) translate3d(-.5%, .4%, 0); } to { transform: scale(1.09) translate3d(.6%, -.5%, 0); } }
   @keyframes cinematic-frame-motion-alt { from { transform: scale(1.09) translate3d(.5%, -.4%, 0); } to { transform: scale(1.02) translate3d(-.6%, .5%, 0); } }
-  .cinematic-controls { position: absolute; z-index: 4; inset: auto 1rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; color: var(--ivory); }
+  .cinematic-controls { position: absolute; z-index: 4; inset: auto 1rem 1rem; display: flex; align-items: center; justify-content: flex-start; gap: 1rem; color: var(--ivory); }
   .cinematic-progress { display: flex; align-items: center; }
   .cinematic-progress button { width: 2.5rem; height: 2.5rem; display: grid; place-items: center; }
   .cinematic-progress button span { display: block; width: 1.6rem; height: 2px; border-radius: 2px; background: rgba(246, 239, 226, 0.4); transition: background-color var(--duration-ui), transform var(--duration-ui); }
   .cinematic-progress button[aria-pressed="true"] span { background: var(--gold); }
-  .cinematic-pause { min-height: 2.5rem; padding-inline: .9rem; border-radius: var(--radius-pill); background: rgba(31, 19, 13, 0.7); border: 1px solid rgba(226, 189, 108, 0.4); color: var(--ivory); font-size: .55rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; backdrop-filter: blur(8px); }
 
   /* Rotating text-ring monogram badge. */
   .badge { position: relative; display: grid; place-items: center; width: var(--badge-size, 11rem); aspect-ratio: 1; color: var(--gold-light); }
@@ -435,7 +470,6 @@
     .hero-video, .hero-poster { object-fit: contain; object-position: 50% 50%; }
     .hero-video { animation: none; }
     .hero-media[data-clip="2"] .hero-video { object-position: 50% 50%; }
-    .hero-video-pause { inset: auto var(--gutter) .75rem auto; }
   }
   /* On tablet and desktop the hero section is taller than a 16:9 screen, and filling it would crop the picture
      to a zoomed-in slice. Instead the media box keeps the clip's own 16:9 shape along the top, so the whole scene
@@ -444,7 +478,6 @@
     /* Sits a little below the top so the header strip does not cover the server's head; both edges feather into the brown. */
     .hero-media { inset: clamp(3rem, 7vw, 6.5rem) 0 auto 0; aspect-ratio: 16 / 9; -webkit-mask-image: linear-gradient(transparent, #000 9%, #000 82%, transparent); mask-image: linear-gradient(transparent, #000 9%, #000 82%, transparent); }
   }
-  .hero-video-pause { position: absolute; z-index: 3; inset: auto clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) auto; }
   @keyframes hero-image-in { from { opacity: 0; transform: scale(1.08); filter: blur(6px); } }
   .hero-scrim { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(90deg, rgba(21, 13, 8, 0.78), rgba(21, 13, 8, 0.28) 55%, transparent); }
   .hero-scrim::after { content: ""; position: absolute; inset: 40% 0 0; background: linear-gradient(180deg, transparent, rgba(31, 19, 13, 0.92)); }
@@ -540,7 +573,6 @@
   .dish-preview-frame.is-active img { transform: scale(1); }
   .dish-preview-frame::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(31, 19, 13, 0.15), rgba(31, 19, 13, 0.55) 45%, rgba(31, 19, 13, 0.92)); }
   .dish-preview-num { position: absolute; top: 1.5rem; right: 2rem; z-index: 2; font-family: var(--font-editorial); font-size: clamp(4rem, 8vw, 7rem); font-weight: 300; line-height: 1; color: transparent; -webkit-text-stroke: 1px rgba(226, 189, 108, 0.7); }
-  .dish-preview-pause { position: absolute; top: 1.5rem; left: 2rem; z-index: 3; }
   .dish-preview-copy { position: absolute; inset: auto 0 0; z-index: 2; padding: clamp(1.5rem, 3vw, 2.5rem); display: grid; gap: .6rem; transform: translateY(12px); transition: transform var(--duration-reveal) var(--ease-luxe); }
   .dish-preview-frame.is-active .dish-preview-copy { transform: none; }
   .dish-preview-copy .eyebrow { color: var(--gold-light); font-size: .58rem; }
@@ -683,7 +715,7 @@
   .map-subway { fill: none; stroke: #8a4a24; stroke-width: 7; stroke-dasharray: 35 9; }
   .map-label, .map-note, .map-address { fill: var(--ivory-muted); font: 600 9px/1 var(--font-functional); letter-spacing: .15em; }
   .map-note { font-size: 8px; }
-  .map-star { fill: var(--brown-deep); font: 22px/1 var(--font-functional); }
+  .map-star { fill: var(--brown-deep); }
   .map-angel { fill: var(--gold); font: 700 20px/1 var(--font-functional); letter-spacing: .18em; }
   .map-address { font-size: 8px; }
   .map-train { fill: var(--ivory); font: 700 9px/1 var(--font-functional); }
@@ -749,6 +781,8 @@
   .footer-bottom-right { margin-left: auto; }
   .footer-bottom a { color: inherit; text-decoration: none; }
   .footer-bottom a:hover { color: var(--gold-light); }
+  /* The pages.css rule that makes footer links inline-flex centres vertically only; keep the back-to-top arrow centred in its circle. */
+  .footer-bottom .circle-btn { justify-content: center; }
   /* Creator credit: its own full-width row under the legal line, so it can never share a line with, or be pushed under, the back-to-top button. */
   .footer-credit { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.5rem; margin: 0; padding: 1.25rem 5rem 0 0; /* right gap keeps the links clear of the floating chat button, which sits over the page corner */ border-top: 1px solid rgba(246, 239, 226, 0.12); min-width: 0; }
   .footer-credit a { display: inline-flex; align-items: center; min-height: 1.5rem; color: inherit; text-decoration: none; min-width: 0; overflow-wrap: anywhere; }
@@ -794,6 +828,23 @@
   .hero-content { padding-top: clamp(2rem, 5vw, 3rem); }
   .hero-copy .eyebrow .is-wide-only { display: none; }
   .hero-copy .button-row .button { width: 100%; }
+  /* Phones: the photo, the headline, the buttons and the three facts read as ONE screen, not a picture
+     followed by a second block. The hero is exactly one screen tall (less the fixed Reserve bar), the
+     photo dissolves into the dark below it, and the spacing and fact cards are compact. */
+  .hero { display: flex; flex-direction: column; min-height: 0; }
+  /* The video keeps its full 16:9 frame; the eyebrow and headline are pulled up over its lower edge. */
+  .hero-media { flex: none; -webkit-mask-image: linear-gradient(#000 80%, transparent); mask-image: linear-gradient(#000 80%, transparent); }
+  .hero-scrim { inset: 0 0 auto 0; height: calc(var(--header-height) + 56.25vw); background: linear-gradient(180deg, rgba(21, 13, 8, .35) 0, rgba(21, 13, 8, .05) 20%, rgba(21, 13, 8, .35) 52%, rgba(21, 13, 8, .88) 100%); }
+  .hero-scrim::before, .hero-scrim::after { display: none; }
+  .hero-content { flex: none; padding-top: 0; padding-bottom: 1.25rem; }
+  .hero-copy .eyebrow { display: flex; margin-top: calc(var(--hero-overlay, 42.6vw) * -1); position: relative; z-index: 3; font-size: 2.3vw; letter-spacing: .12em; white-space: nowrap; gap: .6rem; }
+  .hero-copy h1 { margin-top: .6rem; font-size: 7.4vw; max-width: none; margin-bottom: 14.1vw; position: relative; z-index: 3; }
+  .hero-tagline { margin-top: 1rem; font-size: clamp(1.1rem, 4.9vw, 1.3rem); }
+  .hero-copy .button-row { margin-top: 1.25rem; gap: .6rem; }
+  .hero-stats { grid-template-columns: repeat(3, 1fr); gap: .5rem; margin-top: 1.25rem; padding-top: 1rem; }
+  .hero-stats li { padding: .5rem .6rem .55rem; border-radius: .9rem; }
+  .hero-stats .eyebrow { font-size: .46rem; letter-spacing: .12em; }
+  .hero-stats strong { margin-top: .3rem; font-size: .95rem; line-height: 1.15; }
   .stats-panel, .restaurant-stats, .footer-stats { grid-template-columns: 1fr 1fr; justify-content: start; }
   .restaurant-notes { grid-template-columns: 1fr; }
   .chef-portrait { padding: 0 0 2.5rem; }

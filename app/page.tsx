@@ -16,6 +16,7 @@ import { restaurant } from "@/lib/restaurant";
 import { pageMetadata } from "@/lib/seo";
 import { getPublicMenu } from "@/lib/menu-repository";
 import { MenuRefresh } from "@/components/menu-refresh";
+import { JsonLd } from "@/components/json-ld";
 
 // Rendered per request: the page reads the live menu, so it must not be built (or need the database) at build time.
 export const dynamic = "force-dynamic";
@@ -29,6 +30,13 @@ export const metadata = pageMetadata({
 
 const arrow = <span className="button-icon" aria-hidden="true">↗</span>;
 const order = (index: number) => ({ "--i": index } as CSSProperties);
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  url: restaurant.siteUrl,
+  name: restaurant.name,
+  alternateName: "Angel Indian",
+};
 
 // Copy on this page is the client-approved wording from the previous build; only
 // the presentation and motion are new. Do not reword or add claims here.
@@ -47,11 +55,12 @@ export default async function Home() {
   const pressQuote = press.find(item => item.note?.startsWith("“") || item.note?.startsWith("\""));
   return (
     <main id="main-content" tabIndex={-1} data-motion-pending>
+      <JsonLd data={websiteJsonLd} />
       <MotionReady />
       <MenuRefresh />
       {/* Hero */}
       <section className="hero tone-dark" id="top" aria-label="Introduction">
-        <HeroVideo src="/videos/hero-sequence-v5.mp4" poster="/angel/hero-poster-v5.webp" posterAlt="Guests dining together in Angel’s dining room" />
+        <HeroVideo src="/videos/hero-sequence-v5.mp4" poster="/angel-vps/hero-poster-v5.avif" posterAlt="Guests dining together in Angel’s dining room" />
         <div className="hero-scrim" aria-hidden="true" />
         <div className="hero-spot" aria-hidden="true" />
         <div className="container-shell hero-content">
@@ -96,7 +105,7 @@ export default async function Home() {
           </div>
           <figure className="certificate-frame" data-reveal="photo">
             <Link href="/press" aria-label="Explore Angel press recognition">
-              <Image src="/Certificates/Certificate03.PNG" alt="MICHELIN Guide 2021 New York, New Bib Gourmand Establishments, with Angel listed first" width={1774} height={887} sizes="(max-width: 767px) calc(100vw - 2rem), 40rem" />
+              <Image src="/angel-vps/certificates/Certificate03.avif" alt="MICHELIN Guide 2021 New York, New Bib Gourmand Establishments, with Angel listed first" width={1774} height={887} sizes="(max-width: 767px) calc(100vw - 2rem), 40rem" />
             </Link>
             <figcaption>MICHELIN Guide 2021 · New Bib Gourmand Establishments</figcaption>
           </figure>
@@ -153,7 +162,7 @@ export default async function Home() {
             <h2 className="display-lg"><Words text="“Simple" /><br /><em><Words text="but good.”" from={1} /></em></h2>
             <p className="lede rise rise-late">A philosophy. A family story.<br />A restaurant named for a daughter.</p>
             <p className="rise rise-late">From Pathankot to Australia, and then New York. After cooking at Rahi and Adda, Chef Amrit Pal Singh opened Angel in 2019. His belief is simple: let the true taste of each ingredient shine.</p>
-            <div className="button-row rise rise-late"><Link className="button button-primary" href="/story"><span>Our story</span>{arrow}</Link></div>
+            <div className="button-row rise rise-late"><Link className="button button-primary" href="/story"><span>Our story</span>{arrow}</Link><a className="button button-outline" href={restaurant.chefSite} target="_blank" rel="noopener" aria-label="Chef Amrit’s website (opens in a new tab)"><span>Chef Amrit’s website</span><span className="button-icon" aria-hidden="true">↗</span></a></div>
           </div>
         </div>
       </section>
@@ -176,11 +185,11 @@ export default async function Home() {
           </div>
           <div className="recognition-certificates" aria-label="Featured press recognitions" data-reveal>
             <Link className="recognition-certificate frame frame-strong" href="/press">
-              <Image src="/Certificates/Certificate01.jpeg" alt="Framed Thrillist feature naming Angel Indian Restaurant among the 15 best Indian restaurants in NYC, October 2022" width={1083} height={1600} sizes="(max-width: 767px) 42vw, 18rem" />
+              <Image src="/angel-vps/certificates/Certificate01.avif" alt="Framed Thrillist feature naming Angel Indian Restaurant among the 15 best Indian restaurants in NYC, October 2022" width={1083} height={1600} sizes="(max-width: 767px) 42vw, 18rem" />
               <span><strong>Thrillist</strong><small>View the framed recognition ↗</small></span>
             </Link>
             <Link className="recognition-certificate frame frame-strong" href="/press">
-              <Image src="/Certificates/Certificate02.jpeg" alt="Framed Eater feature, The Best Indian Restaurants in NYC, September 2024" width={679} height={1024} sizes="(max-width: 767px) 42vw, 18rem" />
+              <Image src="/angel-vps/certificates/Certificate02.avif" alt="Framed Eater feature, The Best Indian Restaurants in NYC, September 2024" width={679} height={1024} sizes="(max-width: 767px) 42vw, 18rem" />
               <span><strong>Eater</strong><small>View the framed recognition ↗</small></span>
             </Link>
           </div>

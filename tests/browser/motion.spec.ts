@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test("admin motion preserves navigation, filtering and reduced-motion access", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/admin");
-  await page.getByLabel("Administrator access key").fill("angel-local-e2e-only-access-key-2026");
+  await page.getByLabel("Administrator password").fill("Zx4#mK9!vTq2");
   await page.getByRole("button", { name: "Open workspace" }).click();
   await expect(page).toHaveURL(/\/admin\/dashboard$/);
   const total = page.locator(".admin-stats .admin-number").first();

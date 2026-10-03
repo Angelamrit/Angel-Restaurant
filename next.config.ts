@@ -21,6 +21,8 @@ const nextConfig: NextConfig = {
   distDir: process.env.ANGEL_TEST_BUILD === "true" ? ".next-e2e" : ".next",
   serverExternalPackages: ["mongodb", "sharp"],
   images: {
+    // Send AVIF to supporting browsers and WebP as the compatibility fallback.
+    formats: ["image/avif", "image/webp"],
     // Optimized variants are re-generated from stable source files; keep them for 30 days.
     minimumCacheTTL: 2592000,
     // 75 is the default; 45 is only for the heavily dimmed decorative backgrounds (components/editorial.tsx).
@@ -38,6 +40,7 @@ const nextConfig: NextConfig = {
     return [
       { source: "/:path*", headers: securityHeaders },
       { source: "/angel/:path*", headers: staticCache },
+      { source: "/angel-vps/:path*", headers: staticCache },
       { source: "/videos/:path*", headers: staticCache },
     ];
   },

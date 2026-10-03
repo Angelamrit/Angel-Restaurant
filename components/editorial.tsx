@@ -9,10 +9,11 @@ export function Photo({ name, mobileName, alt, className = "", priority = false,
   const loading = priority ? "eager" : undefined;
   // A priority photo is the page's largest paint (the intro photo), so it is also fetched first.
   const fetchPriority = priority ? "high" : undefined;
-  if (!mobileName) return <div className={`editorial-photo ${className}`}><Image src={`/angel/${name}.webp`} alt={alt} fill sizes={sizes} loading={loading} fetchPriority={fetchPriority} quality={quality} /></div>;
+  const imageQuality = quality ?? (priority ? undefined : 45);
+  if (!mobileName) return <div className={`editorial-photo ${className}`}><Image src={`/angel-vps/${name}.avif`} alt={alt} fill sizes={sizes} loading={loading} fetchPriority={fetchPriority} quality={imageQuality} /></div>;
   // Art direction: phones get a portrait frame of the same room, so a full-bleed backdrop is not a blurry sliver of a landscape photo.
-  const { props } = getImageProps({ src: `/angel/${name}.webp`, alt, fill: true, sizes, loading, fetchPriority, quality });
-  const { props: mobile } = getImageProps({ src: `/angel/${mobileName}.webp`, alt, fill: true, sizes, loading, fetchPriority, quality });
+  const { props } = getImageProps({ src: `/angel-vps/${name}.avif`, alt, fill: true, sizes, loading, fetchPriority, quality: imageQuality });
+  const { props: mobile } = getImageProps({ src: `/angel-vps/${mobileName}.avif`, alt, fill: true, sizes, loading, fetchPriority, quality: imageQuality });
   return <div className={`editorial-photo editorial-photo--art ${className}`} data-mobile={mobileName}><picture><source media="(max-width: 767px)" srcSet={mobile.srcSet} sizes={sizes} /><img {...props} alt={alt} /></picture></div>;
 }
 
@@ -112,6 +113,7 @@ export function Footer() {
             <a href={`tel:${restaurant.phoneHref}`}>{restaurant.phone}</a>
             <a href={`mailto:${restaurant.inbox}`}>{restaurant.email}</a>
             <a href={restaurant.instagram}>Instagram ↗</a>
+            <a href={restaurant.chefSite} target="_blank" rel="noopener" aria-label="Chef Amrit’s website (opens in a new tab)">Chef Amrit’s website ↗</a>
           </div>
         </div>
         <nav className="frame frame-strong footer-card" aria-label="Footer">
@@ -123,7 +125,7 @@ export function Footer() {
       </div>
       <div className="container-shell footer-mark" aria-hidden="true"><span className="footer-wordmark">angel</span></div>
       <div className="container-shell footer-bottom">
-        <div className="footer-bottom-left"><span>© {new Date().getFullYear()} Angel Indian Restaurant</span><span>100% halal food · Full bar · Queens, New York</span><a className="circle-btn" href="#top" aria-label="Back to top">↑</a></div>
+        <div className="footer-bottom-left"><span>© {new Date().getFullYear()} Angel Indian Restaurant</span><span>100% halal food · Full bar · Queens, New York</span><a className="circle-btn" href="#top" aria-label="Back to top"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d="M8 13.5V2.5M3 7.5l5-5 5 5" /></svg></a></div>
         <div className="footer-bottom-right"><Link href="/privacy">Privacy &amp; terms</Link></div>
         <p className="footer-credit">
           <a href={restaurant.aceva} target="_blank" rel="noopener noreferrer">Designed &amp; built by Aceva Tech</a>

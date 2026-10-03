@@ -1,3 +1,4 @@
+import { accessMode } from "@/lib/admin-access";
 import { getDatabase } from "@/lib/database";
 
 // A deployment self-check that reveals no secrets and no data: only yes/no answers about configuration,
@@ -13,12 +14,13 @@ export async function GET() {
   }
   const validOrigin = (() => { try { return Boolean(process.env.ADMIN_ORIGIN && new URL(process.env.ADMIN_ORIGIN)); } catch { return false; } })();
   return Response.json({
+    ok: true,
     database,
     databaseName: process.env.MONGODB_DB ? "custom" : "default",
     databaseMs: Date.now() - started,
     openaiKey: Boolean(process.env.OPENAI_API_KEY),
     resendKey: Boolean(process.env.RESEND_API_KEY),
-    adminKey: Boolean(process.env.ADMIN_ACCESS_KEY),
+    adminAccess: accessMode(),
     adminOrigin: process.env.ADMIN_ORIGIN ? (validOrigin ? "valid" : "invalid") : "unset (falls back to request origin)",
     siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "unset",
     commit: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) || "unknown",

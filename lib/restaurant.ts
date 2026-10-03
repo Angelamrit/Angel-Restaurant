@@ -1,6 +1,8 @@
 export const restaurant = {
   name: "Angel Indian Restaurant",
   resy: "https://resy.com/cities/new-york-ny/venues/angel-indian-restaurant-ny",
+  /** Chef Amrit Pal Singh's own portfolio and private-chef enquiry site. */
+  chefSite: "https://chefamritpalsingh.com",
   directions: "https://www.google.com/maps/dir/?api=1&destination=75-18%2037th%20Avenue%2C%20Jackson%20Heights%2C%20NY%2011372",
   phone: "347-848-0098",
   // Digits-only, for tel: hrefs. Derived rather than duplicated so the display
@@ -29,8 +31,14 @@ export const restaurant = {
     { name: "Grubhub", url: "https://www.grubhub.com/restaurant/angel-indian-restaurant-7518-37th-ave-jackson-heights/1429582" },
     { name: "Uber Eats", url: "https://www.ubereats.com/store/angel-restaurant/o47N21ZxVban0w5H1YSfww" },
   ] as const,
+<<<<<<< Updated upstream
   // Production domain. NEXT_PUBLIC_SITE_URL overrides it per deployment; this fallback
   // keeps metadata/sitemap/JSON-LD correct when the variable is unset (fresh checkout, preview).
+=======
+  // NEXT_PUBLIC_SITE_URL can override this during deployment. Keep the fallback
+  // aligned with the Hostinger production domain so canonicals and structured
+  // data resolve to the actual site even when the variable is not set.
+>>>>>>> Stashed changes
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://angelindianrestaurantnyc.com",
 };
 

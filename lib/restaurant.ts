@@ -29,10 +29,9 @@ export const restaurant = {
     { name: "Grubhub", url: "https://www.grubhub.com/restaurant/angel-indian-restaurant-7518-37th-ave-jackson-heights/1429582" },
     { name: "Uber Eats", url: "https://www.ubereats.com/store/angel-restaurant/o47N21ZxVban0w5H1YSfww" },
   ] as const,
-  // TODO — Client Information Required: no production domain has been assigned yet.
-  // NEXT_PUBLIC_SITE_URL lets deployment set the real domain; this placeholder only
-  // keeps metadata/sitemap/JSON-LD builds valid until then.
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://www.angelindianrestaurant.com",
+  // Production domain. NEXT_PUBLIC_SITE_URL overrides it per deployment; this fallback
+  // keeps metadata/sitemap/JSON-LD correct when the variable is unset (fresh checkout, preview).
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://angelindianrestaurantnyc.com",
 };
 
 export const faqs = [

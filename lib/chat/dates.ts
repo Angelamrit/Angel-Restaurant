@@ -102,6 +102,25 @@ const ORDINAL_WORDS = new Map([
 const ORDINAL_WORD = new RegExp(String.raw`\b(${[...ORDINAL_WORDS.keys()].join("|")})\b`, "gi");
 const suffix = (day: number) => (day % 10 === 1 && day !== 11 ? "st" : day % 10 === 2 && day !== 12 ? "nd" : day % 10 === 3 && day !== 13 ? "rd" : "th");
 const MONTH_IN_VIEW = new RegExp(String.raw`\b(?:${MONTHS.join("|")})\b`, "i");
+// "Oct 15", "Dec. 24", "5th Sept", "in Nov": the abbreviations visitors actually
+// type. They are expanded to the full name before any pattern runs, but only in
+// a date-like position — next to a day number, or after "in", "for", "on",
+// "this", "next", "early", "mid", "late", "of" — so an ordinary word is never
+// mistaken for a month. "May" needs no abbreviation and is left alone.
+const MONTH_ABBREVIATIONS = new Map([
+  ["jan", "january"], ["feb", "february"], ["mar", "march"], ["apr", "april"],
+  ["jun", "june"], ["jul", "july"], ["aug", "august"], ["sep", "september"], ["sept", "september"],
+  ["oct", "october"], ["nov", "november"], ["dec", "december"],
+]);
+const ABBREVIATION = [...MONTH_ABBREVIATIONS.keys()].join("|");
+const ABBREVIATION_BEFORE_DAY = new RegExp(String.raw`\b(${ABBREVIATION})\.?(?=\s*\d{1,2}(?:st|nd|rd|th)?\b)`, "gi");
+const ABBREVIATION_AFTER_DAY = new RegExp(String.raw`(\b\d{1,2}(?:st|nd|rd|th)?\s+(?:of\s+)?)(${ABBREVIATION})\.?\b`, "gi");
+const ABBREVIATION_AFTER_WORD = new RegExp(String.raw`(\b(?:in|for|on|this|next|early|mid|late|of|during)\s+)(${ABBREVIATION})\.?\b`, "gi");
+const expandMonthAbbreviations = (text: string) =>
+  text
+    .replace(ABBREVIATION_BEFORE_DAY, (_match, abbr: string) => MONTH_ABBREVIATIONS.get(abbr.toLowerCase()) ?? abbr)
+    .replace(ABBREVIATION_AFTER_DAY, (_match, lead: string, abbr: string) => lead + (MONTH_ABBREVIATIONS.get(abbr.toLowerCase()) ?? abbr))
+    .replace(ABBREVIATION_AFTER_WORD, (_match, lead: string, abbr: string) => lead + (MONTH_ABBREVIATIONS.get(abbr.toLowerCase()) ?? abbr));
 // Below this, an ordinal word is everyday speech more often than it is a date.
 const AMBIGUOUS_BELOW = 10;
 const digitiseOrdinals = (text: string) => {
@@ -142,7 +161,7 @@ export function resolveDate(text: string, context: string[] = [], now: Date = ne
   const today = todayInRestaurantTz(now);
   // An age is removed before anything looks for a date, so "my 40th birthday for
   // 30 guests" carries no date and is never sent back as "which month?".
-  const value = digitiseOrdinals(text.toLowerCase()).replace(AGE_ORDINAL, " ");
+  const value = digitiseOrdinals(expandMonthAbbreviations(text.toLowerCase())).replace(AGE_ORDINAL, " ");
 
   const iso = ISO.exec(value);
   if (iso) return build(Number(iso[1]), Number(iso[2]), Number(iso[3]));
@@ -191,7 +210,9 @@ export function resolveDate(text: string, context: string[] = [], now: Date = ne
 
   // Past references must never fall through to a future date ("last Friday" is not the coming Friday).
   if (new RegExp(`\\b(yesterday|(?:last|previous|past)\\s+(?:night|${WEEKDAYS.join("|")}))\\b`).test(value)) return { kind: "none" };
-  if (/\btoday\b/.test(value)) return { kind: "date", iso: today };
+  // "Tonight" and "this evening" are today's date: a table tonight is checked
+  // against today exactly as "today" is.
+  if (/\btoday\b|\btonight\b|\bthis\s+evening\b/.test(value)) return { kind: "date", iso: today };
   // Checked before "tomorrow", which is a substring of it.
   if (/\bday\s+after\s+(?:tomorrow|tmrw)\b|\bovermorrow\b/.test(value)) return { kind: "date", iso: toIso(toUtc(today) + 2 * DAY_MS) };
   if (/\btomorrow\b/.test(value)) return { kind: "date", iso: toIso(toUtc(today) + DAY_MS) };
@@ -225,7 +246,7 @@ export function resolveDate(text: string, context: string[] = [], now: Date = ne
         if (resolved.kind === "date") return resolved;
         continue;
       }
-      const named = MONTH_ONLY.exec(context[index]);
+      const named = MONTH_ONLY.exec(expandMonthAbbreviations(context[index].toLowerCase()));
       if (!named) continue;
       const month = monthIndex(named[1]);
       const year = named[2] ? Number(named[2]) : nextOccurrenceYear(month, day, today);

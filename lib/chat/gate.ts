@@ -56,7 +56,7 @@ const INJECTION = [
   // rules about outside cake?" is a real restaurant question, and refusing
   // it is the exact mistake this gate was rewritten to stop making.
   // Grounding still answers the looser phrasings with the redirect.
-  /\b(?:what|tell me|show me|list|give me)\b[^.]{0,25}\byour\b[^.]{0,20}\b(instructions?|directives?|system prompt|prompt)\b/i,
+  /\b(?:what|tell me|show me|list|give me|print|reveal|output|display|share|send me|repeat|dump|leak|expose)\b[^.]{0,25}\byour\b[^.]{0,20}\b(instructions?|directives?|system prompt|prompt)\b/i,
   // Delimiter or turn spoofing.
   /(^|\n)\s*(system|assistant)\s*:/i,
   /<\/?(system|instruction|prompt)[^>]*>/i,
@@ -112,7 +112,30 @@ const CELEBRATION = /\b(birthdays?|b-?days?|anniversar(?:y|ies)|engagements?|wed
 const CONTINUATION = /^(?:and\s+)?(?:how|what|where|when|who)\b[^?]{0,40}\b(?:that|this|it|them|those|they|their)\b[^?]{0,24}\??$|^(?:how|what)\s+(?:do|should|can|would)\s+i\b/i;
 // Who designed/built the website itself, distinct from "who made this dish" —
 // the site/website noun is required so ordinary food questions never match.
-const SITE_CREDIT = /\bwho\s+(?:built|made|designed|developed|created|coded)\s+(?:this|the)\s+(?:site|website)\b|\b(?:this|the)\s+(?:site|website)\b(?:\s+\w+){0,4}\s+(?:built|made|designed|developed|created|coded)\s+by\b|\bweb\s*(?:design(?:er)?|develop(?:er|ment)?)\b|\bsite\s+credit(?:s)?\b|\baceva\b|\b(?:developers?|designers?)\s+(?:of|behind)\s+(?:this|the)\s+(?:site|website)\b|\bcontact\s+(?:the\s+)?(?:developers?|designers?)\b/i;
+// Every way of asking after the people or company behind the site counts:
+// who built, made, developed, founded, owns or runs it, who its founder,
+// owner, developer or designer is, which company or agency is behind it.
+// "Founder of the restaurant" and "who owns Angel" never match: they name no
+// site, and they belong to Chef Amrit.
+const SITE_NOUN = String.raw`(?:web\s*site|site|web\s*page|web\s*app)s?`;
+const SITE_CREDIT = new RegExp([
+  // "who built this website", "who developed the site", "who founded ur website"
+  String.raw`\bwho\s+(?:has\s+|have\s+)?(?:buil[td]s?|ma[dk]es?|designs?|designed|develops?|developed|creates?|created|codes?|coded|programs?|programmed|produces?|produced|founds?|founded|owns?|owned|runs?|ran|maintains?|maintained|manages?|managed|launche[ds]|launch|publishe[ds]|publish)\s+(?:this|the|your|ur)\s+${SITE_NOUN}\b`,
+  // "this website was built by", "the site is developed by"
+  String.raw`\b(?:this|the|your|ur)\s+${SITE_NOUN}\b(?:\s+\w+){0,4}\s+(?:built|made|designed|developed|created|coded|programmed|produced|founded|owned|run|maintained|managed|launched|published)\s+by\b`,
+  // "founder of website", "who is the owner of this site", "company behind the website"
+  String.raw`\b(?:founders?|owners?|creators?|developers?|designers?|makers?|builders?|authors?|programmers?|coders?|compan(?:y|ies)|agenc(?:y|ies)|studios?|teams?|people|person|firms?)\s+(?:of|behind|responsible\s+for|who\s+(?:built|made|designed|developed|created|coded)|that\s+(?:built|made|designed|developed|created|coded))\s+(?:this|the|your|ur)?\s*${SITE_NOUN}\b`,
+  // "website founder", "site developer", "website owner"
+  String.raw`\b${SITE_NOUN}\s+(?:founders?|owners?|creators?|developers?|designers?|makers?|builders?|authors?|programmers?|compan(?:y|ies)|agenc(?:y|ies)|studios?|credits?)\b`,
+  // "who is behind this website", "who is responsible for the site"
+  String.raw`\bwho(?:'s|s|\s+is|\s+are|\s+was|\s+were)?\s+(?:behind|responsible\s+for|in\s+charge\s+of)\s+(?:this|the|your|ur)\s+${SITE_NOUN}\b`,
+  // "what company made this website", "which agency designed the site"
+  String.raw`\b(?:what|which)\s+(?:company|agency|studio|team|firm|developer|designer)\b[^?.]{0,30}\b${SITE_NOUN}\b`,
+  String.raw`\bweb\s*(?:design(?:er|ers)?|develop(?:er|ers|ment)?)\b`,
+  String.raw`\baceva\b`,
+  String.raw`\b(?:developers?|designers?)\s+(?:of|behind)\s+(?:this|the|your|ur)\s+${SITE_NOUN}\b`,
+  String.raw`\bcontact\s+(?:the\s+)?(?:developers?|designers?)\b`,
+].join("|"), "i");
 // The subjects this assistant exists to talk about. strongTopics below only holds
 // the full phrases ("chef amrit", "angel restaurant"), so without this a visitor
 // asking "tell me about chef" or "who is amrit?" was refused as out of scope.
@@ -124,16 +147,26 @@ const SUBJECT = /\b(chef|chefs|amrit|singh|angel|angel's|restaurant)\b/i;
 // "20 people" / "can I bring a cake?" lost the way to send the enquiry.
 const PARTY_SIZE = /^\s*(?:about|around|roughly)?\s*\d{1,3}\s*(?:people|guests?|pax|persons?|adults|of\s+us)?\s*[.!?]?$|\b\d{1,3}\s*(?:people|guests?|pax|persons?|adults|of\s+us)\b|\b(?:two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifteen|twenty|thirty|forty|fifty)\s+(?:people|guests?|pax|persons?|adults|of\s+us)\b|\b(?:we\s+(?:are|will\s+be)|party\s+of|group\s+of|for)\s+(?:\d{1,3}|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifteen|twenty|thirty|forty|fifty)\s*(?:people|guests?|persons?|of\s+us)?\b/i;
 const EVENT_DETAIL = /\b(cakes?|candles?|decorations?|balloons?|deposits?|guest\s+count|head\s*count)\b/i;
+// A party of ten or more named with no booking thread behind it. The answer
+// treats a large group as an event enquiry (the instruction says so), and
+// "we are 45 people, can you fit us?" was answered "send an event enquiry"
+// with no way to send one. A smaller party keeps no button: it is a table.
+const LARGE_GROUP = /\b(?:[1-9]\d{1,2})\s*(?:people|guests?|pax|persons?|adults|of\s+us)\b|\b(?:we\s+(?:are|will\s+be)|party\s+of|group\s+of)\s+(?:[1-9]\d{1,2}|ten|eleven|twelve|fifteen|twenty|thirty|forty|fifty)\b|\b(?:ten|eleven|twelve|fifteen|twenty|thirty|forty|fifty)\s+(?:people|guests?|pax|persons?|adults|of\s+us)\b/i;
+const largeGroup = (text: string) => { const match = LARGE_GROUP.exec(text); if (!match) return false; const digits = /\d+/.exec(match[0]); return digits ? Number(digits[0]) >= 10 : true; };
 // The word that settles it: naming a table means an ordinary reservation,
 // whatever occasion is mentioned alongside it. Matched in the spellings
 // visitors type, because "can i get a tabel for 2" carried no table signal at
 // all and lost its Resy button.
-const TABLE_WORD = /\btab(?:le|el)s?\b/i;
+// "Chef's table" is the open-kitchen experience, not a table to book, so it
+// never counts as naming one.
+const TABLE_WORD = /(?<!chef['’]?s\s)\btab(?:le|el)s?\b/i;
 // Ordering food: delivery, pickup, takeout, "I want to order". Deliberately
 // broad, because the words a visitor reaches for vary and being turned away for
 // using the wrong one is the failure this exists to prevent. Semantic
 // understanding still happens at the model; this only decides the route.
-const ORDERING = /\b(?:order(?:s|ing|ed)?|deliver(?:y|ies|ed|s)?|takeaway|take[-\s]?away|takeout|take[-\s]?out|pick[-\s]?up|collection|to[-\s]go)\b|\bonline\s+(?:food|menu|order\w*)\b|\bfood\s+online\b/i;
+// Naming one of the three platforms ("the doordash link?") is an ordering
+// question too, and its buttons must appear with the answer.
+const ORDERING = /\b(?:order(?:s|ing|ed)?|deliver(?:y|ies|ed|s)?|takeaway|take[-\s]?away|takeout|take[-\s]?out|pick[-\s]?up|collection|to[-\s]go|door\s?dash|grub\s?hub|uber\s?eats)\b|\bonline\s+(?:food|menu|order\w*)\b|\bfood\s+online\b/i;
 // Booking words that mean the visitor wants a table, not food sent out. "Can I
 // order a table?" is a reservation, and "can I order food and reserve a table?"
 // names the table explicitly, so the table route wins the button there.
@@ -170,10 +203,15 @@ const scopeLexicon = new Set([...strongTopics, ...operationalTopics, ...menuWord
 // Previously ANY single word outside the knowledge-base lexicon counted, which
 // refused real one-word questions like "parking?", "vegan?" and "halal?".
 // Now a token is only noise if it fails to look like a word at all.
+const SHORT_REPLY = /^(?:no|ok|k|ya|yo|na|hm|mm|ye|ty)$/;
 function isNoise(text: string) {
   const normalized = text.toLowerCase().replace(/[^a-z0-9'-]+/g, " ").trim();
   if (!normalized || normalized.includes(" ")) return false;
   if (scopeLexicon.has(normalized) || GREETINGS.test(normalized)) return false;
+  // One- and two-letter replies a visitor gives to a question the assistant just
+  // asked ("Are you asking about a regular table or an event?" / "no"). Refusing
+  // them with the redirect broke the exchange they belonged to.
+  if (SHORT_REPLY.test(normalized)) return false;
   if (normalized.length < 3) return true;
   // No vowel at all ("qwrtp"), or a run of four identical characters.
   if (!/[aeiouy]/.test(normalized)) return true;
@@ -280,6 +318,9 @@ export function resolveCta(text: string, history: ChatTurn[]): Cta | undefined {
     if (hasReservationIntent(turn.text)) return "resy";
     if (hasCelebrationIntent(turn.text)) return "event";
   }
+  // Nothing earlier carried an intent: a large group standing alone is an
+  // event enquiry, and the button goes with the answer that says so.
+  if (largeGroup(trimmed)) return "event";
   return undefined;
 }
 
@@ -320,12 +361,16 @@ export function resolveDateIntent(text: string, history: ChatTurn[]): DateIntent
   if (resolveDate(normalized).kind === "none") return "none";
 
   // 6. Inherit whichever side the conversation already established, so a bare
-  //    "October 15" or "what about the 20th?" continues the same thread.
+  //    "October 15" or "what about the 20th?" continues the same thread. An
+  //    earlier turn with booking or celebration wording but no date of its own
+  //    ("can I book?" / "tomorrow") settles the side the same way.
   for (let index = history.length - 1; index >= 0; index--) {
     const turn = history[index];
     if (turn.role !== "user") continue;
     const earlier = resolveDateIntent(turn.text, []);
     if (earlier === "event" || earlier === "table") return earlier;
+    if (hasReservationIntent(turn.text)) return "table";
+    if (hasCelebrationIntent(turn.text)) return "event";
   }
 
   // 7. A date question with no side named and no context behind it. Ask.
@@ -346,7 +391,10 @@ export function gateInput(text: string, history: ChatTurn[]): GateResult {
 
   // A bare greeting with nothing else in it has no question to answer.
   // Short enough to be only a greeting, thanks or goodbye (not "hello, what are your hours?", which carries a real question).
-  if (GREETINGS.test(value) && value.split(/\s+/).length <= 6 && !isClearlyInScope(value)) return { allowed: false, kind: "greeting", message: greetingReply(value) };
+  // Thanks and goodbyes run longer than a hello ("thank you so much, that was
+  // helpful") and still carry no question, so they get a little more room.
+  const greetingLimit = /^(thanks|thank you|thankyou|thx|shukriya|cheers|bye|goodbye|see you)\b/i.test(value) ? 9 : 6;
+  if (GREETINGS.test(value) && value.split(/\s+/).length <= greetingLimit && !isClearlyInScope(value)) return { allowed: false, kind: "greeting", message: greetingReply(value) };
 
   // Knowledge-base or booking vocabulary is unambiguously usable; skip the
   // noise check so a real term is never mistaken for a keyboard roll.

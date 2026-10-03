@@ -172,8 +172,11 @@ test("an enquiry keeps its route through the details it is made of", () => {
   ];
   assert.equal(resolveCta("20 people", table), "resy");
 
-  // With nothing behind it, a bare detail offers no route at all.
-  assert.equal(resolveCta("20 people", []), undefined);
+  // With nothing behind it, a bare event detail offers no route. A party of
+  // ten or more is the exception: the answer treats a large group as an event
+  // enquiry, so the way to send one goes with it (a smaller party is a table).
+  assert.equal(resolveCta("20 people", []), "event");
+  assert.equal(resolveCta("4 people", []), undefined);
   assert.equal(resolveCta("Can I bring a cake?", []), undefined);
 
   // And a genuinely new subject never inherits the button above it.

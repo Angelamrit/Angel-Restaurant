@@ -117,7 +117,8 @@ const APPROVED = [
   ["Uber Eats", "https://www.ubereats.com/store/angel-restaurant/o47N21ZxVban0w5H1YSfww"],
 ];
 const allThreeNamed = (reply) => /doordash/i.test(reply.text) && /grubhub/i.test(reply.text) && /uber ?eats/i.test(reply.text);
-const allThreeLinked = (reply) => APPROVED.every(([, url]) => reply.text.includes(url));
+// The buttons carry the links, so the answer text must name the three and link none.
+const allThreeLinked = (reply) => allThreeNamed(reply) && !/https?:\/\//i.test(reply.text) && !APPROVED.some(([, url]) => reply.text.includes(url));
 
 console.log(`\nAngel chat behavioural run against ${BASE}\n`);
 
@@ -176,8 +177,9 @@ await one("Can I host a corporate dinner?", {
 console.log("\n== the developer question, from the project's own source ==");
 for (const question of ["Who developed this site?", "How can I contact the developers?", "Who is behind the website?"]) {
   await one(question, {
-    "aceva route": (reply) => reply.cta === "aceva",
-    "gives the recorded link": has(/acevatech\.com/i),
+    "credit route": (reply) => reply.cta === "credit",
+    "names Aceva Technologies": has(/Aceva Technologies/),
+    "no link in the text, the button has it": not(/acevatech\.com|https?:\/\//i),
     "no invented office or price": not(/\d+\s+[A-Z][a-z]+\s+(?:Street|St|Avenue|Ave|Road|Rd)|\$\d/),
   });
 }

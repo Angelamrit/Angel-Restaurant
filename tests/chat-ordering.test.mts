@@ -58,6 +58,10 @@ const ORDERING_QUESTIONS = [
   "i want food delivered",
 ];
 
+test("naming a platform is an ordering question", () => {
+  for (const text of ["give me the doordash link please", "are you on grubhub?", "uber eats?", "ubereats menu"]) assert.equal(resolveCta(text, []), "order", text);
+});
+
 test("every way of asking to order food reaches the ordering route", () => {
   for (const question of ORDERING_QUESTIONS) {
     assert.equal(hasOrderingIntent(question), true, `not detected: ${question}`);
@@ -142,19 +146,22 @@ test("no platform beyond the approved three appears anywhere in the source", () 
   }
 });
 
-test("the instruction gives all three, with their addresses, and nothing else", () => {
+test("the instruction gives all three by name, with no links, and nothing else", () => {
   assert.match(promptSource, /ORDERING FOOD/);
   assert.match(promptSource, /these three are the whole list/);
   assert.match(promptSource, /restaurant\.ordering\.map\(\(platform\) =>/, "the list is rendered from the one source");
-  assert.match(promptSource, /give all three with their addresses/);
+  assert.match(promptSource, /give all three by name/);
+  // The buttons carry the links, so the answer text must not.
+  assert.match(promptSource, /never paste a web address or link for any of them/);
+  assert.doesNotMatch(promptSource, /\$\{platform\.url\}/, "the prompt must not hand the model the ordering addresses");
   assert.match(promptSource, /Never offer only one of them/);
   assert.match(promptSource, /never answer an ordering question with the out-of-scope sentence/);
   assert.match(promptSource, /These are the only ordering services you may ever name/);
-  assert.match(promptSource, /never replace any of these three addresses with another/);
+  assert.match(promptSource, /never replace any of these three with another/);
   // Neither wrong route, in the one branch that now exists.
   assert.match(promptSource, /never answer one with Resy or with an enquiry form/);
   assert.match(promptSource, /order: "This reply is on the food-ordering route/);
-  assert.match(promptSource, /Give all three ordering platforms with their addresses/);
+  assert.match(promptSource, /Give all three ordering platforms by name/);
 });
 
 test("nothing about the platforms is invented", () => {

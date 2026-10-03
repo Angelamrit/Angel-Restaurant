@@ -192,12 +192,24 @@ test("website-credit questions are in scope and offer the credit CTA, without ca
     "How can I contact the developers of this site?",
     "tell me about Aceva Tech",
     "who are the designers behind this website",
+    "who is the founder of website",
+    "who is the founder of this website?",
+    "who developed this website",
+    "who owns this website?",
+    "who runs the site",
+    "website founder",
+    "what company made this website?",
+    "which agency designed the site",
+    "who is behind this website",
+    "who's responsible for the website?",
+    "this website was built by whom",
+    "owner of the website",
   ]) {
     assert.equal(gateInput(phrase, []).allowed, true, `gate blocked: ${phrase}`);
     assert.equal(hasSiteCreditIntent(phrase), true, `no credit CTA: ${phrase}`);
     assert.equal(resolveCta(phrase, []), "credit", `wrong CTA: ${phrase}`);
   }
-  for (const phrase of ["who made this dish?", "who made the biryani?", "who is the chef?"]) {
+  for (const phrase of ["who made this dish?", "who made the biryani?", "who is the chef?", "who is the founder of the restaurant?", "who owns Angel?", "who founded Angel Indian Restaurant", "who designed the menu?", "can I order on the website?", "does the website show the menu"]) {
     assert.equal(hasSiteCreditIntent(phrase), false, `wrongly treated as site credit: ${phrase}`);
   }
 });
@@ -397,6 +409,48 @@ test("a bare greeting, thanks or goodbye gets a warm fixed reply instead of the 
     assert.equal(result.allowed, false, text);
     if (!result.allowed) { assert.equal(result.kind, "greeting", text); assert.match(result.message, expected, text); assert.notEqual(result.message, REDIRECT, text); }
   }
+});
+
+test("a bare date after a booking question is that kind of booking", () => {
+  const booking: ChatTurn[] = [{ role: "user", text: "can I book?" }, { role: "model", text: "Which date do you have in mind?" }];
+  assert.equal(resolveDateIntent("tomorrow", booking), "table");
+  assert.equal(resolveDateIntent("October 15", booking), "table");
+  const party: ChatTurn[] = [{ role: "user", text: "I want to celebrate my birthday" }, { role: "model", text: "We'd love to host it." }];
+  assert.equal(resolveDateIntent("tomorrow", party), "event");
+  // No booking wording anywhere: a bare date is still not a booking question.
+  assert.equal(resolveDateIntent("tomorrow", [{ role: "user", text: "what are your hours?" }]), "none");
+});
+
+test("a large group with no booking thread behind it is an event enquiry", () => {
+  for (const text of ["we are 45 people, can you fit us?", "party of 20", "30 guests", "group of twelve"]) assert.equal(resolveCta(text, []), "event", text);
+  // A small party is a table, and carries no button on its own.
+  for (const text of ["we are 4", "2 people", "party of 6"]) assert.equal(resolveCta(text, []), undefined, text);
+  // Inside a table thread the group stays on the table route.
+  const table: ChatTurn[] = [{ role: "user", text: "I want to book a table" }, { role: "model", text: "Reservations are handled through Resy." }];
+  assert.equal(resolveCta("we are 12 people", table), "resy");
+  // Naming a table keeps the table route however large the party.
+  assert.equal(resolveCta("table for 15 people", []), "resy");
+});
+
+test("the chef's table is an experience, not a table to book", () => {
+  assert.equal(resolveDateIntent("is there a chef's table?", []), "none");
+  assert.equal(resolveDateIntent("is there a chef’s table?", []), "none");
+  assert.equal(resolveCta("is there a chef's table?", []), undefined);
+  // Booking words still win: "can I book the chef's table" is a reservation.
+  assert.equal(resolveCta("can I book the chef's table?", []), "resy");
+});
+
+test("a longer thank-you or goodbye still gets the fixed reply", () => {
+  const result = gateInput("thank you so much, that was helpful", []);
+  assert.equal(result.allowed, false);
+  if (!result.allowed) assert.equal(result.kind, "greeting");
+  // A hello with that many words is a message with something in it, and reaches the model.
+  assert.equal(gateInput("hello there I have a few questions for you", []).allowed, true);
+});
+
+test("a one-word answer to the assistant's own question is not noise", () => {
+  for (const reply of ["no", "ok", "k", "yes", "nope"]) assert.equal(gateInput(reply, []).allowed, true, reply);
+  assert.equal(gateInput("qq", []).allowed, false);
 });
 
 test("a greeting uses the visitor's name only when it is plainly a name", () => {

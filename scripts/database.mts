@@ -101,7 +101,6 @@ const photoUpdates = [
   { name: "Tandoori Chicken", from: "tandoori-aceva", to: "tandoori-chicken" },
   { name: "Lamb Rogan Josh", from: "lamb-curry-aceva", to: "lamb-rogan-josh-v2" },
   { name: "Dal Makhni", from: "dal-naan-aceva", to: "dal-makhni" },
-<<<<<<< Updated upstream
   { name: "Chole Bhatura", from: "chole-bhature-stock", to: "chole-bhatura-v2" },
   { name: "Chicken Dum Biryani", from: "chicken-biryani-stock", to: "chicken-dum-biryani-v2" },
   { name: "Goat Dum Biryani", from: "goat-biryani-stock", to: "goat-dum-biryani-v2" },
@@ -113,16 +112,6 @@ const photoUpdates = [
   { name: "Chicken Dum Biryani", from: "chicken-dum-biryani", to: "chicken-dum-biryani-v2" },
   { name: "Goat Dum Biryani", from: "goat-dum-biryani", to: "goat-dum-biryani-v2" },
   { name: "Vegetable Dum Biryani", from: "vegetable-dum-biryani", to: "vegetable-dum-biryani-v2" },
-=======
-  { name: "Chole Bhatura", from: "chole-bhature-stock", to: "chole-bhatura" },
-  { name: "Chole Bhatura", from: "chole-bhatura-v2", to: "chole-bhatura" },
-  { name: "Chicken Dum Biryani", from: "chicken-biryani-stock", to: "chicken-dum-biryani" },
-  { name: "Chicken Dum Biryani", from: "chicken-dum-biryani-v2", to: "chicken-dum-biryani" },
-  { name: "Goat Dum Biryani", from: "goat-biryani-stock", to: "goat-dum-biryani" },
-  { name: "Goat Dum Biryani", from: "goat-dum-biryani-v2", to: "goat-dum-biryani" },
-  { name: "Vegetable Dum Biryani", from: "vegetable-biryani-stock", to: "vegetable-dum-biryani" },
-  { name: "Vegetable Dum Biryani", from: "vegetable-dum-biryani-v2", to: "vegetable-dum-biryani" },
->>>>>>> Stashed changes
   // The three kulcha dishes shared one stock photo; each now has its own photograph.
   { name: "Amritsari Paneer Kulcha", from: "amritsari-kulcha-stock", to: "amritsari-paneer-kulcha" },
   { name: "Amritsari Aloo Kulcha", from: "amritsari-kulcha-stock", to: "amritsari-aloo-kulcha" },

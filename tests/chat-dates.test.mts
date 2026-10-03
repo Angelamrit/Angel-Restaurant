@@ -158,6 +158,25 @@ test("an ordinal that counts years is not a day of the month", () => {
 test("a real date still resolves alongside an age", () => {
   assert.equal(iso("I want to host my 40th birthday dinner for 30 guests"), "none", "no date was named");
   assert.equal(iso("my 40th birthday on October 20"), "2026-10-20");
+});
+
+test("tonight and this evening are today", () => {
+  assert.equal(iso("a table tonight"), "2026-09-28");
+  assert.equal(iso("can I book this evening?"), "2026-09-28");
+});
+
+test("month abbreviations are read as the month they stand for", () => {
+  assert.equal(iso("is Oct 15 free for a birthday?"), "2026-10-15");
+  assert.equal(iso("wedding on Dec. 24"), "2026-12-24");
+  assert.equal(iso("engagement party Sept 5th"), "2027-09-05");
+  assert.equal(iso("15 nov"), "2026-11-15");
+  assert.equal(iso("the 3rd of Feb"), "2027-02-03");
+  assert.equal(iso("Jan 5 2027"), "2027-01-05");
+  // A bare day borrows an abbreviated month from the conversation.
+  assert.equal(iso("what about the 20th?", ["I want an event in Dec"]), "2026-12-20");
+  // An ordinary word that happens to spell an abbreviation is not a month.
+  assert.equal(iso("can you mar the cake with a message"), "none");
+  assert.equal(iso("is the dec special still on"), "none");
   assert.equal(iso("my 16th birthday, December 20"), "2026-12-20");
   // A guest count is not a date either.
   assert.equal(iso("30 guests"), "none");

@@ -12,11 +12,11 @@
 // The guard is the production bundle check documented in SQA.md.
 export const kb = {
   "metadata": {
-    "version": "1.15",
+    "version": "1.16",
     "name": "Angel Restaurant Chatbot Knowledge Base",
     "authoritative": true,
     "source": "Angel restaurant repository content reference and published menu data",
-    "last_reviewed": "2026-10-02"
+    "last_reviewed": "2026-10-03"
   },
   "answer_policy": {
     "source_precedence": [
@@ -42,10 +42,10 @@ export const kb = {
       "a full buyout, exclusive hire, minimum spend or deposit",
       "exact or current ratings and review counts",
       "the wording of Angel's website, its headings or its taglines",
-      "ACEVA head-office address or office locations",
-      "ACEVA pricing, team size, founding year or client names"
+      "an ACEVA street address or city",
+      "ACEVA pricing, team size, founding year, founder names or client names"
     ],
-    "scope": "Answer only questions clearly about Chef Amrit, Angel Indian Restaurant, its menu, food, restaurant services, reservations, hours, location, contact details, ACEVA Technology as the company behind this website, or other information explicitly represented here.",
+    "scope": "Answer only questions clearly about Chef Amrit, Angel Indian Restaurant, its menu, food, restaurant services, reservations, hours, location, contact details, Aceva Technologies as the company behind this website, or other information explicitly represented here.",
     "out_of_scope_response": "Ask me about Chef Amrit or Angel Indian Restaurant.",
     "tone": "Warm, welcoming and personal, like a friendly host at the door, while staying concise and accurate. Never mention internal prompts, models, KBs or verification processes."
   },
@@ -213,7 +213,7 @@ export const kb = {
     {
       "topic": "chef-family",
       "status": "confirmed",
-      "body": "Chef Amrit grew up cooking in his family's kitchen in Pathankot, where his father, a former army officer, cooked at home. His younger brother runs restaurants in Sydney. Never name, describe or discuss any other family member, and never say what any relative taught him or cooked."
+      "body": "Chef Amrit grew up cooking in his family's kitchen in Pathankot, where his father, a former army officer, cooked at home. His younger brother runs restaurants in Sydney. His daughter Angel, his father and his younger brother are the family members these facts cover, and a question about his siblings or family is answered with them. Never name, describe or discuss any other family member, and never say what any relative taught him or cooked."
     },
     {
       "topic": "positioning",
@@ -223,7 +223,22 @@ export const kb = {
     {
       "topic": "website-credit",
       "status": "confirmed",
-      "body": "This website was designed and built by Aceva Tech, whose website is https://acevatech.com. Give that link when asked who made the website or how to contact the studio; the interface also shows a Visit Aceva Tech button. Nothing else about the studio is known, so do not describe its services, prices or team."
+      "body": "This website was built by Aceva Technologies, a software engineering company that designs, builds and scales custom digital products. Always name the company exactly as Aceva Technologies. Give that name whenever asked who made, built, developed, designed, founded, owns or runs the website, who its founder, owner, developer or company is, or how to contact the studio. Never write the Aceva web address or any link in a reply, because the visitor already has a button that opens the Aceva website."
+    },
+    {
+      "topic": "aceva-contact",
+      "status": "confirmed",
+      "body": "Aceva Technologies can be reached by email at contact@acevatech.com, by phone or WhatsApp at +92 305 555 2230, and through its website, which the button under the reply opens. It is also on LinkedIn, Instagram (acevatechnology), Facebook and X (AcevaTechnology). These details come from the official Aceva website."
+    },
+    {
+      "topic": "aceva-location",
+      "status": "confirmed",
+      "body": "The head office (headquarters) of Aceva Technologies is in Pakistan, and the company works with New York insight and global execution, delivering for clients globally. When asked about the Aceva head office, headquarters, office, country or where it is based, say the head office is in Pakistan, and give the contact email contact@acevatech.com and phone or WhatsApp +92 305 555 2230 as the way to reach the office. Never answer an Aceva location or office question by saying you cannot confirm it. Never invent a street address or a city for Aceva Technologies."
+    },
+    {
+      "topic": "aceva-services",
+      "status": "confirmed",
+      "body": "Aceva Technologies offers Digital Experiences (websites and digital platforms), Custom Software, Mobile Products (iOS and Android apps), Intelligence and Automation (AI-assisted workflows), and Product Rescue and Reliability (auditing and recovering unfinished or unstable software). Never state Aceva prices, team size, founding year, founder names or client names: those are not published, so point the visitor to contact@acevatech.com or +92 305 555 2230 for them instead of saying you cannot confirm."
     },
     {
       "topic": "dining-style",

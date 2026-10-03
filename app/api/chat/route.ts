@@ -31,10 +31,25 @@ const EVENT_DATE_REPLY = {
   unknown: () => "I cannot confirm that date right now. Send an event enquiry and the restaurant team will follow up with you.",
 } as const;
 const EVENT_DATE_CLARIFY = "Which month are you thinking of? Give me the full date and I can check whether an event is already held then.";
-// The wording fits an ordinary table or a private event equally well, so the
-// assistant asks rather than picking one. No database is read and no booking
-// route is offered until the visitor says which they mean.
-const BOOKING_KIND_CLARIFY = "Are you asking about a regular table or an event?";
+// "Can I book on October 15?" names neither a table nor an event. The date is
+// checked in the event database first, and the answer states what it found and
+// then gives both ways forward: a table through Resy, an event through an
+// enquiry. The visitor is no longer asked which they meant before anything is
+// looked up. Fixed strings, built from the status alone.
+// A table on a named date. The event database is the only booking record the
+// site holds, so an open day is "yes, open on our side" and the table itself is
+// still made through Resy; a day held by an event is "already reserved".
+const TABLE_DATE_REPLY = {
+  reserved: (date: string) => `${date} is already reserved for an event, so I cannot offer a table that day. Reservations for another date are handled through Resy, and for a private event you can send an event enquiry.`,
+  not_reserved: (date: string) => `Yes, ${date} is open on our side: no event is reserved that day. Table reservations are made through Resy, where you can choose your time.`,
+  unknown: () => "I cannot check that date right now. Table reservations are made through Resy, where you can choose your date and time.",
+} as const;
+const TABLE_DATE_CLARIFY = "Which month are you thinking of? Give me the full date and I can check it for you.";
+const BOOKING_DATE_REPLY = {
+  reserved: (date: string) => `${date} is already reserved for an event. If you would like a regular table that day, reservations are handled through Resy; for a private event on another date, send an event enquiry and the team will follow up.`,
+  not_reserved: (date: string) => `I do not have a reserved event recorded for ${date}, so that day is open at the moment. For a regular table, reservations are handled through Resy; for a private event, send an event enquiry and the team will confirm the date with you.`,
+  unknown: () => "I cannot check that date right now. For a regular table, reservations are handled through Resy; for a private event, send an event enquiry and the restaurant team will confirm the date with you.",
+} as const;
 // Which onward route the answer offers: "resy" for an ordinary table, "event"
 // for a celebration or private-event enquiry the restaurant team handles
 // through the existing form, "credit" for a website-credit question, "order"
@@ -125,10 +140,33 @@ export async function POST(request: Request) {
     // and returns nothing — without this the visitor is told to use Resy and
     // given no way to get there.
     if (!cta && dateIntent === "table") cta = "resy";
-    // Ambiguous between a table and an event: ask, read nothing, offer nothing.
-    if (dateIntent === "clarify") return gateResponse(BOOKING_KIND_CLARIFY, "date_intent_clarify");
+    const priorUserText = history.filter((turn) => turn.role === "user").map((turn) => turn.text);
+    // Neither a table nor an event was named: check the date in the event
+    // database and answer with what it holds, offering both routes. A date that
+    // cannot be pinned down is asked about, exactly as an event date is.
+    // A table on a named date is checked the same way and answered with a
+    // plain yes or "already reserved", never left to the model, which cannot
+    // see the database and used to say it could not check availability.
+    if (dateIntent === "table") {
+      const resolved = resolveDate(message, priorUserText);
+      if (resolved.kind === "ambiguous") return gateResponse(TABLE_DATE_CLARIFY, `table_date_${resolved.reason}`, 200, ctaHeader("resy"));
+      if (resolved.kind === "date") {
+        const { status } = await getEventDateStatus(resolved.iso);
+        const reply = status === "unknown" ? TABLE_DATE_REPLY.unknown() : TABLE_DATE_REPLY[status](formatDate(resolved.iso));
+        return gateResponse(reply, `table_date_${status}`, 200, ctaHeader("resy"));
+      }
+    }
+    if (dateIntent === "clarify") {
+      const resolved = resolveDate(message, priorUserText);
+      if (resolved.kind === "ambiguous") return gateResponse(EVENT_DATE_CLARIFY, `booking_date_${resolved.reason}`);
+      if (resolved.kind === "date") {
+        const { status } = await getEventDateStatus(resolved.iso);
+        const reply = status === "unknown" ? BOOKING_DATE_REPLY.unknown() : BOOKING_DATE_REPLY[status](formatDate(resolved.iso));
+        // A reserved date sends the visitor to the enquiry for another date; an open one offers the table.
+        return gateResponse(reply, `booking_date_${status}`, 200, ctaHeader(status === "not_reserved" ? "resy" : "event"));
+      }
+    }
     if (dateIntent === "event") {
-      const priorUserText = history.filter((turn) => turn.role === "user").map((turn) => turn.text);
       const resolved = resolveDate(message, priorUserText);
       if (resolved.kind === "ambiguous") {
         return gateResponse(EVENT_DATE_CLARIFY, `event_date_${resolved.reason}`, 200, ctaHeader("event"));

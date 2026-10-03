@@ -38,7 +38,7 @@ export const ChatMessage = memo(function ChatMessage({ role, text, cta }: { role
         client-side one would leave it open over the new page. */}
     {cta === "event" && <a className="angel-chat-cta" href="/private-dining#enquiry"><span>Plan your celebration</span><span className="angel-chat-cta-icon" aria-hidden="true">↗</span></a>}
     {/* Studio credit, surfaced only when a visitor asks who built the site. */}
-    {cta === "credit" && <a className="angel-chat-cta" href={restaurant.aceva} target="_blank" rel="noopener noreferrer"><span>Visit Aceva Tech</span><span className="angel-chat-cta-icon" aria-hidden="true">↗</span></a>}
+    {cta === "credit" && <a className="angel-chat-cta" href={restaurant.aceva} target="_blank" rel="noopener noreferrer"><span>Visit ACEVA</span><span className="angel-chat-cta-icon" aria-hidden="true">↗</span></a>}
     {/* Ordering food, which is not a table booking: one button per approved
         platform, read from the single list in lib/restaurant.ts. */}
     {cta === "order" && <div className="angel-chat-ctas">{restaurant.ordering.map((platform) => <a key={platform.name} className="angel-chat-cta" href={platform.url} target="_blank" rel="noopener noreferrer"><span>Order via {platform.name}</span><span className="angel-chat-cta-icon" aria-hidden="true">↗</span></a>)}</div>}

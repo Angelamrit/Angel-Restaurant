@@ -7,19 +7,6 @@ import { money } from "@/lib/menu-types";
 type Plate = { name: string; price: string; description: string; section?: string; image: string; imageRatio: string; vegetarian: boolean; stock: boolean };
 
 function imageRatio(image: string) {
-<<<<<<< Updated upstream
-  const ratios: [string, string][] = [
-    ["chicken-dum-biryani-v2.webp", "1536 / 1024"],
-    ["amritsari-paneer-kulcha.webp", "1536 / 1024"],
-    ["vegetable-dum-biryani-v2.webp", "1200 / 675"],
-    ["goat-dum-biryani-v2.webp", "1448 / 1086"],
-    ["chole-bhatura-v2.webp", "1448 / 1086"],
-    ["amritsari-kulcha-stock.webp", "1600 / 1200"],
-    ["amritsari-aloo-kulcha.webp", "1199 / 1312"],
-    ["mix-veg-kulcha.webp", "1408 / 1117"],
-  ];
-  return ratios.find(([filename]) => image.endsWith(filename))?.[1] ?? "4 / 3";
-=======
   const ratios: Record<string, string> = {
     "chicken-dum-biryani": "1536 / 1024",
     "amritsari-paneer-kulcha": "1536 / 1024",
@@ -33,9 +20,9 @@ function imageRatio(image: string) {
     "dal-makhni": "1122 / 1402",
     "butter-chicken": "1254 / 1254",
   };
-  const filename = image.split("/").at(-1)?.replace(/\.(?:avif|webp|jpe?g|png)$/i, "");
+  // Photos replaced under a new name carry a -v2/-v3 suffix (to defeat 30-day caches); the ratio is the same dish's.
+  const filename = image.split("/").at(-1)?.replace(/(?:-v\d+)?\.(?:avif|webp|jpe?g|png)$/i, "");
   return (filename && ratios[filename]) || "4 / 3";
->>>>>>> Stashed changes
 }
 
 const order = (index: number) => ({ "--i": index } as CSSProperties);

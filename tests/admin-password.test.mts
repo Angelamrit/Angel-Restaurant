@@ -4,30 +4,25 @@ import { PASSWORD_MAX, PASSWORD_MIN, hashPassword, isPasswordHash, passwordProbl
 
 const GOOD = "Tk7#mQz2$Lx9";
 
-test("length is 8 to 16 characters, inclusive", () => {
+test("length is at least 8 characters", () => {
   assert.equal(PASSWORD_MIN, 8);
-  assert.equal(PASSWORD_MAX, 16);
-  assert.ok(passwordProblems("Ab1#xyz").some(p => p.includes("8 to 16")), "7 characters is too short");
+  assert.ok(passwordProblems("Ab1#xyz").some(p => p.includes("at least 8")), "7 characters is too short");
   assert.deepEqual(passwordProblems("Tk7#mQz2"), [], "8 characters is accepted");
-  assert.deepEqual(passwordProblems("Tk7#mQz2$Lx9Bn4!"), [], "16 characters is accepted");
-  assert.ok(passwordProblems("Tk7#mQz2$Lx9Bn4!x").some(p => p.includes("8 to 16")), "17 characters is too long");
-  assert.ok(passwordProblems("").some(p => p.includes("8 to 16")));
+  assert.deepEqual(passwordProblems("Tk7#mQz2$Lx9Bn4!x"), [], "longer than 16 is accepted");
+  assert.ok(passwordProblems("A1#" + "a".repeat(PASSWORD_MAX)).some(p => p.includes("at least 8")), "absurdly long input is refused");
+  assert.ok(passwordProblems("").some(p => p.includes("at least 8")));
 });
 
-test("every character class is required, and each missing one is named", () => {
-  assert.ok(passwordProblems("tk7#mqz2$lx9").includes("Add an uppercase letter."));
-  assert.ok(passwordProblems("TK7#MQZ2$LX9").includes("Add a lowercase letter."));
+test("a letter, a number and a special character are required, and each missing one is named", () => {
+  assert.ok(passwordProblems("12345678#!").includes("Add a letter."));
   assert.ok(passwordProblems("Tk#mQzx$LxBn").includes("Add a number."));
-  assert.ok(passwordProblems("Tk7mQz2xLx9B").includes("Add a symbol such as ! # $ % & * ?"));
+  assert.ok(passwordProblems("Tk7mQz2xLx9B").includes("Add a special character such as ! # $ % & * ?"));
   assert.ok(passwordProblems("Tk7 mQz2 Lx9#").includes("Do not use spaces."));
-  assert.ok(passwordProblems("Tk7#mQzzz9$L").some(p => p.includes("three times")));
 });
 
-test("guessable passwords are refused even when they satisfy the character rules", () => {
-  for (const weak of ["Password1!", "Admin@2026x", "Angel@2026!", "Qwerty@12345", "Welcome#1Ab", "Restaurant1!"]) {
-    assert.ok(passwordProblems(weak).some(p => p.includes("common words")), weak);
-  }
-  assert.deepEqual(passwordProblems(GOOD), []);
+test("letter case is not enforced", () => {
+  assert.deepEqual(passwordProblems("tk7#mqz2$lx9"), []);
+  assert.deepEqual(passwordProblems("Angel@2026"), []);
 });
 
 test("a hash verifies only the password it was made from", async () => {
@@ -49,8 +44,8 @@ test("the stored value is salted, contains no plaintext, and is safe in an env f
 });
 
 test("hashing refuses a password that breaks the policy", () => {
-  assert.throws(() => hashPassword("Sh1!"), /8 to 16/);
-  assert.throws(() => hashPassword("alllowercase"), /uppercase/);
+  assert.throws(() => hashPassword("Sh1!"), /at least 8/);
+  assert.throws(() => hashPassword("alllowercase"), /number/);
 });
 
 test("unusable stored values never authenticate and never throw", async () => {

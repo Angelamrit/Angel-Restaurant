@@ -8,7 +8,7 @@ The immutable migration snapshot is `db/original-menu.json`: **84 dishes, eight 
 
 ## Local setup
 
-Use Node 24 LTS (minimum 22.18, for [native TypeScript script execution](https://nodejs.org/download/release/v22.18.0/docs/api/typescript.html)). Copy `.env.example` to `.env.local`, then run `npm run admin:password -- --write`. It asks for the administrator password twice (typing is hidden) and saves only a salted scrypt hash as `ADMIN_PASSWORD_HASH`. The password must be 8 to 16 characters with an uppercase letter, a lowercase letter, a number and a symbol, with no spaces, no common words and not the restaurant's name. The password itself is never stored, printed or logged, and is never passed on the command line. Never commit the hash either.
+Use Node 24 LTS (minimum 22.18, for [native TypeScript script execution](https://nodejs.org/download/release/v22.18.0/docs/api/typescript.html)). Copy `.env.example` to `.env.local`, then run `npm run admin:password -- --write`. It asks for the administrator password twice (typing is hidden) and saves only a salted scrypt hash as `ADMIN_PASSWORD_HASH`. The password must be at least 8 characters with a letter, a number and a special character, with no spaces. The password itself is never stored, printed or logged, and is never passed on the command line. Never commit the hash either.
 
 Set `MONGODB_URI` to a development MongoDB connection string (an Atlas development cluster, or a local MongoDB), and leave `BLOB_READ_WRITE_TOKEN` empty: uploads are then stored under `.data/uploads`.
 Then run:
@@ -35,7 +35,7 @@ Set these server environment variables before enabling the deployment:
 | --- | --- |
 | `MONGODB_URI` | MongoDB connection string (Atlas, or a MongoDB on the server) |
 | `MONGODB_DB` | Optional database name; defaults to `angel-restaurant` |
-| `ADMIN_PASSWORD_HASH` | The administrator password as a salted hash. Create it with `npm run admin:password` (add `-- --write` to save it into `.env.local`). Password rules: 8 to 16 characters with an uppercase letter, a lowercase letter, a number and a symbol; no spaces, common words or the restaurant's name |
+| `ADMIN_PASSWORD_HASH` | The administrator password as a salted hash. Create it with `npm run admin:password` (add `-- --write` to save it into `.env.local`). Password rules: at least 8 characters with a letter, a number and a special character; no spaces |
 | `ADMIN_ACCESS_KEY` | Legacy shared key, minimum 32 random characters. Honoured only while `ADMIN_PASSWORD_HASH` is unset; ignored once the hash exists |
 | `BLOB_READ_WRITE_TOKEN` | Optional, server-only. Leave unset on the VPS (photos then go to `.data/uploads`). Only needed to keep using a Vercel Blob store |
 | `CLIENT_IP_HEADER` | Behind nginx, set to `x-real-ip` so rate limits (enquiry form, chat, admin sign-in) apply per visitor. See DEPLOY_HOSTINGER.md |

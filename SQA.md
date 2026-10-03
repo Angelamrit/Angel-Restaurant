@@ -84,3 +84,21 @@ Run `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:e2e`, and `np
 - The existing admin lifecycle test failed when restoring a dish's availability, leaving an extra test dish that caused a later count assertion to fail. Reproduce on a healthy host using the isolated test database; this is unresolved, not a passing workflow.
 - The final production build passed, including generation of all 19 static outputs. Earlier attempts ran out of disk space and encountered an incomplete generated test type file during concurrent regeneration. A production performance baseline has not been measured.
 - Generated project caches were cleared and isolated test compiler persistence disabled. The machine also reported paging-file exhaustion. Free disk/memory before rerunning; do not interpret these host failures as production performance measurements.
+
+## Speed and smoothness inspection — 3 October 2026
+
+Method: production build, phone profile (390 px, 4x CPU slowdown, 1.6 Mbps / 150 ms), every public page; request waterfalls, CPU profiles, browser traces, idle-cost and interaction-latency probes. Load figures on a shared Windows PC swing by about 2x between runs, so changes were judged by alternating old and new builds in the same time window, never by comparing runs hours apart.
+
+Fixed:
+
+- **Idle home page rendering.** The slideshow progress bar animated `width`, which forced layout and paint on every frame for the whole interval. An idle phone-profile home page spent about 1.6 s of paint, 0.7 s of layout and 380 frames per 4 s on it; after switching the bar to `transform: scaleX()` it is about 20 ms and 3 frames (Private dining has the same slideshow and benefits equally). Rule: animate only `transform` and `opacity` on anything that runs continuously.
+- **Menu filters.** Each tap re-rendered the heading, count and the whole list before the next paint. The buttons now update at once and the list follows through `useDeferredValue`; tap-to-paint is typically 30 to 60% faster at phone speed (noisy).
+- **Deployment guide.** nginx now buffers normally (only `/api/chat` streams), caches optimised images, built assets, photos and the hero video, and the guide says how to enable HTTP/2. Not yet tested on the live server.
+
+Measured and left alone:
+
+- First load: JavaScript is the framework floor (about 115 KB gzip of React and Next) plus roughly 30 KB of site code; Google Analytics (about 150 KB, idle-loaded) is third party. Browser-native layout and text shaping, not script, dominate first-paint time on a throttled CPU.
+- Not preloading the fonts gives an earlier first paint but a later largest-content paint on every page tested, so the preloads stay.
+- `content-visibility: auto` on later sections gave mixed results (menu got slower), so it is not used.
+- Opening the assistant or the gallery viewer costs about 0.7 to 1 s at the 4x phone profile and was unchanged by removing blur, page animations or the `body:has()` rule; it is the native modal's page-wide style recalculation. The remaining lever is a custom non-modal panel, which would give up native focus handling.
+- After load, scrolling is smooth (no frames over 50 ms on Story, Private dining or Privacy).

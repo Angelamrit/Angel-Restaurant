@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
@@ -10,7 +11,7 @@ const links = [["/menu", "Menu"], ["/story", "Our story"], ["/gallery", "The exp
 const order = (index: number) => ({ "--i": index } as CSSProperties);
 
 // Fixed header in the chef-site pattern: a utility strip that folds away once
-// scrolled, then the monogram wordmark, a frosted pill nav and a gold Reserve
+// scrolled, then the gold logo, a frosted pill nav and a gold Reserve
 // pill. Hides while scrolling down, returns on the first scroll up.
 export function Header() {
   const pathname = usePathname();
@@ -66,9 +67,8 @@ export function Header() {
         </div>
         <div className="container-wide header-inner">
           <Link href="/" className="brand" aria-label="Angel Indian Restaurant home" onClick={() => setOpen(false)}>
-            <span className="monogram" aria-hidden="true">A</span>
             <span className="brand-text">
-              <span className="brand-name">angel</span>
+              <Image className="brand-logo" src="/angel-vps/angel-logo.avif" alt="Angel" width={126} height={44} loading="eager" />
               <span className="brand-sub">INDIAN RESTAURANT</span>
             </span>
           </Link>

@@ -10,11 +10,11 @@ export default function manifest(): MetadataRoute.Manifest {
     display: "browser",
     background_color: "#25130D",
     theme_color: "#E5C88F",
-    // Reuses the file-convention icon routes (app/icon.tsx, app/apple-icon.tsx)
-    // rather than static PNGs; swap for real logo files when the client supplies one.
+    // Reuses the file-convention icons (app/icon.png, app/apple-icon.png), the gold
+    // "Angel" logo built by scripts/optimize-public-images.mjs.
     icons: [
-      { src: "/icon", sizes: "512x512", type: "image/png" },
-      { src: "/apple-icon", sizes: "180x180", type: "image/png", purpose: "any" },
+      { src: "/icon.png", sizes: "512x512", type: "image/png" },
+      { src: "/apple-icon.png", sizes: "180x180", type: "image/png", purpose: "any" },
     ],
   };
 }

@@ -218,8 +218,8 @@
     transition: color var(--duration-ui) var(--ease-luxe), box-shadow var(--duration-ui) var(--ease-luxe), background var(--duration-ui) var(--ease-luxe);
   }
   .monogram::before { content: ""; position: absolute; inset: -.3rem; border-radius: 50%; border: 1px dashed rgba(226, 189, 108, 0.3); animation: spin 60s linear infinite; }
-  .brand:hover .monogram { color: var(--brown-deep); background: var(--btn-fill); box-shadow: 0 0 30px -4px rgba(226, 189, 108, 0.95); }
   .brand-text { display: flex; flex-direction: column; gap: .35rem; line-height: 1; }
+  .brand-logo { display: block; align-self: flex-start; width: auto; height: 2.75rem; }
   .brand-name { font-family: var(--font-editorial); font-size: 1.35rem; letter-spacing: .01em; white-space: nowrap; }
   .brand-name em { font-style: normal; background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .brand-sub { display: flex; align-items: center; gap: .5rem; font-size: .5rem; font-weight: 700; letter-spacing: .3em; text-transform: uppercase; color: rgba(246, 239, 226, 0.5); transition: color var(--duration-ui) var(--ease-luxe); }

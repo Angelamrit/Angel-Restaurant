@@ -1,4 +1,4 @@
-import { copyFile, readdir, mkdir, stat } from "node:fs/promises";
+import { copyFile, readdir, readFile, mkdir, stat } from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
 
@@ -50,3 +50,11 @@ for (const name of ["Certificate01.jpeg", "Certificate02.jpeg", "Certificate03.P
   const outputSize = (await stat(output)).size;
   console.log(`Certificates/${name}: ${Math.round(sourceSize / 1024)} KB -> ${Math.round(outputSize / 1024)} KB`);
 }
+
+// The supplied logo SVG only wraps a 2068px transparent PNG, so decode that PNG,
+// trim its empty edges and keep a small master for next/image to resize.
+const logoSource = path.join(process.cwd(), "public", "Logo", "Angel_Logo_Transparent_Detailed.svg");
+const logoOutput = path.join(outputDir, "angel-logo.avif");
+const logoPng = Buffer.from((await readFile(logoSource, "utf8")).match(/base64,([^"]+)"/)[1], "base64");
+await sharp(logoPng).trim().resize({ width: 768 }).avif({ quality: 72, effort: 6 }).toFile(logoOutput);
+console.log(`Logo/${path.basename(logoSource)}: ${Math.round((await stat(logoSource)).size / 1024)} KB -> ${Math.round((await stat(logoOutput)).size / 1024)} KB`);

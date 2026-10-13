@@ -130,9 +130,10 @@ confirm which is current before launch:
 
 ### Other open items
 
-- A logo file (PNG/SVG) has not been supplied. `app/icon.tsx`, `app/apple-icon.tsx`, and
-  `app/opengraph-image.tsx` currently render a typographic placeholder in the site's own
-  color tokens; swap these for the real mark once received.
+- The gold logo (`public/Logo/Angel_Logo_Transparent_Detailed.svg`) now drives the header
+  and the favicon/app icons (`app/favicon.ico`, `app/icon.png`, `app/apple-icon.png`).
+  `app/opengraph-image.tsx` still renders a typographic placeholder in the site's own
+  color tokens.
 - Takeout/delivery availability and any third-party ordering links (DoorDash, Uber Eats,
   Grubhub, Seamless) are not mentioned on the new build. The old site's JSON-LD claims
   "Dine-in, Takeout, Delivery" but links no ordering platform; Uber Eats appears only as
